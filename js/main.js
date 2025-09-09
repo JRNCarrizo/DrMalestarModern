@@ -8,7 +8,7 @@ const sampleData = {
         {
             id: 1,
             title: "Noche de Blues",
-            date: "2024-12-09",
+            date: "2024-09-12",
             location: "Six Bar San Miguel",
             image: "img/bluseraflier.jpg",
             description: "Gran Presentación tributo a Pappo"
@@ -16,7 +16,7 @@ const sampleData = {
         {
             id: 2,
             title: "Noche de Blues",
-            date: "2024-12-09",
+            date: "2024-09-12",
             location: "Six Bar San Miguel",
             image: "img/bluseraflier.jpg",
             description: "Gran Presentación tributo a Pappo"
