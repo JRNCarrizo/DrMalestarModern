@@ -147,9 +147,15 @@ async function handleFlyerSubmit(e) {
         
         const imageFile = document.getElementById('flyerImage').files[0];
         if (imageFile) {
-            // Por ahora usar blob URL hasta que Cloudinary esté configurado
-            flyerData.image = URL.createObjectURL(imageFile);
-            console.log('Imagen guardada como blob URL:', flyerData.image);
+            // Convertir imagen a base64 para persistencia
+            flyerData.image = await new Promise((resolve) => {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    resolve(e.target.result);
+                };
+                reader.readAsDataURL(imageFile);
+            });
+            console.log('Imagen convertida a base64');
         }
         
         await simpleAPI.addFlyer(flyerData);
@@ -240,9 +246,15 @@ async function handlePhotoSubmit(e) {
         
         const imageFile = document.getElementById('photoImage').files[0];
         if (imageFile) {
-            // Por ahora usar blob URL hasta que Cloudinary esté configurado
-            photoData.image = URL.createObjectURL(imageFile);
-            console.log('Imagen guardada como blob URL:', photoData.image);
+            // Convertir imagen a base64 para persistencia
+            photoData.image = await new Promise((resolve) => {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    resolve(e.target.result);
+                };
+                reader.readAsDataURL(imageFile);
+            });
+            console.log('Imagen convertida a base64');
         }
         
         await simpleAPI.addPhoto(photoData);

@@ -49,14 +49,17 @@ class SimpleAPI {
             if (!this.binId) {
                 this.binId = localStorage.getItem('drmalestar_bin_id');
                 if (!this.binId) {
+                    console.log('🔄 Creando nuevo bin...');
                     await this.createBin();
                 }
             }
 
             if (!this.binId) {
-                throw new Error('No se pudo crear el bin');
+                console.log('❌ No se pudo crear el bin, usando datos locales');
+                return this.getLocalData();
             }
 
+            console.log('🔄 Obteniendo datos del bin:', this.binId);
             const response = await fetch(`${this.baseUrl}/b/${this.binId}/latest`, {
                 method: 'GET',
                 headers: {
@@ -69,10 +72,11 @@ class SimpleAPI {
             }
 
             const result = await response.json();
+            console.log('✅ Datos obtenidos de JSONBin:', result.record);
             return result.record;
         } catch (error) {
-            console.error('Error obteniendo datos:', error);
-            // Fallback a datos locales
+            console.error('❌ Error obteniendo datos de JSONBin:', error);
+            console.log('🔄 Usando datos locales como fallback');
             return this.getLocalData();
         }
     }
@@ -175,9 +179,13 @@ class SimpleAPI {
     }
 
     async deleteFlyer(id) {
+        console.log('🗑️ Eliminando flyer con ID:', id);
         const data = await this.getData();
+        console.log('📋 Flyers antes de eliminar:', data.flyers.length);
         data.flyers = data.flyers.filter(flyer => flyer.id !== id);
+        console.log('📋 Flyers después de eliminar:', data.flyers.length);
         await this.updateData(data);
+        console.log('✅ Flyer eliminado de la base de datos');
     }
 
     async deletePhoto(id) {
@@ -195,3 +203,21 @@ class SimpleAPI {
 
 // Crear instancia global
 const simpleAPI = new SimpleAPI();
+
+// Función para forzar sincronización
+window.forceSync = async function() {
+    console.log('🔄 Forzando sincronización...');
+    try {
+        const data = await simpleAPI.getData();
+        console.log('📋 Datos sincronizados:', data);
+        
+        // Guardar en localStorage como respaldo
+        localStorage.setItem('drmalestar_data', JSON.stringify(data));
+        console.log('✅ Datos guardados en localStorage');
+        
+        return data;
+    } catch (error) {
+        console.error('❌ Error en sincronización:', error);
+        return null;
+    }
+};
