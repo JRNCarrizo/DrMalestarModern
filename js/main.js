@@ -215,21 +215,28 @@ async function loadPhotos() {
     container.innerHTML = '<div class="text-center"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Cargando...</span></div></div>';
     
     try {
-        // Intentar cargar desde JSONBin primero
-        if (typeof jsonbinManager !== 'undefined') {
+        // Cargar desde CloudAPI
+        if (typeof cloudAPI !== 'undefined') {
             try {
-                const photos = await jsonbinManager.getPhotos();
+                console.log('🔄 Cargando fotos desde CloudAPI...');
+                const photos = await cloudAPI.getPhotos();
+                console.log('📋 Fotos obtenidas:', photos);
                 if (photos && photos.length > 0) {
                     container.innerHTML = '';
                     photos.forEach(photo => {
                         const photoCard = createPhotoCard(photo);
                         container.appendChild(photoCard);
                     });
+                    console.log('✅ Fotos cargadas desde CloudAPI');
                     return;
+                } else {
+                    console.log('⚠️ No hay fotos en CloudAPI');
                 }
-            } catch (jsonbinError) {
-                console.log('JSONBin no disponible, usando localStorage:', jsonbinError);
+            } catch (error) {
+                console.log('❌ Error cargando desde CloudAPI:', error);
             }
+        } else {
+            console.log('❌ cloudAPI no está definido');
         }
         
         // Fallback a datos locales
@@ -259,21 +266,28 @@ async function loadVideos() {
     container.innerHTML = '<div class="text-center"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Cargando...</span></div></div>';
     
     try {
-        // Intentar cargar desde JSONBin primero
-        if (typeof jsonbinManager !== 'undefined') {
+        // Cargar desde CloudAPI
+        if (typeof cloudAPI !== 'undefined') {
             try {
-                const videos = await jsonbinManager.getVideos();
+                console.log('🔄 Cargando videos desde CloudAPI...');
+                const videos = await cloudAPI.getVideos();
+                console.log('📋 Videos obtenidos:', videos);
                 if (videos && videos.length > 0) {
                     container.innerHTML = '';
                     videos.forEach(video => {
                         const videoCard = createVideoCard(video);
                         container.appendChild(videoCard);
                     });
+                    console.log('✅ Videos cargados desde CloudAPI');
                     return;
+                } else {
+                    console.log('⚠️ No hay videos en CloudAPI');
                 }
-            } catch (jsonbinError) {
-                console.log('JSONBin no disponible, usando localStorage:', jsonbinError);
+            } catch (error) {
+                console.log('❌ Error cargando desde CloudAPI:', error);
             }
+        } else {
+            console.log('❌ cloudAPI no está definido');
         }
         
         // Fallback a datos locales

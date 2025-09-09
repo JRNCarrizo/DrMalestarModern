@@ -283,7 +283,7 @@ async function loadPhotos() {
     if (!container) return;
     
     try {
-        const photos = await simpleAPI.getPhotos();
+        const photos = await cloudAPI.getPhotos();
         container.innerHTML = '';
         
         photos.forEach(photo => {
@@ -321,7 +321,7 @@ function createPhotoItem(photo) {
 async function deletePhoto(id) {
     if (confirm('¿Estás seguro de que quieres eliminar esta foto?')) {
         try {
-            await simpleAPI.deletePhoto(id);
+            await cloudAPI.deletePhoto(id);
             await loadPhotos();
             showNotification('Foto eliminada', 'info');
         } catch (error) {
@@ -384,7 +384,7 @@ async function loadVideos() {
     if (!container) return;
     
     try {
-        const videos = await simpleAPI.getVideos();
+        const videos = await cloudAPI.getVideos();
         container.innerHTML = '';
         
         videos.forEach(video => {
@@ -425,7 +425,7 @@ function createVideoItem(video) {
 async function deleteVideo(id) {
     if (confirm('¿Estás seguro de que quieres eliminar este video?')) {
         try {
-            await simpleAPI.deleteVideo(id);
+            await cloudAPI.deleteVideo(id);
             await loadVideos();
             showNotification('Video eliminado', 'info');
         } catch (error) {
@@ -614,10 +614,52 @@ window.reloadAdminContent = async function() {
 // Función para verificar el estado de la API
 window.checkAdminAPI = function() {
     console.log('🔍 Verificando estado de la API en admin...');
-    console.log('simpleAPI disponible:', typeof simpleAPI !== 'undefined');
-    if (typeof simpleAPI !== 'undefined') {
-        console.log('Bin ID:', simpleAPI.binId);
-        console.log('API Key:', simpleAPI.apiKey ? 'Configurada' : 'No configurada');
+    console.log('cloudAPI disponible:', typeof cloudAPI !== 'undefined');
+    if (typeof cloudAPI !== 'undefined') {
+        console.log('Bin ID:', cloudAPI.binId);
+        console.log('API Key:', cloudAPI.apiKey ? 'Configurada' : 'No configurada');
     }
     showNotification('Estado de API verificado en consola', 'info');
+};
+
+// Función para limpiar imágenes rotas
+window.cleanBrokenImages = async function() {
+    console.log('🧹 Limpiando imágenes rotas...');
+    try {
+        const data = await cloudAPI.getData();
+        let cleaned = false;
+        
+        // Limpiar flyers con imágenes blob rotas
+        data.flyers = data.flyers.filter(flyer => {
+            if (flyer.image && flyer.image.startsWith('blob:')) {
+                console.log('🗑️ Eliminando flyer con imagen blob rota:', flyer.title);
+                cleaned = true;
+                return false;
+            }
+            return true;
+        });
+        
+        // Limpiar fotos con imágenes blob rotas
+        data.photos = data.photos.filter(photo => {
+            if (photo.image && photo.image.startsWith('blob:')) {
+                console.log('🗑️ Eliminando foto con imagen blob rota:', photo.title);
+                cleaned = true;
+                return false;
+            }
+            return true;
+        });
+        
+        if (cleaned) {
+            await cloudAPI.updateData(data);
+            console.log('✅ Imágenes rotas eliminadas');
+            showNotification('Imágenes rotas eliminadas', 'info');
+            await loadAllContent();
+        } else {
+            console.log('✅ No hay imágenes rotas');
+            showNotification('No hay imágenes rotas', 'info');
+        }
+    } catch (error) {
+        console.error('❌ Error limpiando imágenes:', error);
+        showNotification('Error limpiando imágenes', 'error');
+    }
 };
