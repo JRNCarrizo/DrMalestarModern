@@ -89,6 +89,7 @@ class CloudAPI {
             }
 
             console.log('🔄 Actualizando datos del bin:', this.binId);
+            console.log('🔑 API Key:', this.apiKey ? 'Configurada' : 'No configurada');
             
             const response = await fetch(`${this.baseUrl}/b/${this.binId}`, {
                 method: 'PUT',
@@ -100,7 +101,17 @@ class CloudAPI {
             });
 
             if (!response.ok) {
-                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                const errorText = await response.text();
+                console.error('❌ Error HTTP:', response.status, response.statusText);
+                console.error('❌ Error details:', errorText);
+                
+                if (response.status === 403) {
+                    throw new Error(`HTTP 403: Acceso denegado. Verifica tu API Key y permisos del bin.`);
+                } else if (response.status === 404) {
+                    throw new Error(`HTTP 404: Bin no encontrado. Creando nuevo bin...`);
+                } else {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
             }
 
             const result = await response.json();
@@ -261,6 +272,51 @@ class CloudAPI {
             return false;
         }
     }
+
+    // Crear un nuevo bin y limpiar el anterior
+    async createNewBin() {
+        try {
+            console.log('🔄 Creando nuevo bin...');
+            
+            // Limpiar el binId anterior
+            this.binId = null;
+            localStorage.removeItem('drmalestar_bin_id');
+            
+            // Crear nuevo bin
+            await this.createBin();
+            
+            console.log('✅ Nuevo bin creado:', this.binId);
+            return this.binId;
+        } catch (error) {
+            console.error('❌ Error creando nuevo bin:', error);
+            throw error;
+        }
+    }
+
+    // Verificar y arreglar permisos
+    async fixPermissions() {
+        try {
+            console.log('🔧 Intentando arreglar permisos...');
+            
+            // Intentar crear un nuevo bin
+            await this.createNewBin();
+            
+            // Probar con datos de prueba
+            const testData = {
+                flyers: [],
+                photos: [],
+                videos: [],
+                lastUpdated: new Date().toISOString()
+            };
+            
+            await this.updateData(testData);
+            console.log('✅ Permisos arreglados');
+            return true;
+        } catch (error) {
+            console.error('❌ No se pudieron arreglar los permisos:', error);
+            return false;
+        }
+    }
 }
 
 // Crear instancia global
@@ -305,5 +361,34 @@ window.testCloudAPI = async function() {
     } catch (error) {
         console.error('❌ Error en prueba:', error);
         return false;
+    }
+};
+
+window.fixCloudAPI = async function() {
+    console.log('🔧 Intentando arreglar CloudAPI...');
+    try {
+        const fixed = await cloudAPI.fixPermissions();
+        if (fixed) {
+            console.log('✅ CloudAPI arreglado');
+            return true;
+        } else {
+            console.log('❌ No se pudo arreglar CloudAPI');
+            return false;
+        }
+    } catch (error) {
+        console.error('❌ Error arreglando CloudAPI:', error);
+        return false;
+    }
+};
+
+window.createNewBin = async function() {
+    console.log('🆕 Creando nuevo bin...');
+    try {
+        const newBinId = await cloudAPI.createNewBin();
+        console.log('✅ Nuevo bin creado:', newBinId);
+        return newBinId;
+    } catch (error) {
+        console.error('❌ Error creando nuevo bin:', error);
+        return null;
     }
 };
