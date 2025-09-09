@@ -147,15 +147,11 @@ async function handleFlyerSubmit(e) {
         
         const imageFile = document.getElementById('flyerImage').files[0];
         if (imageFile) {
-            // Convertir imagen a base64 para persistencia
-            flyerData.image = await new Promise((resolve) => {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    resolve(e.target.result);
-                };
-                reader.readAsDataURL(imageFile);
-            });
-            console.log('Imagen convertida a base64');
+            // Subir imagen a Cloudinary
+            const cloudinaryResult = await cloudinaryUpload.uploadImageCompressed(imageFile, 800, 'auto', 'drmalestar/flyers');
+            flyerData.image = cloudinaryResult.url;
+            flyerData.imagePublicId = cloudinaryResult.publicId;
+            console.log('Imagen subida a Cloudinary:', cloudinaryResult.url);
         }
         
         await cloudAPI.addFlyer(flyerData);
@@ -227,6 +223,16 @@ async function deleteFlyer(id) {
     if (confirm('¿Estás seguro de que quieres eliminar este flyer?')) {
         try {
             console.log('🔄 Eliminando flyer...');
+            
+            // Obtener el flyer para eliminar la imagen de Cloudinary
+            const flyers = await cloudAPI.getFlyers();
+            const flyer = flyers.find(f => f.id === id);
+            
+            if (flyer && flyer.imagePublicId) {
+                console.log('🗑️ Eliminando imagen de Cloudinary...');
+                await cloudinaryUpload.deleteImage(flyer.imagePublicId);
+            }
+            
             await cloudAPI.deleteFlyer(id);
             console.log('✅ Flyer eliminado');
             await loadFlyers();
@@ -253,15 +259,11 @@ async function handlePhotoSubmit(e) {
         
         const imageFile = document.getElementById('photoImage').files[0];
         if (imageFile) {
-            // Convertir imagen a base64 para persistencia
-            photoData.image = await new Promise((resolve) => {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    resolve(e.target.result);
-                };
-                reader.readAsDataURL(imageFile);
-            });
-            console.log('Imagen convertida a base64');
+            // Subir imagen a Cloudinary
+            const cloudinaryResult = await cloudinaryUpload.uploadImageCompressed(imageFile, 800, 'auto', 'drmalestar/photos');
+            photoData.image = cloudinaryResult.url;
+            photoData.imagePublicId = cloudinaryResult.publicId;
+            console.log('Imagen subida a Cloudinary:', cloudinaryResult.url);
         }
         
         await cloudAPI.addPhoto(photoData);
@@ -321,6 +323,15 @@ function createPhotoItem(photo) {
 async function deletePhoto(id) {
     if (confirm('¿Estás seguro de que quieres eliminar esta foto?')) {
         try {
+            // Obtener la foto para eliminar la imagen de Cloudinary
+            const photos = await cloudAPI.getPhotos();
+            const photo = photos.find(p => p.id === id);
+            
+            if (photo && photo.imagePublicId) {
+                console.log('🗑️ Eliminando imagen de Cloudinary...');
+                await cloudinaryUpload.deleteImage(photo.imagePublicId);
+            }
+            
             await cloudAPI.deletePhoto(id);
             await loadPhotos();
             showNotification('Foto eliminada', 'info');
@@ -663,3 +674,67 @@ window.cleanBrokenImages = async function() {
         showNotification('Error limpiando imágenes', 'error');
     }
 };
+
+// ===========================================
+// FUNCIÓN DE COMPRESIÓN DE IMÁGENES
+// ===========================================
+
+// Función para comprimir y convertir imagen a base64
+async function compressAndConvertToBase64(file, maxWidth = 600, quality = 0.6) {
+    return new Promise((resolve) => {
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        const img = new Image();
+        
+        img.onload = function() {
+            // Calcular nuevas dimensiones manteniendo proporción
+            let { width, height } = img;
+            
+            if (width > maxWidth) {
+                height = (height * maxWidth) / width;
+                width = maxWidth;
+            }
+            
+            // Configurar canvas
+            canvas.width = width;
+            canvas.height = height;
+            
+            // Dibujar imagen comprimida
+            ctx.drawImage(img, 0, 0, width, height);
+            
+            // Convertir a base64 con compresión agresiva
+            let compressedBase64 = canvas.toDataURL('image/jpeg', quality);
+            
+            // Verificar tamaño y comprimir más si es necesario
+            let sizeKB = (compressedBase64.length * 0.75) / 1024;
+            console.log(`📏 Imagen comprimida: ${sizeKB.toFixed(1)}KB`);
+            
+            // Si sigue siendo muy grande, comprimir más agresivamente
+            if (sizeKB > 50) {
+                console.log('⚠️ Imagen muy grande, comprimiendo más...');
+                compressedBase64 = canvas.toDataURL('image/jpeg', 0.4);
+                sizeKB = (compressedBase64.length * 0.75) / 1024;
+                console.log(`📏 Imagen re-comprimida: ${sizeKB.toFixed(1)}KB`);
+            }
+            
+            // Si aún es muy grande, reducir más el tamaño
+            if (sizeKB > 50) {
+                console.log('⚠️ Imagen aún muy grande, reduciendo tamaño...');
+                const smallerWidth = Math.min(width, 400);
+                const smallerHeight = (height * smallerWidth) / width;
+                
+                canvas.width = smallerWidth;
+                canvas.height = smallerHeight;
+                ctx.drawImage(img, 0, 0, smallerWidth, smallerHeight);
+                
+                compressedBase64 = canvas.toDataURL('image/jpeg', 0.3);
+                sizeKB = (compressedBase64.length * 0.75) / 1024;
+                console.log(`📏 Imagen final: ${sizeKB.toFixed(1)}KB`);
+            }
+            
+            resolve(compressedBase64);
+        };
+        
+        img.src = URL.createObjectURL(file);
+    });
+}
