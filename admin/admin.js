@@ -147,8 +147,16 @@ async function handleFlyerSubmit(e) {
         
         const imageFile = document.getElementById('flyerImage').files[0];
         if (imageFile) {
-            // Por ahora usamos URL local, después integraremos Cloudinary
-            flyerData.image = URL.createObjectURL(imageFile);
+            // Subir imagen a Cloudinary
+            const uploadResult = await cloudinaryUploader.uploadImage(imageFile);
+            if (uploadResult.success) {
+                flyerData.image = uploadResult.url;
+                flyerData.publicId = uploadResult.publicId;
+            } else {
+                // Fallback a blob URL si falla Cloudinary
+                flyerData.image = uploadResult.fallback;
+                console.warn('Cloudinary falló, usando blob URL:', uploadResult.error);
+            }
         }
         
         await simpleAPI.addFlyer(flyerData);
@@ -236,8 +244,16 @@ async function handlePhotoSubmit(e) {
         
         const imageFile = document.getElementById('photoImage').files[0];
         if (imageFile) {
-            // Por ahora usamos URL local, después integraremos Cloudinary
-            photoData.image = URL.createObjectURL(imageFile);
+            // Subir imagen a Cloudinary
+            const uploadResult = await cloudinaryUploader.uploadImage(imageFile);
+            if (uploadResult.success) {
+                photoData.image = uploadResult.url;
+                photoData.publicId = uploadResult.publicId;
+            } else {
+                // Fallback a blob URL si falla Cloudinary
+                photoData.image = uploadResult.fallback;
+                console.warn('Cloudinary falló, usando blob URL:', uploadResult.error);
+            }
         }
         
         await simpleAPI.addPhoto(photoData);
