@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Administración - Dr.Malestar</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    
+    <!-- Custom CSS -->
+    <link href="../css/style.css" rel="stylesheet">
+    
+    <style>
+        .admin-container {
+            min-height: 100vh;
+            background: var(--gradient-dark);
+            padding: 2rem 0;
+        }
+        
+        .admin-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-color);
+            border-radius: 15px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            backdrop-filter: blur(10px);
+        }
+        
+        .admin-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+        
+        .admin-title {
+            color: var(--primary-color);
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+        }
+        
+        .admin-subtitle {
+            color: var(--text-muted);
+            font-size: 1.2rem;
+        }
+        
+        .form-section {
+            margin-bottom: 2rem;
+        }
+        
+        .form-section h3 {
+            color: var(--primary-color);
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .file-upload-area {
+            border: 2px dashed var(--border-color);
+            border-radius: 10px;
+            padding: 2rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            background: rgba(255, 255, 255, 0.02);
+        }
+        
+        .file-upload-area:hover {
+            border-color: var(--primary-color);
+            background: rgba(255, 107, 53, 0.1);
+        }
+        
+        .file-upload-area.dragover {
+            border-color: var(--primary-color);
+            background: rgba(255, 107, 53, 0.2);
+        }
+        
+        .upload-icon {
+            font-size: 3rem;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+        }
+        
+        .media-preview {
+            max-width: 200px;
+            max-height: 200px;
+            border-radius: 10px;
+            margin-top: 1rem;
+        }
+        
+        .media-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .media-item {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            transition: all 0.3s ease;
+        }
+        
+        .media-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateY(-2px);
+        }
+        
+        .media-item img {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+        
+        .btn-admin {
+            background: var(--gradient-primary);
+            color: var(--text-light);
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-admin:hover {
+            background: linear-gradient(45deg, #e55a2b, #e0841a);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 107, 53, 0.3);
+        }
+        
+        .btn-danger-admin {
+            background: linear-gradient(45deg, #dc3545, #c82333);
+            color: var(--text-light);
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-size: 0.9rem;
+        }
+        
+        .btn-danger-admin:hover {
+            background: linear-gradient(45deg, #c82333, #a71e2a);
+        }
+        
+        .login-section {
+            max-width: 400px;
+            margin: 0 auto;
+        }
+        
+        .back-to-site {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: var(--gradient-primary);
+            color: var(--text-light);
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+        
+        .back-to-site:hover {
+            background: linear-gradient(45deg, #e55a2b, #e0841a);
+            color: var(--text-light);
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body class="bodyP">
+    <a href="../index.html" class="back-to-site">
+        <i class="bi bi-arrow-left"></i> Volver al Sitio
+    </a>
+    
+    <div class="admin-container">
+        <div class="container">
+            <!-- Login Section (inicialmente visible) -->
+            <div id="loginSection" class="login-section">
+                <div class="admin-card">
+                    <div class="admin-header">
+                        <h1 class="admin-title">Panel de Administración</h1>
+                        <p class="admin-subtitle">Dr.Malestar - Gestión de Contenido</p>
+                    </div>
+                    
+                    <form id="loginForm">
+                        <div class="mb-3">
+                            <label for="username" class="form-label">Usuario</label>
+                            <input type="text" class="form-control" id="username" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="password" class="form-label">Contraseña</label>
+                            <input type="password" class="form-control" id="password" required>
+                        </div>
+                        <button type="submit" class="btn btn-admin w-100">Iniciar Sesión</button>
+                    </form>
+                </div>
+            </div>
+            
+            <!-- Admin Panel (inicialmente oculto) -->
+            <div id="adminPanel" style="display: none;">
+                <div class="admin-header">
+                    <h1 class="admin-title">Panel de Administración</h1>
+                    <p class="admin-subtitle">Dr.Malestar - Gestión de Contenido</p>
+                    <div class="admin-actions">
+                        <button id="exportBtn" class="btn btn-secondary">Exportar Datos</button>
+                        <button id="importBtn" class="btn btn-secondary">Importar Datos</button>
+                        <button id="logoutBtn" class="btn btn-danger-admin">Cerrar Sesión</button>
+                        <input type="file" id="importFile" accept=".json" style="display: none;">
+                    </div>
+                </div>
+                
+                <!-- Gestión de Flyers -->
+                <div class="admin-card">
+                    <div class="form-section">
+                        <h3><i class="bi bi-calendar-event"></i> Gestión de Flyers</h3>
+                        
+                        <form id="flyerForm">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="flyerTitle" class="form-label">Título del Show</label>
+                                        <input type="text" class="form-control" id="flyerTitle" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="flyerDate" class="form-label">Fecha</label>
+                                        <input type="date" class="form-control" id="flyerDate" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="flyerLocation" class="form-label">Lugar</label>
+                                        <input type="text" class="form-control" id="flyerLocation" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="flyerTime" class="form-label">Hora</label>
+                                        <input type="time" class="form-control" id="flyerTime" required>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="flyerDescription" class="form-label">Descripción</label>
+                                        <textarea class="form-control" id="flyerDescription" rows="4"></textarea>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="flyerImage" class="form-label">Imagen del Flyer</label>
+                                        <div class="file-upload-area" onclick="document.getElementById('flyerImage').click()">
+                                            <i class="bi bi-cloud-upload upload-icon"></i>
+                                            <p>Haz clic para subir o arrastra una imagen</p>
+                                            <input type="file" id="flyerImage" accept="image/*" style="display: none;">
+                                        </div>
+                                        <div id="flyerPreview"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-admin">Agregar Flyer</button>
+                        </form>
+                    </div>
+                    
+                    <!-- Lista de Flyers -->
+                    <div class="form-section">
+                        <h4>Flyers Existentes</h4>
+                        <div id="flyersList" class="media-list">
+                            <!-- Los flyers se cargarán aquí -->
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Gestión de Fotos -->
+                <div class="admin-card">
+                    <div class="form-section">
+                        <h3><i class="bi bi-images"></i> Gestión de Fotos</h3>
+                        
+                        <form id="photoForm">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="photoTitle" class="form-label">Título de la Foto</label>
+                                        <input type="text" class="form-control" id="photoTitle" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="photoDescription" class="form-label">Descripción</label>
+                                        <textarea class="form-control" id="photoDescription" rows="3"></textarea>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="photoImage" class="form-label">Imagen</label>
+                                        <div class="file-upload-area" onclick="document.getElementById('photoImage').click()">
+                                            <i class="bi bi-cloud-upload upload-icon"></i>
+                                            <p>Haz clic para subir o arrastra una imagen</p>
+                                            <input type="file" id="photoImage" accept="image/*" style="display: none;">
+                                        </div>
+                                        <div id="photoPreview"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-admin">Agregar Foto</button>
+                        </form>
+                    </div>
+                    
+                    <!-- Lista de Fotos -->
+                    <div class="form-section">
+                        <h4>Fotos Existentes</h4>
+                        <div id="photosList" class="media-list">
+                            <!-- Las fotos se cargarán aquí -->
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Gestión de Videos -->
+                <div class="admin-card">
+                    <div class="form-section">
+                        <h3><i class="bi bi-youtube"></i> Gestión de Videos</h3>
+                        
+                        <form id="videoForm">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="videoTitle" class="form-label">Título del Video</label>
+                                        <input type="text" class="form-control" id="videoTitle" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="videoDescription" class="form-label">Descripción</label>
+                                        <textarea class="form-control" id="videoDescription" rows="3"></textarea>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="videoUrl" class="form-label">URL de YouTube</label>
+                                        <input type="url" class="form-control" id="videoUrl" placeholder="https://www.youtube.com/watch?v=..." required>
+                                        <div class="form-text">Pega aquí el enlace completo de YouTube</div>
+                                    </div>
+                                    <div id="videoPreview"></div>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-admin">Agregar Video</button>
+                        </form>
+                    </div>
+                    
+                    <!-- Lista de Videos -->
+                    <div class="form-section">
+                        <h4>Videos Existentes</h4>
+                        <div id="videosList" class="media-list">
+                            <!-- Los videos se cargarán aquí -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="../js/jsonbin-config.js"></script>
+    <script src="../js/jsonbin-manager.js"></script>
+    <script src="admin.js"></script>
+</body>
+</html>
