@@ -158,7 +158,7 @@ async function handleFlyerSubmit(e) {
             console.log('Imagen convertida a base64');
         }
         
-        await simpleAPI.addFlyer(flyerData);
+        await cloudAPI.addFlyer(flyerData);
         await loadFlyers();
         
         // Limpiar formulario
@@ -177,13 +177,20 @@ async function loadFlyers() {
     if (!container) return;
     
     try {
-        const flyers = await simpleAPI.getFlyers();
+        const flyers = await cloudAPI.getFlyers();
         container.innerHTML = '';
+        
+        if (flyers.length === 0) {
+            container.innerHTML = '<p class="text-muted">No hay flyers agregados</p>';
+            return;
+        }
         
         flyers.forEach(flyer => {
             const flyerItem = createFlyerItem(flyer);
             container.appendChild(flyerItem);
         });
+        
+        console.log('✅ Flyers cargados:', flyers.length);
     } catch (error) {
         console.error('Error cargando flyers:', error);
         container.innerHTML = '<p class="text-danger">Error cargando flyers</p>';
@@ -219,9 +226,9 @@ async function deleteFlyer(id) {
     console.log('🗑️ Eliminando flyer con ID:', id);
     if (confirm('¿Estás seguro de que quieres eliminar este flyer?')) {
         try {
-            console.log('🔄 Llamando a simpleAPI.deleteFlyer...');
-            await simpleAPI.deleteFlyer(id);
-            console.log('✅ Flyer eliminado de la API');
+            console.log('🔄 Eliminando flyer...');
+            await cloudAPI.deleteFlyer(id);
+            console.log('✅ Flyer eliminado');
             await loadFlyers();
             showNotification('Flyer eliminado', 'info');
         } catch (error) {
@@ -257,7 +264,7 @@ async function handlePhotoSubmit(e) {
             console.log('Imagen convertida a base64');
         }
         
-        await simpleAPI.addPhoto(photoData);
+        await cloudAPI.addPhoto(photoData);
         await loadPhotos();
         
         // Limpiar formulario
@@ -346,7 +353,7 @@ async function handleVideoSubmit(e) {
             originalUrl: videoUrl
         };
         
-        await simpleAPI.addVideo(videoData);
+        await cloudAPI.addVideo(videoData);
         await loadVideos();
         
         // Limpiar formulario

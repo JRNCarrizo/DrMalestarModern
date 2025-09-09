@@ -164,11 +164,11 @@ async function loadFlyers() {
     container.innerHTML = '<div class="text-center"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Cargando...</span></div></div>';
     
     try {
-        // Intentar cargar desde API simple primero
-        if (typeof simpleAPI !== 'undefined') {
+        // Cargar desde CloudAPI
+        if (typeof cloudAPI !== 'undefined') {
             try {
-                console.log('🔄 Cargando flyers desde API...');
-                const flyers = await simpleAPI.getFlyers();
+                console.log('🔄 Cargando flyers desde CloudAPI...');
+                const flyers = await cloudAPI.getFlyers();
                 console.log('📋 Flyers obtenidos:', flyers);
                 if (flyers && flyers.length > 0) {
                     container.innerHTML = '';
@@ -176,16 +176,16 @@ async function loadFlyers() {
                         const flyerCard = createFlyerCard(flyer);
                         container.appendChild(flyerCard);
                     });
-                    console.log('✅ Flyers cargados desde API');
+                    console.log('✅ Flyers cargados desde CloudAPI');
                     return;
                 } else {
-                    console.log('⚠️ No hay flyers en la API');
+                    console.log('⚠️ No hay flyers en CloudAPI');
                 }
-            } catch (apiError) {
-                console.log('❌ API no disponible, usando localStorage:', apiError);
+            } catch (error) {
+                console.log('❌ Error cargando desde CloudAPI:', error);
             }
         } else {
-            console.log('❌ simpleAPI no está definido');
+            console.log('❌ cloudAPI no está definido');
         }
         
         // Fallback a datos locales
