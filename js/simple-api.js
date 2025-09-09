@@ -138,14 +138,18 @@ class SimpleAPI {
     }
 
     async addFlyer(flyer) {
+        console.log('🔄 Agregando flyer:', flyer);
         const data = await this.getData();
-        data.flyers.push({
+        const newFlyer = {
             id: Date.now().toString(),
             ...flyer,
             createdAt: new Date().toISOString()
-        });
+        };
+        data.flyers.push(newFlyer);
+        console.log('📝 Datos actualizados:', data);
         await this.updateData(data);
-        return data.flyers[data.flyers.length - 1];
+        console.log('✅ Flyer agregado exitosamente');
+        return newFlyer;
     }
 
     async addPhoto(photo) {

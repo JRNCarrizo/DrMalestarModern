@@ -167,18 +167,25 @@ async function loadFlyers() {
         // Intentar cargar desde API simple primero
         if (typeof simpleAPI !== 'undefined') {
             try {
+                console.log('🔄 Cargando flyers desde API...');
                 const flyers = await simpleAPI.getFlyers();
+                console.log('📋 Flyers obtenidos:', flyers);
                 if (flyers && flyers.length > 0) {
                     container.innerHTML = '';
                     flyers.forEach(flyer => {
                         const flyerCard = createFlyerCard(flyer);
                         container.appendChild(flyerCard);
                     });
+                    console.log('✅ Flyers cargados desde API');
                     return;
+                } else {
+                    console.log('⚠️ No hay flyers en la API');
                 }
             } catch (apiError) {
-                console.log('API no disponible, usando localStorage:', apiError);
+                console.log('❌ API no disponible, usando localStorage:', apiError);
             }
+        } else {
+            console.log('❌ simpleAPI no está definido');
         }
         
         // Fallback a datos locales
@@ -666,3 +673,29 @@ const modalStyles = `
 
 // Agregar estilos al head
 document.head.insertAdjacentHTML('beforeend', modalStyles);
+
+// ===========================================
+// FUNCIONES DE DEBUGGING
+// ===========================================
+// Función para recargar contenido (útil para debugging)
+async function reloadAllContent() {
+    console.log('🔄 Recargando todo el contenido...');
+    await loadFlyers();
+    await loadPhotos();
+    await loadVideos();
+    console.log('✅ Contenido recargado');
+}
+
+// Función para ver el estado de la API
+function checkAPIStatus() {
+    console.log('🔍 Verificando estado de la API...');
+    console.log('simpleAPI disponible:', typeof simpleAPI !== 'undefined');
+    if (typeof simpleAPI !== 'undefined') {
+        console.log('Bin ID:', simpleAPI.binId);
+        console.log('API Key:', simpleAPI.apiKey ? 'Configurada' : 'No configurada');
+    }
+}
+
+// Hacer funciones disponibles globalmente
+window.reloadContent = reloadAllContent;
+window.checkAPI = checkAPIStatus;

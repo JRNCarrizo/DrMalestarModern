@@ -147,16 +147,9 @@ async function handleFlyerSubmit(e) {
         
         const imageFile = document.getElementById('flyerImage').files[0];
         if (imageFile) {
-            // Subir imagen a Cloudinary
-            const uploadResult = await cloudinaryUploader.uploadImage(imageFile);
-            if (uploadResult.success) {
-                flyerData.image = uploadResult.url;
-                flyerData.publicId = uploadResult.publicId;
-            } else {
-                // Fallback a blob URL si falla Cloudinary
-                flyerData.image = uploadResult.fallback;
-                console.warn('Cloudinary falló, usando blob URL:', uploadResult.error);
-            }
+            // Por ahora usar blob URL hasta que Cloudinary esté configurado
+            flyerData.image = URL.createObjectURL(imageFile);
+            console.log('Imagen guardada como blob URL:', flyerData.image);
         }
         
         await simpleAPI.addFlyer(flyerData);
@@ -217,13 +210,16 @@ function createFlyerItem(flyer) {
 }
 
 async function deleteFlyer(id) {
+    console.log('🗑️ Eliminando flyer con ID:', id);
     if (confirm('¿Estás seguro de que quieres eliminar este flyer?')) {
         try {
+            console.log('🔄 Llamando a simpleAPI.deleteFlyer...');
             await simpleAPI.deleteFlyer(id);
+            console.log('✅ Flyer eliminado de la API');
             await loadFlyers();
             showNotification('Flyer eliminado', 'info');
         } catch (error) {
-            console.error('Error eliminando flyer:', error);
+            console.error('❌ Error eliminando flyer:', error);
             showNotification('Error eliminando flyer', 'error');
         }
     }
@@ -244,16 +240,9 @@ async function handlePhotoSubmit(e) {
         
         const imageFile = document.getElementById('photoImage').files[0];
         if (imageFile) {
-            // Subir imagen a Cloudinary
-            const uploadResult = await cloudinaryUploader.uploadImage(imageFile);
-            if (uploadResult.success) {
-                photoData.image = uploadResult.url;
-                photoData.publicId = uploadResult.publicId;
-            } else {
-                // Fallback a blob URL si falla Cloudinary
-                photoData.image = uploadResult.fallback;
-                console.warn('Cloudinary falló, usando blob URL:', uploadResult.error);
-            }
+            // Por ahora usar blob URL hasta que Cloudinary esté configurado
+            photoData.image = URL.createObjectURL(imageFile);
+            console.log('Imagen guardada como blob URL:', photoData.image);
         }
         
         await simpleAPI.addPhoto(photoData);
@@ -594,3 +583,22 @@ function showNotification(message, type = 'info') {
 window.deleteFlyer = deleteFlyer;
 window.deletePhoto = deletePhoto;
 window.deleteVideo = deleteVideo;
+
+// Función para recargar contenido
+window.reloadAdminContent = async function() {
+    await loadFlyers();
+    await loadPhotos();
+    await loadVideos();
+    showNotification('Contenido recargado', 'info');
+};
+
+// Función para verificar el estado de la API
+window.checkAdminAPI = function() {
+    console.log('🔍 Verificando estado de la API en admin...');
+    console.log('simpleAPI disponible:', typeof simpleAPI !== 'undefined');
+    if (typeof simpleAPI !== 'undefined') {
+        console.log('Bin ID:', simpleAPI.binId);
+        console.log('API Key:', simpleAPI.apiKey ? 'Configurada' : 'No configurada');
+    }
+    showNotification('Estado de API verificado en consola', 'info');
+};
