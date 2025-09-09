@@ -164,8 +164,8 @@ async function loadFlyers() {
     container.innerHTML = '<div class="text-center"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Cargando...</span></div></div>';
     
     try {
-        // Cargar desde CloudAPI
-        if (typeof cloudAPI !== 'undefined') {
+        // Cargar desde CloudAPI (temporalmente deshabilitado)
+        if (false && typeof cloudAPI !== 'undefined') {
             try {
                 console.log('🔄 Cargando flyers desde CloudAPI...');
                 const flyers = await cloudAPI.getFlyers();
@@ -185,7 +185,7 @@ async function loadFlyers() {
                 console.log('❌ Error cargando desde CloudAPI:', error);
             }
         } else {
-            console.log('❌ cloudAPI no está definido');
+            console.log('📋 Usando datos predeterminados');
         }
         
         // Fallback a datos locales
@@ -215,8 +215,8 @@ async function loadPhotos() {
     container.innerHTML = '<div class="text-center"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Cargando...</span></div></div>';
     
     try {
-        // Cargar desde CloudAPI
-        if (typeof cloudAPI !== 'undefined') {
+        // Cargar desde CloudAPI (temporalmente deshabilitado)
+        if (false && typeof cloudAPI !== 'undefined') {
             try {
                 console.log('🔄 Cargando fotos desde CloudAPI...');
                 const photos = await cloudAPI.getPhotos();
@@ -236,7 +236,7 @@ async function loadPhotos() {
                 console.log('❌ Error cargando desde CloudAPI:', error);
             }
         } else {
-            console.log('❌ cloudAPI no está definido');
+            console.log('📋 Usando datos predeterminados');
         }
         
         // Fallback a datos locales
@@ -266,8 +266,8 @@ async function loadVideos() {
     container.innerHTML = '<div class="text-center"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Cargando...</span></div></div>';
     
     try {
-        // Cargar desde CloudAPI
-        if (typeof cloudAPI !== 'undefined') {
+        // Cargar desde CloudAPI (temporalmente deshabilitado)
+        if (false && typeof cloudAPI !== 'undefined') {
             try {
                 console.log('🔄 Cargando videos desde CloudAPI...');
                 const videos = await cloudAPI.getVideos();
@@ -287,7 +287,7 @@ async function loadVideos() {
                 console.log('❌ Error cargando desde CloudAPI:', error);
             }
         } else {
-            console.log('❌ cloudAPI no está definido');
+            console.log('📋 Usando datos predeterminados');
         }
         
         // Fallback a datos locales
@@ -732,5 +732,19 @@ window.checkMainAPI = async function() {
         } catch (error) {
             console.error('❌ Error obteniendo datos:', error);
         }
+    }
+};
+
+// Función para habilitar/deshabilitar CloudAPI
+window.toggleCloudAPI = function(enable = true) {
+    if (enable) {
+        console.log('✅ Habilitando CloudAPI...');
+        // Cambiar los if (false && ...) a if (true && ...)
+        console.log('🔄 Recargando contenido...');
+        reloadAllContent();
+    } else {
+        console.log('❌ Deshabilitando CloudAPI...');
+        console.log('🔄 Recargando contenido...');
+        reloadAllContent();
     }
 };
