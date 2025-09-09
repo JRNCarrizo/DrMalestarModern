@@ -464,7 +464,10 @@ function setupScrollAnimations() {
 // UTILIDADES
 // ===========================================
 function formatDate(dateString) {
-    const date = new Date(dateString);
+    // Crear fecha local para evitar problemas de zona horaria
+    const [year, month, day] = dateString.split('-');
+    const date = new Date(year, month - 1, day); // month - 1 porque los meses van de 0-11
+    
     return date.toLocaleDateString('es-ES', {
         year: 'numeric',
         month: 'long',
