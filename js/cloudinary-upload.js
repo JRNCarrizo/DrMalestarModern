@@ -9,10 +9,13 @@ class CloudinaryUpload {
         this.baseUrl = `https://api.cloudinary.com/v1_1/${this.cloudName}/image/upload`;
     }
 
-    // Subir imagen a Cloudinary
+    // Subir imagen a Cloudinary (versión simple)
     async uploadImage(file, folder = 'drmalestar') {
         try {
             console.log('🔄 Subiendo imagen a Cloudinary...');
+            console.log('📁 Archivo:', file.name, 'Tamaño:', (file.size / 1024).toFixed(1) + 'KB');
+            console.log('🔧 Preset:', this.uploadPreset);
+            console.log('📂 Folder:', folder);
             
             // Crear FormData
             const formData = new FormData();
@@ -20,21 +23,22 @@ class CloudinaryUpload {
             formData.append('upload_preset', this.uploadPreset);
             formData.append('folder', folder);
             
-            // Configuraciones de optimización
-            formData.append('transformation', 'f_auto,q_auto,w_800');
-            
-            // Subir imagen
+            // Subir imagen (sin transformaciones adicionales, usa las del preset)
             const response = await fetch(this.baseUrl, {
                 method: 'POST',
                 body: formData
             });
 
             if (!response.ok) {
-                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                const errorText = await response.text();
+                console.error('❌ Error HTTP:', response.status, response.statusText);
+                console.error('❌ Error details:', errorText);
+                throw new Error(`HTTP ${response.status}: ${response.statusText} - ${errorText}`);
             }
 
             const result = await response.json();
             console.log('✅ Imagen subida a Cloudinary:', result.secure_url);
+            console.log(`📏 Tamaño: ${(result.bytes / 1024).toFixed(1)}KB`);
             
             return {
                 url: result.secure_url,
@@ -53,6 +57,9 @@ class CloudinaryUpload {
     async uploadImageCompressed(file, maxWidth = 800, quality = 'auto', folder = 'drmalestar') {
         try {
             console.log('🔄 Subiendo imagen comprimida a Cloudinary...');
+            console.log('📁 Archivo:', file.name, 'Tamaño:', (file.size / 1024).toFixed(1) + 'KB');
+            console.log('🔧 Preset:', this.uploadPreset);
+            console.log('📂 Folder:', folder);
             
             // Crear FormData
             const formData = new FormData();
@@ -64,6 +71,8 @@ class CloudinaryUpload {
             const transformation = `f_auto,q_${quality},w_${maxWidth}`;
             formData.append('transformation', transformation);
             
+            console.log('🔧 Transformation:', transformation);
+            
             // Subir imagen
             const response = await fetch(this.baseUrl, {
                 method: 'POST',
@@ -71,7 +80,10 @@ class CloudinaryUpload {
             });
 
             if (!response.ok) {
-                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                const errorText = await response.text();
+                console.error('❌ Error HTTP:', response.status, response.statusText);
+                console.error('❌ Error details:', errorText);
+                throw new Error(`HTTP ${response.status}: ${response.statusText} - ${errorText}`);
             }
 
             const result = await response.json();

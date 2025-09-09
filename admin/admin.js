@@ -147,8 +147,8 @@ async function handleFlyerSubmit(e) {
         
         const imageFile = document.getElementById('flyerImage').files[0];
         if (imageFile) {
-            // Subir imagen a Cloudinary
-            const cloudinaryResult = await cloudinaryUpload.uploadImageCompressed(imageFile, 800, 'auto', 'drmalestar/flyers');
+            // Subir imagen a Cloudinary (versión simple)
+            const cloudinaryResult = await cloudinaryUpload.uploadImage(imageFile, 'drmalestar/flyers');
             flyerData.image = cloudinaryResult.url;
             flyerData.imagePublicId = cloudinaryResult.publicId;
             console.log('Imagen subida a Cloudinary:', cloudinaryResult.url);
@@ -259,8 +259,8 @@ async function handlePhotoSubmit(e) {
         
         const imageFile = document.getElementById('photoImage').files[0];
         if (imageFile) {
-            // Subir imagen a Cloudinary
-            const cloudinaryResult = await cloudinaryUpload.uploadImageCompressed(imageFile, 800, 'auto', 'drmalestar/photos');
+            // Subir imagen a Cloudinary (versión simple)
+            const cloudinaryResult = await cloudinaryUpload.uploadImage(imageFile, 'drmalestar/photos');
             photoData.image = cloudinaryResult.url;
             photoData.imagePublicId = cloudinaryResult.publicId;
             console.log('Imagen subida a Cloudinary:', cloudinaryResult.url);
