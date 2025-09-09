@@ -25,14 +25,14 @@ const sampleData = {
     photos: [
         {
             id: 1,
-            title: "Ensayo en el estudio",
-            description: "Preparando el repertorio para el próximo show",
+            title: "La Cueva del Indio",
+            description: "Noche de festejo",
             image: "img/banda1.jpg"
         },
         {
             id: 2,
-            title: "Backstage",
-            description: "Momento de relax antes del concierto",
+            title: "Tarde en Parque Avellaneda",
+            description: "Que sea Rock",
             image: "img/banda2.jpg"
         }
     ],
