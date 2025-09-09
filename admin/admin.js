@@ -151,7 +151,7 @@ async function handleFlyerSubmit(e) {
             flyerData.image = URL.createObjectURL(imageFile);
         }
         
-        await jsonbinManager.addFlyer(flyerData);
+        await simpleAPI.addFlyer(flyerData);
         await loadFlyers();
         
         // Limpiar formulario
@@ -170,7 +170,7 @@ async function loadFlyers() {
     if (!container) return;
     
     try {
-        const flyers = await jsonbinManager.getFlyers();
+        const flyers = await simpleAPI.getFlyers();
         container.innerHTML = '';
         
         flyers.forEach(flyer => {
@@ -211,7 +211,7 @@ function createFlyerItem(flyer) {
 async function deleteFlyer(id) {
     if (confirm('¿Estás seguro de que quieres eliminar este flyer?')) {
         try {
-            await jsonbinManager.deleteFlyer(id);
+            await simpleAPI.deleteFlyer(id);
             await loadFlyers();
             showNotification('Flyer eliminado', 'info');
         } catch (error) {
@@ -240,7 +240,7 @@ async function handlePhotoSubmit(e) {
             photoData.image = URL.createObjectURL(imageFile);
         }
         
-        await jsonbinManager.addPhoto(photoData);
+        await simpleAPI.addPhoto(photoData);
         await loadPhotos();
         
         // Limpiar formulario
@@ -259,7 +259,7 @@ async function loadPhotos() {
     if (!container) return;
     
     try {
-        const photos = await jsonbinManager.getPhotos();
+        const photos = await simpleAPI.getPhotos();
         container.innerHTML = '';
         
         photos.forEach(photo => {
@@ -297,7 +297,7 @@ function createPhotoItem(photo) {
 async function deletePhoto(id) {
     if (confirm('¿Estás seguro de que quieres eliminar esta foto?')) {
         try {
-            await jsonbinManager.deletePhoto(id);
+            await simpleAPI.deletePhoto(id);
             await loadPhotos();
             showNotification('Foto eliminada', 'info');
         } catch (error) {
@@ -329,7 +329,7 @@ async function handleVideoSubmit(e) {
             originalUrl: videoUrl
         };
         
-        await jsonbinManager.addVideo(videoData);
+        await simpleAPI.addVideo(videoData);
         await loadVideos();
         
         // Limpiar formulario
@@ -360,7 +360,7 @@ async function loadVideos() {
     if (!container) return;
     
     try {
-        const videos = await jsonbinManager.getVideos();
+        const videos = await simpleAPI.getVideos();
         container.innerHTML = '';
         
         videos.forEach(video => {
@@ -401,7 +401,7 @@ function createVideoItem(video) {
 async function deleteVideo(id) {
     if (confirm('¿Estás seguro de que quieres eliminar este video?')) {
         try {
-            await jsonbinManager.deleteVideo(id);
+            await simpleAPI.deleteVideo(id);
             await loadVideos();
             showNotification('Video eliminado', 'info');
         } catch (error) {

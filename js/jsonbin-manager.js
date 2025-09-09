@@ -48,7 +48,9 @@ class JSONBinManager {
             return binId;
         } catch (error) {
             console.error('Error creando bin:', error);
-            throw error;
+            // Si falla JSONBin, usar localStorage como respaldo
+            console.log('Usando localStorage como respaldo');
+            return null;
         }
     }
 

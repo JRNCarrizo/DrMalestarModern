@@ -164,16 +164,20 @@ async function loadFlyers() {
     container.innerHTML = '<div class="text-center"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Cargando...</span></div></div>';
     
     try {
-        // Intentar cargar desde JSONBin primero
-        if (typeof jsonbinManager !== 'undefined') {
-            const flyers = await jsonbinManager.getFlyers();
-            if (flyers && flyers.length > 0) {
-                container.innerHTML = '';
-                flyers.forEach(flyer => {
-                    const flyerCard = createFlyerCard(flyer);
-                    container.appendChild(flyerCard);
-                });
-                return;
+        // Intentar cargar desde API simple primero
+        if (typeof simpleAPI !== 'undefined') {
+            try {
+                const flyers = await simpleAPI.getFlyers();
+                if (flyers && flyers.length > 0) {
+                    container.innerHTML = '';
+                    flyers.forEach(flyer => {
+                        const flyerCard = createFlyerCard(flyer);
+                        container.appendChild(flyerCard);
+                    });
+                    return;
+                }
+            } catch (apiError) {
+                console.log('API no disponible, usando localStorage:', apiError);
             }
         }
         
@@ -206,14 +210,18 @@ async function loadPhotos() {
     try {
         // Intentar cargar desde JSONBin primero
         if (typeof jsonbinManager !== 'undefined') {
-            const photos = await jsonbinManager.getPhotos();
-            if (photos && photos.length > 0) {
-                container.innerHTML = '';
-                photos.forEach(photo => {
-                    const photoCard = createPhotoCard(photo);
-                    container.appendChild(photoCard);
-                });
-                return;
+            try {
+                const photos = await jsonbinManager.getPhotos();
+                if (photos && photos.length > 0) {
+                    container.innerHTML = '';
+                    photos.forEach(photo => {
+                        const photoCard = createPhotoCard(photo);
+                        container.appendChild(photoCard);
+                    });
+                    return;
+                }
+            } catch (jsonbinError) {
+                console.log('JSONBin no disponible, usando localStorage:', jsonbinError);
             }
         }
         
@@ -246,14 +254,18 @@ async function loadVideos() {
     try {
         // Intentar cargar desde JSONBin primero
         if (typeof jsonbinManager !== 'undefined') {
-            const videos = await jsonbinManager.getVideos();
-            if (videos && videos.length > 0) {
-                container.innerHTML = '';
-                videos.forEach(video => {
-                    const videoCard = createVideoCard(video);
-                    container.appendChild(videoCard);
-                });
-                return;
+            try {
+                const videos = await jsonbinManager.getVideos();
+                if (videos && videos.length > 0) {
+                    container.innerHTML = '';
+                    videos.forEach(video => {
+                        const videoCard = createVideoCard(video);
+                        container.appendChild(videoCard);
+                    });
+                    return;
+                }
+            } catch (jsonbinError) {
+                console.log('JSONBin no disponible, usando localStorage:', jsonbinError);
             }
         }
         
