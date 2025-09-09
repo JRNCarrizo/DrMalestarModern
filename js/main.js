@@ -713,3 +713,24 @@ function checkAPIStatus() {
 // Hacer funciones disponibles globalmente
 window.reloadContent = reloadAllContent;
 window.checkAPI = checkAPIStatus;
+
+// Función para verificar el estado de la API en el sitio principal
+window.checkMainAPI = async function() {
+    console.log('🔍 Verificando estado de la API en sitio principal...');
+    console.log('cloudAPI disponible:', typeof cloudAPI !== 'undefined');
+    console.log('cloudinaryUpload disponible:', typeof cloudinaryUpload !== 'undefined');
+    
+    if (typeof cloudAPI !== 'undefined') {
+        try {
+            const data = await cloudAPI.getData();
+            console.log('📋 Datos obtenidos:', data);
+            console.log('📊 Estadísticas:', {
+                flyers: data.flyers?.length || 0,
+                photos: data.photos?.length || 0,
+                videos: data.videos?.length || 0
+            });
+        } catch (error) {
+            console.error('❌ Error obteniendo datos:', error);
+        }
+    }
+};
