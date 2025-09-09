@@ -506,6 +506,83 @@ body {
 }
 
 /* =========================================== */
+/* RIDER TÉCNICO */
+/* =========================================== */
+.rider-card {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 20px;
+    padding: 3rem 2rem;
+    border: 1px solid var(--border-color);
+    backdrop-filter: blur(15px);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.rider-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: var(--gradient-primary);
+}
+
+.rider-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+    border-color: var(--primary-color);
+}
+
+.rider-icon {
+    font-size: 4rem;
+    color: var(--primary-color);
+    margin-bottom: 1.5rem;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+}
+
+.rider-card h3 {
+    color: var(--text-light);
+    font-size: 2rem;
+    margin-bottom: 1rem;
+    font-family: 'Orbitron', sans-serif;
+}
+
+.rider-description {
+    color: var(--text-muted);
+    font-size: 1.1rem;
+    line-height: 1.6;
+    margin-bottom: 2rem;
+}
+
+.rider-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+}
+
+.rider-actions .btn {
+    padding: 0.75rem 2rem;
+    font-weight: 600;
+    border-radius: 10px;
+    transition: all 0.3s ease;
+}
+
+.rider-actions .btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 25px rgba(255, 107, 53, 0.3);
+}
+
+
+/* =========================================== */
 /* CONTACTO */
 /* =========================================== */
 .contact-content {
@@ -608,6 +685,23 @@ body {
 .footer-text {
     color: var(--text-muted);
     font-size: 0.9rem;
+}
+
+.footer-credit {
+    margin-top: 0.5rem;
+    opacity: 0.7;
+}
+
+.credit-link {
+    color: var(--primary-color);
+    text-decoration: none;
+    transition: all 0.3s ease;
+    font-weight: 500;
+}
+
+.credit-link:hover {
+    color: var(--secondary-color);
+    text-decoration: underline;
 }
 
 /* =========================================== */
@@ -825,6 +919,23 @@ body {
         grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
     }
     
+    .rider-actions {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .rider-actions .btn {
+        width: 100%;
+        max-width: 250px;
+    }
+    
+    .rider-card {
+        padding: 2rem 1.5rem;
+    }
+    
+    .rider-card h3 {
+        font-size: 1.5rem;
+    }
     
     .admin-toggle {
         right: 10px;
