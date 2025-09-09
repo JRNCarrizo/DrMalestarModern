@@ -7,19 +7,19 @@ const sampleData = {
     flyers: [
         {
             id: 1,
-            title: "Show en el Teatro Colón",
-            date: "2024-03-15",
-            location: "Teatro Colón, Buenos Aires",
+            title: "Noche de Blues",
+            date: "2024-09-12",
+            location: "Six Bar San Miguel",
             image: "img/bluseraflier.jpg",
-            description: "Gran presentación tributo a Pappo"
+            description: "Gran Presentación tributo a Pappo"
         },
         {
             id: 2,
-            title: "Festival de Rock",
-            date: "2024-04-20",
-            location: "Estadio Luna Park",
+            title: "Noche de Blues",
+            date: "2024-09-12",
+            location: "Six Bar San Miguel",
             image: "img/bluseraflier.jpg",
-            description: "Participación en el festival más importante del año"
+            description: "Gran Presentación tributo a Pappo"
         }
     ],
     photos: [
