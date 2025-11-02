@@ -60,12 +60,21 @@ async function loadFlyers() {
         console.log('🔄 Cargando flyers...');
         const flyers = await api.getFlyers();
         console.log('📋 Flyers obtenidos:', flyers?.length || 0);
+        console.log('📋 Flyers raw:', flyers);
         
         // Asegurar que flyers sea un array
         const flyersArray = Array.isArray(flyers) ? flyers : [];
+        console.log('📋 Flyers array:', flyersArray);
+        
+        if (flyersArray.length === 0) {
+            console.warn('⚠️ No hay flyers en el bin. Verifica que el Bin ID sea correcto.');
+            console.warn('⚠️ Bin ID actual:', api.binId);
+        }
+        
         displayFlyers(flyersArray);
     } catch (error) {
         console.error('❌ Error cargando flyers:', error);
+        console.error('❌ Error completo:', error);
         const container = document.getElementById('flyers-container');
         if (container) {
             // Mostrar mensaje más amigable
@@ -73,6 +82,7 @@ async function loadFlyers() {
                 <div class="text-center text-muted" style="grid-column: 1/-1; padding: 3rem;">
                     <p>No se pudieron cargar los flyers.</p>
                     <small>Recarga la página o intenta más tarde.</small>
+                    <br><small class="text-muted">Error: ${error.message}</small>
                 </div>
             `;
         }

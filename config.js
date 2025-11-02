@@ -8,7 +8,7 @@ const CONFIG = {
     // JSONBin (Para almacenar datos)
     // ==========================================
     // Obtén tus credenciales en: https://jsonbin.io
-    BIN_ID: '67b0a0b8-5c4a-4b8a-9c1a-1a2b3c4d5e6f', // Tu Bin ID de JSONBin
+    BIN_ID: '6907b8f2d0ea881f40cf6c4c', // Bin ID con el contenido cargado
     API_KEY: '$2a$10$oYe3uG0XIyCLhNeLvtrZjOSEAkLtqlABuEdQbM9QRKK0FRGVRdxfC', // Tu API Key
     BASE_URL: 'https://api.jsonbin.io/v3',
     

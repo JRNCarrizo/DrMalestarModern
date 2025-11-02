@@ -33,6 +33,15 @@ class SimpleAPI {
         
         console.log('📋 Bin ID:', this.binId || 'No configurado (se creará automáticamente)');
         console.log('📋 Fuente:', configBinId ? 'Config.js' : localBinId ? 'LocalStorage' : 'Se creará nuevo');
+        
+        // Mostrar el Bin ID actual de forma destacada para que sea fácil copiarlo
+        if (this.binId) {
+            console.log('%c═══════════════════════════════════════', 'background: #4ecdc4; color: white; font-size: 12px; padding: 3px;');
+            console.log('%c📋 BIN ID ACTUAL:', 'background: #4ecdc4; color: white; font-size: 14px; font-weight: bold; padding: 5px;');
+            console.log('%c' + this.binId, 'background: #4ecdc4; color: white; font-size: 14px; font-weight: bold; padding: 8px;');
+            console.log('%cSi este es el que tiene tu contenido, copia este valor y actualízalo en config.js', 'background: #4ecdc4; color: white; font-size: 12px; padding: 3px;');
+            console.log('%c═══════════════════════════════════════', 'background: #4ecdc4; color: white; font-size: 12px; padding: 3px;');
+        }
     }
 
     // Obtener todos los datos
@@ -62,7 +71,21 @@ class SimpleAPI {
 
             const result = await response.json();
             const data = result.record || { flyers: [], photos: [], videos: [] };
+            
+            // Log detallado del contenido recibido
             console.log('✅ Datos cargados correctamente');
+            console.log('📊 Contenido del bin:');
+            console.log('   - Flyers:', Array.isArray(data.flyers) ? data.flyers.length : 'no es array');
+            console.log('   - Photos:', Array.isArray(data.photos) ? data.photos.length : 'no es array');
+            console.log('   - Videos:', Array.isArray(data.videos) ? data.videos.length : 'no es array');
+            console.log('📋 Datos completos:', JSON.stringify(data, null, 2));
+            
+            // Si viene vacío pero tiene estructura, puede que el contenido esté en otro formato
+            if (data.flyers?.length === 0 && data.photos?.length === 0 && data.videos?.length === 0) {
+                console.warn('⚠️ El bin está vacío. Si tenías contenido, puede estar en otro bin.');
+                console.warn('⚠️ Verifica si hay otro Bin ID guardado en localStorage o en otro dispositivo.');
+            }
+            
             return data;
         } catch (error) {
             console.error('❌ Error obteniendo datos:', error);
@@ -145,8 +168,16 @@ class SimpleAPI {
             console.log('✅ Bin creado:', this.binId);
             console.warn('⚠️ IMPORTANTE: Actualiza el BIN_ID en config.js con este valor:', this.binId);
             console.warn('⚠️ De lo contrario, cada usuario creará su propio bin.');
+            console.warn('⚠️ COPIA ESTE VALOR Y ACTUALÍZALO EN config.js:', this.binId);
             
-            // Mostrar alerta visible en la página
+            // Mostrar en consola de forma destacada
+            console.log('%c═══════════════════════════════════════', 'background: #ff6b6b; color: white; font-size: 14px; padding: 5px;');
+            console.log('%c📋 NUEVO BIN ID CREADO', 'background: #ff6b6b; color: white; font-size: 16px; font-weight: bold; padding: 5px;');
+            console.log('%c' + this.binId, 'background: #4ecdc4; color: white; font-size: 16px; font-weight: bold; padding: 10px;');
+            console.log('%c⚠️ ACTUALIZA config.js con este valor', 'background: #ff6b6b; color: white; font-size: 14px; padding: 5px;');
+            console.log('%c═══════════════════════════════════════', 'background: #ff6b6b; color: white; font-size: 14px; padding: 5px;');
+            
+            // Mostrar alerta visible en la página (solo en desarrollo)
             showBinIdAlert(this.binId);
             
             return initialData;
