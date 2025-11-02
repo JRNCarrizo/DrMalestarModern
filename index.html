@@ -389,14 +389,12 @@
                 }
             }
             
-            // Función para cargar el audio
+            // Función para cargar el audio (sin activar el contexto)
             async function loadAudio() {
                 if (!audioContext || audioLoaded) return;
                 
                 try {
-                    // Asegurar que el contexto esté activo antes de cargar
-                    resumeAudioContext();
-                    
+                    // NO activar el contexto aquí - esperar interacción del usuario
                     const response = await fetch('audio/bucle cadillac.mp3');
                     if (!response.ok) {
                         throw new Error(`HTTP error! status: ${response.status}`);
@@ -475,15 +473,18 @@
             
             // Fallback: método estándar con elemento <audio>
             let audioElement = null;
+            let useStandardMethod = false;
+            
             function useStandardAudio() {
                 audioElement = document.getElementById('background-audio');
                 if (!audioElement) return;
                 
                 audioElement.volume = 0.3;
                 audioElement.loop = true;
+                useStandardMethod = true;
                 
                 // Función para iniciar reproducción
-                function startAudio() {
+                function startAudioStandard() {
                     if (!isPlaying) {
                         isPlaying = true;
                         audioElement.play().then(() => {
@@ -499,7 +500,7 @@
                 }
                 
                 // Función para silenciar/activar
-                function toggleMute() {
+                function toggleMuteStandard() {
                     if (audioElement.muted) {
                         audioElement.muted = false;
                         updateUI(isPlaying);
@@ -512,8 +513,8 @@
                 }
                 
                 // Exponer funciones
-                window.startAudioStandard = startAudio;
-                window.toggleMuteStandard = toggleMute;
+                window.startAudioStandard = startAudioStandard;
+                window.toggleMuteStandard = toggleMuteStandard;
             }
             
             // Función para actualizar UI
@@ -533,28 +534,43 @@
             async function startAudio() {
                 if (isPlaying) return;
                 
-                // Si tenemos Web Audio API disponible, usarla
+                // Si estamos usando el método estándar, usar esa función
+                if (useStandardMethod && window.startAudioStandard) {
+                    window.startAudioStandard();
+                    return;
+                }
+                
+                // Si tenemos Web Audio API y el buffer cargado, intentar usar Web Audio
+                // Pero primero asegurar que el contexto esté activo
                 if (audioContext && audioBuffer) {
-                    playWebAudio();
+                    resumeAudioContext();
+                    // Esperar un momento para que el contexto se active
+                    setTimeout(() => {
+                        playWebAudio();
+                    }, 10);
                 } else if (audioContext && !audioLoaded) {
                     // Cargar primero
+                    resumeAudioContext();
                     await loadAudio();
                     if (audioLoaded) {
-                        playWebAudio();
+                        setTimeout(() => {
+                            playWebAudio();
+                        }, 10);
                     } else {
-                        useStandardAudio();
+                        // Fallback al método estándar
+                        if (!useStandardMethod) useStandardAudio();
                         if (window.startAudioStandard) window.startAudioStandard();
                     }
                 } else {
                     // Usar método estándar
-                    useStandardAudio();
+                    if (!useStandardMethod) useStandardAudio();
                     if (window.startAudioStandard) window.startAudioStandard();
                 }
             }
             
             // Función para toggle mute
             function toggleMute() {
-                if (audioContext && gainNode) {
+                if (audioContext && gainNode && !useStandardMethod) {
                     toggleMuteWebAudio();
                 } else if (audioElement) {
                     if (window.toggleMuteStandard) window.toggleMuteStandard();
@@ -574,34 +590,52 @@
                     }
                 });
                 
-                // Cargar audio al inicio si tenemos Web Audio API
+                // Inicializar con método estándar primero para permitir auto-play
+                useStandardAudio();
+                
+                // En segundo plano, intentar cargar Web Audio API (para mejor calidad de loop)
                 if (audioContext) {
-                    // Intentar cargar, pero si falla usar método estándar
                     loadAudio().catch(() => {
                         console.log('🔄 Web Audio API no disponible, usando método estándar');
-                        useStandardAudio();
                     });
-                } else {
-                    useStandardAudio();
                 }
                 
                 // Verificar preferencia guardada
                 const audioPreference = localStorage.getItem('drmalestar_audio_enabled');
                 const shouldAutoPlay = audioPreference !== 'false';
                 
-                // Intentar reproducir automáticamente al cargar la página
-                // Pero Web Audio API puede requerir interacción del usuario primero
+                // Intentar reproducir automáticamente con método estándar
                 if (shouldAutoPlay) {
                     setTimeout(() => {
-                        startAudio();
+                        if (window.startAudioStandard) {
+                            window.startAudioStandard();
+                        }
                     }, 500);
                 } else {
+                    if (audioElement) {
+                        audioElement.muted = true;
+                    }
                     updateUI(false);
                 }
                 
-                // También activar contexto con cualquier clic en la página (para auto-play)
-                document.addEventListener('click', resumeAudioContext, { once: true });
-                document.addEventListener('touchstart', resumeAudioContext, { once: true });
+                // Si el usuario interactúa, podemos cambiar a Web Audio API para mejor loop
+                document.addEventListener('click', function() {
+                    resumeAudioContext();
+                    // Si ya está sonando con método estándar y tenemos Web Audio listo, cambiar
+                    if (isPlaying && audioContext && audioBuffer && useStandardMethod) {
+                        // Detener método estándar y cambiar a Web Audio
+                        if (audioElement) {
+                            audioElement.pause();
+                            audioElement.currentTime = 0;
+                        }
+                        useStandardMethod = false;
+                        playWebAudio();
+                    }
+                }, { once: true });
+                
+                document.addEventListener('touchstart', function() {
+                    resumeAudioContext();
+                }, { once: true });
             }
         });
     </script>
