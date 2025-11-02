@@ -295,7 +295,7 @@
         <button id="audio-toggle" class="audio-toggle" title="Reproducir/Pausar audio">
             <i class="bi bi-volume-up-fill" id="audio-icon"></i>
         </button>
-        <audio id="background-audio" loop preload="auto" volume="0.3">
+        <audio id="background-audio" loop preload="auto" autoplay volume="0.3">
             <source src="audio/bucle cadillac.mp3" type="audio/mpeg">
         </audio>
     </div>
@@ -578,14 +578,16 @@
             }
             
             if (audioToggle) {
-                // Manejar click en el botón de audio
+                // Manejar click en el botón de audio (solo para silenciar/activar)
                 audioToggle.addEventListener('click', function() {
                     // Activar contexto de audio con la interacción del usuario
                     resumeAudioContext();
                     
+                    // Si no está reproduciéndose, iniciarlo
                     if (!isPlaying) {
                         startAudio();
                     } else {
+                        // Si ya está reproduciéndose, solo cambiar mute/unmute
                         toggleMute();
                     }
                 });
@@ -600,18 +602,30 @@
                     });
                 }
                 
-                // Verificar preferencia guardada
+                // Verificar preferencia guardada (pero por defecto reproducir automáticamente)
                 const audioPreference = localStorage.getItem('drmalestar_audio_enabled');
-                const shouldAutoPlay = audioPreference !== 'false';
                 
                 // Intentar reproducir automáticamente con método estándar
-                if (shouldAutoPlay) {
+                // Solo no reproducir si explícitamente el usuario lo silenció antes
+                if (audioPreference !== 'false') {
                     setTimeout(() => {
                         if (window.startAudioStandard) {
                             window.startAudioStandard();
+                        } else if (audioElement) {
+                            // Si la función no está lista, intentar directamente
+                            audioElement.muted = false;
+                            audioElement.play().then(() => {
+                                isPlaying = true;
+                                updateUI(true);
+                                console.log('🔊 Audio iniciado automáticamente');
+                            }).catch(error => {
+                                console.log('⚠️ Auto-play bloqueado, usuario debe hacer clic:', error);
+                                updateUI(false);
+                            });
                         }
-                    }, 500);
+                    }, 300);
                 } else {
+                    // Si el usuario lo silenció antes, mantenerlo silenciado pero cargado
                     if (audioElement) {
                         audioElement.muted = true;
                     }
