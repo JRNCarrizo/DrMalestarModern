@@ -290,6 +290,16 @@
         <i class="bi bi-gear"></i> Admin
     </button>
 
+    <!-- Controles de Audio -->
+    <div id="audio-controls" class="audio-controls">
+        <button id="audio-toggle" class="audio-toggle" title="Reproducir/Pausar audio">
+            <i class="bi bi-volume-up-fill" id="audio-icon"></i>
+        </button>
+        <audio id="background-audio" loop preload="auto" volume="0.3">
+            <source src="audio/bucle cadillac.mp3" type="audio/mpeg">
+        </audio>
+    </div>
+
 
     <!-- Modal para imágenes -->
     <div id="imageModal" class="modal" style="display: none;">
@@ -347,6 +357,215 @@
                 });
             } else {
                 console.error('❌ Botón admin no encontrado');
+            }
+            
+            // Controles de audio con Web Audio API para loop sin cortes
+            const audioToggle = document.getElementById('audio-toggle');
+            const audioIcon = document.getElementById('audio-icon');
+            
+            let audioContext = null;
+            let audioBuffer = null;
+            let sourceNode = null;
+            let gainNode = null;
+            let isPlaying = false;
+            let audioLoaded = false;
+            
+            // Intentar usar Web Audio API para loop perfecto
+            try {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            } catch (e) {
+                console.warn('Web Audio API no disponible, usando método estándar');
+            }
+            
+            // Función para cargar el audio
+            async function loadAudio() {
+                if (!audioContext || audioLoaded) return;
+                
+                try {
+                    const response = await fetch('audio/bucle cadillac.mp3');
+                    const arrayBuffer = await response.arrayBuffer();
+                    audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+                    audioLoaded = true;
+                    console.log('📊 Audio cargado:', audioBuffer.duration, 'segundos');
+                } catch (error) {
+                    console.error('❌ Error cargando audio:', error);
+                    // Fallback al método estándar
+                    useStandardAudio();
+                }
+            }
+            
+            // Función para reproducir con Web Audio API (loop perfecto)
+            function playWebAudio() {
+                if (!audioContext || !audioBuffer || sourceNode) return;
+                
+                try {
+                    // Crear nodo de ganancia para controlar el volumen
+                    gainNode = audioContext.createGain();
+                    gainNode.gain.value = 0.3;
+                    gainNode.connect(audioContext.destination);
+                    
+                    // Crear source node
+                    sourceNode = audioContext.createBufferSource();
+                    sourceNode.buffer = audioBuffer;
+                    sourceNode.loop = true; // Loop nativo sin cortes
+                    sourceNode.connect(gainNode);
+                    
+                    // Reproducir
+                    sourceNode.start(0);
+                    isPlaying = true;
+                    updateUI(true);
+                    localStorage.setItem('drmalestar_audio_enabled', 'true');
+                    console.log('🔊 Audio iniciado con Web Audio API (loop perfecto)');
+                } catch (error) {
+                    console.error('❌ Error reproduciendo audio:', error);
+                    useStandardAudio();
+                }
+            }
+            
+            // Función para detener Web Audio
+            function stopWebAudio() {
+                if (sourceNode) {
+                    try {
+                        sourceNode.stop();
+                    } catch (e) {}
+                    sourceNode = null;
+                }
+                isPlaying = false;
+            }
+            
+            // Función para silenciar/activar Web Audio
+            function toggleMuteWebAudio() {
+                if (gainNode) {
+                    if (gainNode.gain.value === 0) {
+                        gainNode.gain.value = 0.3;
+                        localStorage.setItem('drmalestar_audio_enabled', 'true');
+                        console.log('🔊 Audio activado');
+                    } else {
+                        gainNode.gain.value = 0;
+                        localStorage.setItem('drmalestar_audio_enabled', 'false');
+                        console.log('🔇 Audio silenciado');
+                    }
+                    updateUI(isPlaying && gainNode.gain.value > 0);
+                }
+            }
+            
+            // Fallback: método estándar con elemento <audio>
+            let audioElement = null;
+            function useStandardAudio() {
+                audioElement = document.getElementById('background-audio');
+                if (!audioElement) return;
+                
+                audioElement.volume = 0.3;
+                audioElement.loop = true;
+                
+                // Función para iniciar reproducción
+                function startAudio() {
+                    if (!isPlaying) {
+                        isPlaying = true;
+                        audioElement.play().then(() => {
+                            updateUI(true);
+                            localStorage.setItem('drmalestar_audio_enabled', 'true');
+                            console.log('🔊 Audio iniciado (método estándar)');
+                        }).catch(error => {
+                            console.error('❌ Error reproduciendo audio:', error);
+                            isPlaying = false;
+                            updateUI(false);
+                        });
+                    }
+                }
+                
+                // Función para silenciar/activar
+                function toggleMute() {
+                    if (audioElement.muted) {
+                        audioElement.muted = false;
+                        updateUI(isPlaying);
+                        localStorage.setItem('drmalestar_audio_enabled', 'true');
+                    } else {
+                        audioElement.muted = true;
+                        updateUI(false);
+                        localStorage.setItem('drmalestar_audio_enabled', 'false');
+                    }
+                }
+                
+                // Exponer funciones
+                window.startAudioStandard = startAudio;
+                window.toggleMuteStandard = toggleMute;
+            }
+            
+            // Función para actualizar UI
+            function updateUI(playing) {
+                if (playing) {
+                    audioToggle.classList.add('playing');
+                    audioToggle.classList.remove('muted');
+                    audioIcon.className = 'bi bi-volume-up-fill';
+                } else {
+                    audioToggle.classList.remove('playing');
+                    audioToggle.classList.add('muted');
+                    audioIcon.className = 'bi bi-volume-mute-fill';
+                }
+            }
+            
+            // Función principal para iniciar audio
+            async function startAudio() {
+                if (isPlaying) return;
+                
+                // Si tenemos Web Audio API disponible, usarla
+                if (audioContext && audioBuffer) {
+                    playWebAudio();
+                } else if (audioContext && !audioLoaded) {
+                    // Cargar primero
+                    await loadAudio();
+                    if (audioLoaded) {
+                        playWebAudio();
+                    } else {
+                        useStandardAudio();
+                        if (window.startAudioStandard) window.startAudioStandard();
+                    }
+                } else {
+                    // Usar método estándar
+                    useStandardAudio();
+                    if (window.startAudioStandard) window.startAudioStandard();
+                }
+            }
+            
+            // Función para toggle mute
+            function toggleMute() {
+                if (audioContext && gainNode) {
+                    toggleMuteWebAudio();
+                } else if (audioElement) {
+                    if (window.toggleMuteStandard) window.toggleMuteStandard();
+                }
+            }
+            
+            if (audioToggle) {
+                // Manejar click en el botón de audio
+                audioToggle.addEventListener('click', function() {
+                    if (!isPlaying) {
+                        startAudio();
+                    } else {
+                        toggleMute();
+                    }
+                });
+                
+                // Cargar audio al inicio si tenemos Web Audio API
+                if (audioContext) {
+                    loadAudio();
+                } else {
+                    useStandardAudio();
+                }
+                
+                // Verificar preferencia guardada
+                const audioPreference = localStorage.getItem('drmalestar_audio_enabled');
+                const shouldAutoPlay = audioPreference !== 'false';
+                
+                // Intentar reproducir automáticamente al cargar la página
+                if (shouldAutoPlay) {
+                    setTimeout(() => {
+                        startAudio();
+                    }, 500);
+                } else {
+                    updateUI(false);
+                }
             }
         });
     </script>

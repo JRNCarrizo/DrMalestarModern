@@ -1007,6 +1007,82 @@ body {
     transform: translateY(-50%) translateX(-5px);
 }
 
+/* =========================================== */
+/* CONTROLES DE AUDIO */
+/* =========================================== */
+.audio-controls {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    z-index: 9998;
+}
+
+.audio-toggle {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: var(--gradient-primary);
+    border: none;
+    color: var(--text-light);
+    font-size: 24px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 8px 25px rgba(255, 107, 53, 0.4);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.audio-toggle::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.3);
+    transform: translate(-50%, -50%);
+    transition: width 0.6s, height 0.6s;
+}
+
+.audio-toggle:hover::before {
+    width: 300px;
+    height: 300px;
+}
+
+.audio-toggle:hover {
+    transform: scale(1.1);
+    box-shadow: 0 12px 35px rgba(255, 107, 53, 0.6);
+}
+
+.audio-toggle:active {
+    transform: scale(0.95);
+}
+
+.audio-toggle.playing {
+    animation: pulseAudio 2s infinite;
+}
+
+@keyframes pulseAudio {
+    0%, 100% {
+        box-shadow: 0 8px 25px rgba(255, 107, 53, 0.4);
+    }
+    50% {
+        box-shadow: 0 8px 35px rgba(255, 107, 53, 0.7), 0 0 20px rgba(255, 107, 53, 0.5);
+    }
+}
+
+.audio-toggle.muted {
+    background: linear-gradient(45deg, #666, #999);
+}
+
+#background-audio {
+    display: none;
+}
+
 .admin-header {
     padding: 20px;
     border-bottom: 1px solid var(--border-color);
