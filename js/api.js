@@ -10,38 +10,43 @@ class SimpleAPI {
         this.apiKey = window.CONFIG?.API_KEY || '$2a$10$oYe3uG0XIyCLhNeLvtrZjOSEAkLtqlABuEdQbM9QRKK0FRGVRdxfC';
         this.baseUrl = 'https://api.jsonbin.io/v3';
         
-        // PRIORIDAD: Siempre usar el BIN_ID del config primero (compartido para todos)
-        // Esto asegura que todos los usuarios usen el mismo bin
+        // PRIORIDAD: Usar el BIN_ID del config (compartido para todos)
         const configBinId = window.CONFIG?.BIN_ID;
         const localBinId = localStorage.getItem('drmalestar_bin_id');
         
-        // Usar el Bin ID del config si existe, incluso si parece placeholder
-        // El código intentará usarlo y si falla, creará uno nuevo automáticamente
+        // Usar el Bin ID del config si existe
         if (configBinId) {
             this.binId = configBinId;
-            // Sincronizar localStorage con el config para consistencia
-            if (localBinId && localBinId !== configBinId) {
-                // Si hay un bin local diferente, puede que sea más reciente
-                // Pero priorizamos el config para que todos usen el mismo
-                console.log('⚠️ Bin ID en localStorage diferente al config. Usando config para consistencia.');
-            }
+            // Guardar también en localStorage para sincronización
             localStorage.setItem('drmalestar_bin_id', configBinId);
         } else {
             // Si no hay config, usar localStorage como fallback
             this.binId = localBinId || null;
         }
         
-        console.log('📋 Bin ID:', this.binId || 'No configurado (se creará automáticamente)');
+        console.log('📋 Bin ID configurado:', this.binId || 'No configurado (se creará automáticamente)');
         console.log('📋 Fuente:', configBinId ? 'Config.js' : localBinId ? 'LocalStorage' : 'Se creará nuevo');
-        
-        // Mostrar el Bin ID actual de forma destacada para que sea fácil copiarlo
-        if (this.binId) {
-            console.log('%c═══════════════════════════════════════', 'background: #4ecdc4; color: white; font-size: 12px; padding: 3px;');
-            console.log('%c📋 BIN ID ACTUAL:', 'background: #4ecdc4; color: white; font-size: 14px; font-weight: bold; padding: 5px;');
-            console.log('%c' + this.binId, 'background: #4ecdc4; color: white; font-size: 14px; font-weight: bold; padding: 8px;');
-            console.log('%cSi este es el que tiene tu contenido, copia este valor y actualízalo en config.js', 'background: #4ecdc4; color: white; font-size: 12px; padding: 3px;');
-            console.log('%c═══════════════════════════════════════', 'background: #4ecdc4; color: white; font-size: 12px; padding: 3px;');
-        }
+    }
+    
+    // Método para verificar si un bin tiene contenido
+    async verificarBinConContenido(binId) {
+        if (!binId) return false;
+        try {
+            const response = await fetch(`${this.baseUrl}/b/${binId}`, {
+                headers: {
+                    'X-Master-Key': this.apiKey
+                }
+            });
+            if (response.ok) {
+                const result = await response.json();
+                const data = result.record || {};
+                const total = (Array.isArray(data.flyers) ? data.flyers.length : 0) +
+                             (Array.isArray(data.photos) ? data.photos.length : 0) +
+                             (Array.isArray(data.videos) ? data.videos.length : 0);
+                return total > 0;
+            }
+        } catch (e) {}
+        return false;
     }
 
     // Obtener todos los datos
@@ -53,6 +58,7 @@ class SimpleAPI {
                 return await this.createBin();
             }
 
+            // Intentar obtener datos del bin configurado
             const response = await fetch(`${this.baseUrl}/b/${this.binId}`, {
                 headers: {
                     'X-Master-Key': this.apiKey
@@ -63,7 +69,6 @@ class SimpleAPI {
                 if (response.status === 400 || response.status === 404) {
                     console.log('🔄 Bin no válido o no encontrado, creando nuevo...');
                     console.log('⚠️ El Bin ID anterior era:', this.binId);
-                    // Crear nuevo bin y retornar datos vacíos
                     return await this.createBin();
                 }
                 throw new Error(`HTTP ${response.status}: ${response.statusText}`);
@@ -72,18 +77,31 @@ class SimpleAPI {
             const result = await response.json();
             const data = result.record || { flyers: [], photos: [], videos: [] };
             
-            // Log detallado del contenido recibido
-            console.log('✅ Datos cargados correctamente');
-            console.log('📊 Contenido del bin:');
-            console.log('   - Flyers:', Array.isArray(data.flyers) ? data.flyers.length : 'no es array');
-            console.log('   - Photos:', Array.isArray(data.photos) ? data.photos.length : 'no es array');
-            console.log('   - Videos:', Array.isArray(data.videos) ? data.videos.length : 'no es array');
-            console.log('📋 Datos completos:', JSON.stringify(data, null, 2));
+            const flyersCount = Array.isArray(data.flyers) ? data.flyers.length : 0;
+            const photosCount = Array.isArray(data.photos) ? data.photos.length : 0;
+            const videosCount = Array.isArray(data.videos) ? data.videos.length : 0;
+            const total = flyersCount + photosCount + videosCount;
             
-            // Si viene vacío pero tiene estructura, puede que el contenido esté en otro formato
-            if (data.flyers?.length === 0 && data.photos?.length === 0 && data.videos?.length === 0) {
-                console.warn('⚠️ El bin está vacío. Si tenías contenido, puede estar en otro bin.');
-                console.warn('⚠️ Verifica si hay otro Bin ID guardado en localStorage o en otro dispositivo.');
+            console.log('✅ Datos cargados del bin:', this.binId);
+            console.log(`📊 Contenido: ${flyersCount} flyers, ${photosCount} fotos, ${videosCount} videos (Total: ${total})`);
+            
+            // Si el bin está vacío, intentar buscar en localStorage otro bin que tenga contenido
+            if (total === 0) {
+                const localBinId = localStorage.getItem('drmalestar_bin_id');
+                if (localBinId && localBinId !== this.binId) {
+                    console.log('🔍 Bin configurado está vacío, verificando bin de localStorage...');
+                    const tieneContenido = await this.verificarBinConContenido(localBinId);
+                    if (tieneContenido) {
+                        console.log('✅ ¡Encontré contenido en otro bin!');
+                        console.log('📋 Bin ID con contenido:', localBinId);
+                        console.warn('⚠️ IMPORTANTE: Actualiza config.js con este Bin ID:', localBinId);
+                        // Usar ese bin temporalmente
+                        this.binId = localBinId;
+                        // Obtener datos de ese bin
+                        return await this.getData(); // Recursión para obtener datos del bin correcto
+                    }
+                }
+                console.warn('⚠️ El bin está vacío. El contenido puede estar en otro bin o necesitas cargarlo.');
             }
             
             return data;
@@ -96,7 +114,6 @@ class SimpleAPI {
                     return await this.createBin();
                 } catch (createError) {
                     console.error('❌ Error creando bin:', createError);
-                    // Retornar estructura vacía como último recurso
                     return { flyers: [], photos: [], videos: [] };
                 }
             }
