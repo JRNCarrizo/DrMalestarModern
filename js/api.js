@@ -10,10 +10,26 @@ class SimpleAPI {
         this.apiKey = window.CONFIG?.API_KEY || '$2a$10$oYe3uG0XIyCLhNeLvtrZjOSEAkLtqlABuEdQbM9QRKK0FRGVRdxfC';
         this.baseUrl = 'https://api.jsonbin.io/v3';
         
-        // Obtener bin ID del localStorage o config
-        this.binId = localStorage.getItem('drmalestar_bin_id') || window.CONFIG?.BIN_ID || null;
+        // PRIORIDAD: Primero usar el BIN_ID del config (compartido para todos)
+        // Solo usar localStorage si el config no tiene BIN_ID
+        // Esto asegura que todos los usuarios usen el mismo bin
+        const configBinId = window.CONFIG?.BIN_ID;
+        const localBinId = localStorage.getItem('drmalestar_bin_id');
+        
+        // Si el config tiene un bin ID válido (no es placeholder), usarlo
+        if (configBinId && configBinId !== '67b0a0b8-5c4a-4b8a-9c1a-1a2b3c4d5e6f') {
+            this.binId = configBinId;
+            // Sincronizar localStorage con el config para consistencia
+            if (localBinId !== configBinId) {
+                localStorage.setItem('drmalestar_bin_id', configBinId);
+            }
+        } else {
+            // Si no hay config válido, usar localStorage o intentar crear uno
+            this.binId = localBinId || null;
+        }
         
         console.log('📋 Bin ID:', this.binId || 'No configurado');
+        console.log('📋 Fuente:', configBinId && configBinId !== '67b0a0b8-5c4a-4b8a-9c1a-1a2b3c4d5e6f' ? 'Config' : localBinId ? 'LocalStorage' : 'Ninguna');
     }
 
     // Obtener todos los datos
@@ -107,6 +123,12 @@ class SimpleAPI {
             localStorage.setItem('drmalestar_bin_id', this.binId);
             
             console.log('✅ Bin creado:', this.binId);
+            console.warn('⚠️ IMPORTANTE: Actualiza el BIN_ID en config.js con este valor:', this.binId);
+            console.warn('⚠️ De lo contrario, cada usuario creará su propio bin.');
+            
+            // Mostrar alerta visible en la página
+            showBinIdAlert(this.binId);
+            
             return initialData;
         } catch (error) {
             console.error('❌ Error creando bin:', error);
@@ -190,6 +212,14 @@ class SimpleAPI {
         const data = await this.getData();
         data.videos = data.videos.filter(v => v.id !== id);
         await this.saveData(data);
+    }
+}
+
+// Función para mostrar alerta del nuevo Bin ID
+function showBinIdAlert(binId) {
+    // Solo mostrar en consola en producción, no molestar al usuario final
+    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+        alert(`Nuevo Bin ID creado: ${binId}\n\nActualiza config.js con este valor para que todos los usuarios usen el mismo bin.`);
     }
 }
 
