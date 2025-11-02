@@ -1,740 +1,836 @@
 // ===========================================
-// PANEL DE ADMINISTRACIÓN - DR. MALESTAR
+// ADMIN SIMPLIFICADO - Dr.Malestar
+// Panel de administración simple y funcional
 // ===========================================
 
-// Importar el sistema de gestión de datos con JSONBin
-// import { 
-//     addFlyer, getFlyers, deleteFlyer,
-//     addPhoto, getPhotos, deletePhoto,
-//     addVideo, getVideos, deleteVideo,
-//     exportData, importData, getDataStats
-// } from '../js/data-manager.js';
+console.log('🔧 Admin Simplificado - Dr.Malestar cargado');
 
-// Configuración de autenticación (en producción, esto debería estar en el servidor)
-const ADMIN_CREDENTIALS = {
-    username: 'admin',
-    password: 'drmalestar2024'
-};
+// Estado
+let isAuthenticated = false;
+let isSubmitting = false;
 
-// ===========================================
-// INICIALIZACIÓN
-// ===========================================
+// Inicializar cuando el DOM esté listo
 document.addEventListener('DOMContentLoaded', function() {
-    initializeAdmin();
+    console.log('🚀 Inicializando Admin...');
+    checkAuth();
     setupEventListeners();
-    loadStoredData();
 });
 
-function initializeAdmin() {
-    console.log('Panel de Administración - Dr.Malestar inicializado');
-    
-    // Verificar si ya está autenticado
-    const isAuthenticated = localStorage.getItem('adminAuthenticated');
-    if (isAuthenticated === 'true') {
+// Verificar autenticación
+function checkAuth() {
+    const auth = localStorage.getItem('adminAuthenticated');
+    if (auth === 'true') {
         showAdminPanel();
     } else {
-        showLoginSection();
+        showLoginForm();
     }
 }
 
-// ===========================================
-// AUTENTICACIÓN
-// ===========================================
+// Mostrar formulario de login
+function showLoginForm() {
+    document.getElementById('loginSection').style.display = 'block';
+    document.getElementById('adminPanel').style.display = 'none';
+    isAuthenticated = false;
+}
+
+// Mostrar panel de admin
+async function showAdminPanel() {
+    document.getElementById('loginSection').style.display = 'none';
+    document.getElementById('adminPanel').style.display = 'block';
+    isAuthenticated = true;
+    await loadAllContent();
+}
+
+// Configurar event listeners
 function setupEventListeners() {
-    // Login form
-    const loginForm = document.getElementById('loginForm');
-    if (loginForm) {
-        loginForm.addEventListener('submit', handleLogin);
-    }
+    // Login
+    document.getElementById('loginForm').addEventListener('submit', handleLogin);
     
-    // Logout button
-    const logoutBtn = document.getElementById('logoutBtn');
-    if (logoutBtn) {
-        logoutBtn.addEventListener('click', handleLogout);
-    }
+    // Logout
+    document.getElementById('logoutBtn').addEventListener('click', handleLogout);
     
-    // Forms
-    const flyerForm = document.getElementById('flyerForm');
-    if (flyerForm) {
-        flyerForm.addEventListener('submit', handleFlyerSubmit);
-    }
+    // Formularios
+    document.getElementById('flyerForm').addEventListener('submit', handleFlyerSubmit);
+    document.getElementById('photoForm').addEventListener('submit', handlePhotoSubmit);
+    document.getElementById('videoForm').addEventListener('submit', handleVideoSubmit);
     
-    const photoForm = document.getElementById('photoForm');
-    if (photoForm) {
-        photoForm.addEventListener('submit', handlePhotoSubmit);
+    // Sync button
+    const syncBtn = document.getElementById('syncBtn');
+    if (syncBtn) {
+        syncBtn.addEventListener('click', async () => {
+            await loadAllContent();
+            notify('Contenido recargado', 'success');
+        });
     }
-    
-    const videoForm = document.getElementById('videoForm');
-    if (videoForm) {
-        videoForm.addEventListener('submit', handleVideoSubmit);
-    }
-    
-    // File uploads
-    setupFileUploads();
 }
 
+// Manejar login
 function handleLogin(e) {
     e.preventDefault();
-    
     const username = document.getElementById('username').value;
     const password = document.getElementById('password').value;
     
-    if (username === ADMIN_CREDENTIALS.username && password === ADMIN_CREDENTIALS.password) {
+    const validUser = window.CONFIG?.ADMIN_USER || 'admin';
+    const validPass = window.CONFIG?.ADMIN_PASS || 'admin123';
+    
+    if (username === validUser && password === validPass) {
         localStorage.setItem('adminAuthenticated', 'true');
         showAdminPanel();
-        showNotification('Sesión iniciada correctamente', 'success');
+        notify('Sesión iniciada', 'success');
     } else {
-        showNotification('Credenciales incorrectas', 'error');
+        notify('Credenciales incorrectas', 'error');
     }
 }
 
+// Manejar logout
 function handleLogout() {
     localStorage.removeItem('adminAuthenticated');
-    showLoginSection();
-    showNotification('Sesión cerrada', 'info');
+    showLoginForm();
+    notify('Sesión cerrada', 'info');
 }
 
-function showLoginSection() {
-    document.getElementById('loginSection').style.display = 'block';
-    document.getElementById('adminPanel').style.display = 'none';
-}
-
-function showAdminPanel() {
-    document.getElementById('loginSection').style.display = 'none';
-    document.getElementById('adminPanel').style.display = 'block';
-    loadAllContent();
-}
-
-// ===========================================
-// GESTIÓN DE DATOS CON JSONBIN
-// ===========================================
-async function loadStoredData() {
-    try {
-        // Los datos se cargan desde JSONBin automáticamente
-        console.log('Datos cargados desde JSONBin');
-    } catch (error) {
-        console.error('Error cargando datos:', error);
-        showNotification('Error cargando datos desde la nube', 'error');
-    }
-}
-
+// Cargar todo el contenido
 async function loadAllContent() {
     try {
-        await loadFlyers();
-        await loadPhotos();
-        await loadVideos();
-    } catch (error) {
-        console.error('Error cargando contenido:', error);
-        showNotification('Error cargando contenido', 'error');
+        await Promise.all([
+            loadFlyers(),
+            loadPhotos(),
+            loadVideos()
+        ]);
+        } catch (error) {
+        console.error('❌ Error cargando contenido:', error);
+        notify('Error cargando contenido', 'error');
     }
 }
 
 // ===========================================
-// GESTIÓN DE FLYERS
+// FLYERS
 // ===========================================
-async function handleFlyerSubmit(e) {
-    e.preventDefault();
-    
-    try {
-        const flyerData = {
-            title: document.getElementById('flyerTitle').value,
-            date: document.getElementById('flyerDate').value,
-            location: document.getElementById('flyerLocation').value,
-            time: document.getElementById('flyerTime').value,
-            description: document.getElementById('flyerDescription').value,
-            image: null
-        };
-        
-        const imageFile = document.getElementById('flyerImage').files[0];
-        if (imageFile) {
-            // Subir imagen a Cloudinary (versión simple)
-            const cloudinaryResult = await cloudinaryUpload.uploadImage(imageFile, 'drmalestar/flyers');
-            flyerData.image = cloudinaryResult.url;
-            flyerData.imagePublicId = cloudinaryResult.publicId;
-            console.log('Imagen subida a Cloudinary:', cloudinaryResult.url);
-        }
-        
-        await cloudAPI.addFlyer(flyerData);
-        await loadFlyers();
-        
-        // Limpiar formulario
-        e.target.reset();
-        document.getElementById('flyerPreview').innerHTML = '';
-        
-        showNotification('Flyer agregado correctamente', 'success');
-    } catch (error) {
-        console.error('Error agregando flyer:', error);
-        showNotification('Error agregando flyer', 'error');
-    }
-}
 
 async function loadFlyers() {
+    try {
+        const flyers = await api.getFlyers();
+        displayFlyers(flyers);
+        updateFlyerButtonState();
+        
+        // Mostrar contador
+        const counter = document.getElementById('flyersCounter');
+        if (counter) {
+            counter.textContent = `Flyers: ${flyers.length}/4`;
+            if (flyers.length >= 4) {
+                counter.className = 'badge bg-warning';
+            } else {
+                counter.className = 'badge bg-info';
+            }
+            }
+        } catch (error) {
+        console.error('❌ Error cargando flyers:', error);
+        document.getElementById('flyersList').innerHTML = '<p class="text-danger">Error cargando flyers</p>';
+    }
+}
+
+function displayFlyers(flyers) {
     const container = document.getElementById('flyersList');
-    if (!container) return;
-    
-    try {
-        const flyers = await cloudAPI.getFlyers();
-        container.innerHTML = '';
-        
-        if (flyers.length === 0) {
-            container.innerHTML = '<p class="text-muted">No hay flyers agregados</p>';
-            return;
-        }
-        
-        flyers.forEach(flyer => {
-            const flyerItem = createFlyerItem(flyer);
-            container.appendChild(flyerItem);
-        });
-        
-        console.log('✅ Flyers cargados:', flyers.length);
-    } catch (error) {
-        console.error('Error cargando flyers:', error);
-        container.innerHTML = '<p class="text-danger">Error cargando flyers</p>';
-    }
-}
-
-function createFlyerItem(flyer) {
-    const item = document.createElement('div');
-    item.className = 'media-item';
-    item.innerHTML = `
-        <div class="row align-items-center">
-            <div class="col-md-2">
-                ${flyer.image ? `<img src="${flyer.image}" alt="${flyer.title}">` : '<div class="bg-secondary rounded" style="width: 80px; height: 80px;"></div>'}
-            </div>
-            <div class="col-md-8">
-                <h5>${flyer.title}</h5>
-                <p class="mb-1"><strong>Fecha:</strong> ${formatDate(flyer.date)}</p>
-                <p class="mb-1"><strong>Lugar:</strong> ${flyer.location}</p>
-                <p class="mb-1"><strong>Hora:</strong> ${flyer.time}</p>
-                ${flyer.description ? `<p class="mb-0"><strong>Descripción:</strong> ${flyer.description}</p>` : ''}
-            </div>
-            <div class="col-md-2 text-end">
-                <button class="btn btn-danger-admin" onclick="deleteFlyer(${flyer.id})">
-                    <i class="bi bi-trash"></i> Eliminar
-                </button>
-            </div>
-        </div>
-    `;
-    return item;
-}
-
-async function deleteFlyer(id) {
-    console.log('🗑️ Eliminando flyer con ID:', id);
-    if (confirm('¿Estás seguro de que quieres eliminar este flyer?')) {
-        try {
-            console.log('🔄 Eliminando flyer...');
-            
-            // Obtener el flyer para eliminar la imagen de Cloudinary
-            const flyers = await cloudAPI.getFlyers();
-            const flyer = flyers.find(f => f.id === id);
-            
-            if (flyer && flyer.imagePublicId) {
-                console.log('🗑️ Eliminando imagen de Cloudinary...');
-                await cloudinaryUpload.deleteImage(flyer.imagePublicId);
-            }
-            
-            await cloudAPI.deleteFlyer(id);
-            console.log('✅ Flyer eliminado');
-            await loadFlyers();
-            showNotification('Flyer eliminado', 'info');
-        } catch (error) {
-            console.error('❌ Error eliminando flyer:', error);
-            showNotification('Error eliminando flyer', 'error');
-        }
-    }
-}
-
-// ===========================================
-// GESTIÓN DE FOTOS
-// ===========================================
-async function handlePhotoSubmit(e) {
-    e.preventDefault();
-    
-    try {
-        const photoData = {
-            title: document.getElementById('photoTitle').value,
-            description: document.getElementById('photoDescription').value,
-            image: null
-        };
-        
-        const imageFile = document.getElementById('photoImage').files[0];
-        if (imageFile) {
-            // Subir imagen a Cloudinary (versión simple)
-            const cloudinaryResult = await cloudinaryUpload.uploadImage(imageFile, 'drmalestar/photos');
-            photoData.image = cloudinaryResult.url;
-            photoData.imagePublicId = cloudinaryResult.publicId;
-            console.log('Imagen subida a Cloudinary:', cloudinaryResult.url);
-        }
-        
-        await cloudAPI.addPhoto(photoData);
-        await loadPhotos();
-        
-        // Limpiar formulario
-        e.target.reset();
-        document.getElementById('photoPreview').innerHTML = '';
-        
-        showNotification('Foto agregada correctamente', 'success');
-    } catch (error) {
-        console.error('Error agregando foto:', error);
-        showNotification('Error agregando foto', 'error');
-    }
-}
-
-async function loadPhotos() {
-    const container = document.getElementById('photosList');
-    if (!container) return;
-    
-    try {
-        const photos = await cloudAPI.getPhotos();
-        container.innerHTML = '';
-        
-        photos.forEach(photo => {
-            const photoItem = createPhotoItem(photo);
-            container.appendChild(photoItem);
-        });
-    } catch (error) {
-        console.error('Error cargando fotos:', error);
-        container.innerHTML = '<p class="text-danger">Error cargando fotos</p>';
-    }
-}
-
-function createPhotoItem(photo) {
-    const item = document.createElement('div');
-    item.className = 'media-item';
-    item.innerHTML = `
-        <div class="row align-items-center">
-            <div class="col-md-2">
-                ${photo.image ? `<img src="${photo.image}" alt="${photo.title}">` : '<div class="bg-secondary rounded" style="width: 80px; height: 80px;"></div>'}
-            </div>
-            <div class="col-md-8">
-                <h5>${photo.title}</h5>
-                ${photo.description ? `<p class="mb-0">${photo.description}</p>` : ''}
-            </div>
-            <div class="col-md-2 text-end">
-                <button class="btn btn-danger-admin" onclick="deletePhoto(${photo.id})">
-                    <i class="bi bi-trash"></i> Eliminar
-                </button>
-            </div>
-        </div>
-    `;
-    return item;
-}
-
-async function deletePhoto(id) {
-    if (confirm('¿Estás seguro de que quieres eliminar esta foto?')) {
-        try {
-            // Obtener la foto para eliminar la imagen de Cloudinary
-            const photos = await cloudAPI.getPhotos();
-            const photo = photos.find(p => p.id === id);
-            
-            if (photo && photo.imagePublicId) {
-                console.log('🗑️ Eliminando imagen de Cloudinary...');
-                await cloudinaryUpload.deleteImage(photo.imagePublicId);
-            }
-            
-            await cloudAPI.deletePhoto(id);
-            await loadPhotos();
-            showNotification('Foto eliminada', 'info');
-        } catch (error) {
-            console.error('Error eliminando foto:', error);
-            showNotification('Error eliminando foto', 'error');
-        }
-    }
-}
-
-// ===========================================
-// GESTIÓN DE VIDEOS
-// ===========================================
-async function handleVideoSubmit(e) {
-    e.preventDefault();
-    
-    try {
-        const videoUrl = document.getElementById('videoUrl').value;
-        const embedUrl = convertToEmbedUrl(videoUrl);
-        
-        if (!embedUrl) {
-            showNotification('URL de YouTube no válida', 'error');
-            return;
-        }
-        
-        const videoData = {
-            title: document.getElementById('videoTitle').value,
-            description: document.getElementById('videoDescription').value,
-            url: embedUrl,
-            originalUrl: videoUrl
-        };
-        
-        await cloudAPI.addVideo(videoData);
-        await loadVideos();
-        
-        // Limpiar formulario
-        e.target.reset();
-        document.getElementById('videoPreview').innerHTML = '';
-        
-        showNotification('Video agregado correctamente', 'success');
-    } catch (error) {
-        console.error('Error agregando video:', error);
-        showNotification('Error agregando video', 'error');
-    }
-}
-
-function convertToEmbedUrl(url) {
-    // Convertir URL de YouTube a formato embed
-    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
-    const match = url.match(regExp);
-    
-    if (match && match[2].length === 11) {
-        return `https://www.youtube.com/embed/${match[2]}`;
+    if (flyers.length === 0) {
+        container.innerHTML = '<p class="text-muted text-center py-4">No hay flyers disponibles</p>';
+        return;
     }
     
-    return null;
-}
-
-async function loadVideos() {
-    const container = document.getElementById('videosList');
-    if (!container) return;
+    // Escapar HTML para evitar problemas
+    const escapeHtml = (text) => {
+        const div = document.createElement('div');
+        div.textContent = text || '';
+        return div.innerHTML;
+    };
     
-    try {
-        const videos = await cloudAPI.getVideos();
-        container.innerHTML = '';
+    container.innerHTML = flyers.map(flyer => {
+        const title = escapeHtml(flyer.title || 'Sin título');
+        const date = escapeHtml(flyer.date || 'Sin fecha');
+        const time = escapeHtml(flyer.time || 'Sin hora');
+        const location = escapeHtml(flyer.location || 'Sin lugar');
+        const description = escapeHtml(flyer.description || '');
+        const image = flyer.image || 'img/bluseraflier.jpg';
         
-        videos.forEach(video => {
-            const videoItem = createVideoItem(video);
-            container.appendChild(videoItem);
-        });
-    } catch (error) {
-        console.error('Error cargando videos:', error);
-        container.innerHTML = '<p class="text-danger">Error cargando videos</p>';
-    }
-}
-
-function createVideoItem(video) {
-    const item = document.createElement('div');
-    item.className = 'media-item';
-    item.innerHTML = `
-        <div class="row align-items-center">
-            <div class="col-md-2">
-                <div class="bg-secondary rounded d-flex align-items-center justify-content-center" style="width: 80px; height: 80px;">
-                    <i class="bi bi-youtube text-danger" style="font-size: 2rem;"></i>
+        return `
+            <div class="admin-flyer-card" data-id="${flyer.id}">
+                <div class="admin-flyer-image-wrapper">
+                    <img src="${image}" class="admin-flyer-image" alt="${title}" onerror="this.src='img/bluseraflier.jpg'">
+                    <div class="admin-flyer-badge">Show</div>
                 </div>
-            </div>
-            <div class="col-md-8">
-                <h5>${video.title}</h5>
-                ${video.description ? `<p class="mb-0">${video.description}</p>` : ''}
-                <small class="text-muted">${video.originalUrl}</small>
-            </div>
-            <div class="col-md-2 text-end">
-                <button class="btn btn-danger-admin" onclick="deleteVideo(${video.id})">
-                    <i class="bi bi-trash"></i> Eliminar
-                </button>
-            </div>
-        </div>
-    `;
-    return item;
-}
-
-async function deleteVideo(id) {
-    if (confirm('¿Estás seguro de que quieres eliminar este video?')) {
-        try {
-            await cloudAPI.deleteVideo(id);
-            await loadVideos();
-            showNotification('Video eliminado', 'info');
-        } catch (error) {
-            console.error('Error eliminando video:', error);
-            showNotification('Error eliminando video', 'error');
-        }
-    }
-}
-
-// ===========================================
-// SUBIDA DE ARCHIVOS
-// ===========================================
-function setupFileUploads() {
-    // Flyer image upload
-    const flyerUpload = document.getElementById('flyerImage');
-    if (flyerUpload) {
-        flyerUpload.addEventListener('change', function(e) {
-            handleFilePreview(e, 'flyerPreview');
-        });
-    }
-    
-    // Photo image upload
-    const photoUpload = document.getElementById('photoImage');
-    if (photoUpload) {
-        photoUpload.addEventListener('change', function(e) {
-            handleFilePreview(e, 'photoPreview');
-        });
-    }
-    
-    // Video URL preview
-    const videoUrl = document.getElementById('videoUrl');
-    if (videoUrl) {
-        videoUrl.addEventListener('input', function(e) {
-            handleVideoPreview(e.target.value);
-        });
-    }
-    
-    // Drag and drop functionality
-    setupDragAndDrop();
-}
-
-function handleFilePreview(event, previewId) {
-    const file = event.target.files[0];
-    const preview = document.getElementById(previewId);
-    
-    if (file) {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            preview.innerHTML = `
-                <img src="${e.target.result}" class="media-preview" alt="Preview">
-                <p class="mt-2 text-muted">${file.name}</p>
-            `;
-        };
-        reader.readAsDataURL(file);
-    }
-}
-
-function handleVideoPreview(url) {
-    const preview = document.getElementById('videoPreview');
-    const embedUrl = convertToEmbedUrl(url);
-    
-    if (embedUrl) {
-        preview.innerHTML = `
-            <div class="mt-3">
-                <h6>Vista previa:</h6>
-                <div class="ratio ratio-16x9">
-                    <iframe src="${embedUrl}" frameborder="0" allowfullscreen></iframe>
+                <div class="admin-flyer-content">
+                    <h5 class="admin-flyer-title">${title}</h5>
+                    <div class="admin-flyer-details">
+                        <div class="admin-detail-row">
+                            <i class="bi bi-calendar3"></i>
+                            <span>${date}</span>
+                        </div>
+                        <div class="admin-detail-row">
+                            <i class="bi bi-clock"></i>
+                            <span>${time}</span>
+                        </div>
+                        <div class="admin-detail-row">
+                            <i class="bi bi-geo-alt"></i>
+                            <span>${location}</span>
+                        </div>
+                    </div>
+                    ${description ? `<p class="admin-flyer-description">${description}</p>` : ''}
+                    <div class="admin-flyer-actions">
+                        <button class="btn btn-danger-admin btn-sm" onclick="deleteFlyer('${flyer.id}')">
+                            <i class="bi bi-trash"></i> Eliminar
+                        </button>
+                    </div>
                 </div>
             </div>
         `;
-    } else if (url) {
-        preview.innerHTML = '<p class="text-warning mt-2">URL de YouTube no válida</p>';
-    } else {
-        preview.innerHTML = '';
+    }).join('');
+}
+
+async function handleFlyerSubmit(e) {
+    e.preventDefault();
+    if (isSubmitting) return;
+    isSubmitting = true;
+    
+    try {
+        // Verificar límite de flyers (máximo 4)
+        const currentFlyers = await api.getFlyers();
+        if (currentFlyers.length >= 4) {
+            notify('❌ Límite alcanzado: Solo se pueden tener 4 flyers. Elimina uno para agregar otro.', 'error');
+            isSubmitting = false;
+            return;
+        }
+        
+        const formData = new FormData(e.target);
+        const flyerData = {
+            title: formData.get('title'),
+            date: formData.get('date'),
+            time: formData.get('time'),
+            location: formData.get('location'),
+            description: formData.get('description') || ''
+        };
+        
+        // Subir imagen si existe
+        const imageFile = formData.get('image');
+        if (imageFile && imageFile.size > 0) {
+            console.log('🔄 Subiendo imagen a Cloudinary...');
+            const cloudinaryResult = await uploadToCloudinary(imageFile, 'drmalestar/flyers');
+            flyerData.image = cloudinaryResult.url;
+        } else {
+            flyerData.image = 'img/bluseraflier.jpg'; // Imagen por defecto
+        }
+        
+        await api.addFlyer(flyerData);
+        await loadFlyers();
+        e.target.reset();
+        clearPreview('flyerPreview');
+        notify(`✅ Flyer agregado correctamente (${currentFlyers.length + 1}/4)`, 'success');
+        
+        // Actualizar estado del botón
+        updateFlyerButtonState();
+        
+        // Notificar a la página principal
+        if (window.opener) {
+            window.opener.postMessage('contentUpdated', '*');
+        }
+    } catch (error) {
+        console.error('❌ Error agregando flyer:', error);
+        notify('Error agregando flyer: ' + error.message, 'error');
+    } finally {
+        isSubmitting = false;
     }
 }
 
-function setupDragAndDrop() {
-    const uploadAreas = document.querySelectorAll('.file-upload-area');
+// Actualizar estado del botón de agregar flyer
+async function updateFlyerButtonState() {
+    try {
+        const flyers = await api.getFlyers();
+        const addButton = flyerForm?.querySelector('button[type="submit"]');
+        if (addButton) {
+            if (flyers.length >= 4) {
+                addButton.disabled = true;
+                addButton.innerHTML = '<i class="bi bi-exclamation-triangle"></i> Límite alcanzado (4/4)';
+                addButton.className = 'btn btn-warning w-100';
+        } else {
+                addButton.disabled = false;
+                addButton.innerHTML = '<i class="bi bi-plus-circle"></i> Agregar Flyer';
+                addButton.className = 'btn btn-admin w-100';
+            }
+        }
+    } catch (error) {
+        console.error('Error actualizando estado del botón:', error);
+    }
+}
+
+async function deleteFlyer(id) {
+    if (!confirm('¿Estás seguro de eliminar este flyer?')) return;
     
-    uploadAreas.forEach(area => {
-        area.addEventListener('dragover', function(e) {
-            e.preventDefault();
-            this.classList.add('dragover');
-        });
+    try {
+        await api.deleteFlyer(id);
+        await loadFlyers();
+        notify('Flyer eliminado. Ya puedes agregar otro.', 'success');
         
-        area.addEventListener('dragleave', function(e) {
-            e.preventDefault();
-            this.classList.remove('dragover');
-        });
+        // Notificar a la página principal
+        if (window.opener) {
+            window.opener.postMessage('contentUpdated', '*');
+        }
+    } catch (error) {
+        console.error('❌ Error eliminando flyer:', error);
+        notify('Error eliminando flyer', 'error');
+    }
+}
+
+// ===========================================
+// FOTOS
+// ===========================================
+
+async function loadPhotos() {
+    try {
+        const photos = await api.getPhotos();
+        displayPhotos(photos);
+        updatePhotoButtonState();
         
-        area.addEventListener('drop', function(e) {
-            e.preventDefault();
-            this.classList.remove('dragover');
+        // Mostrar contador
+        const counter = document.getElementById('photosCounter');
+        if (counter) {
+            counter.textContent = `Fotos: ${photos.length}/8`;
+            if (photos.length >= 8) {
+                counter.className = 'badge bg-warning';
+            } else {
+                counter.className = 'badge bg-info';
+            }
+        }
+        } catch (error) {
+        console.error('❌ Error cargando fotos:', error);
+        document.getElementById('photosList').innerHTML = '<p class="text-danger">Error cargando fotos</p>';
+    }
+}
+
+function displayPhotos(photos) {
+    const container = document.getElementById('photosList');
+    if (photos.length === 0) {
+        container.innerHTML = '<p class="text-muted text-center py-4">No hay fotos disponibles</p>';
+        return;
+    }
+    
+    // Escapar HTML
+    const escapeHtml = (text) => {
+        const div = document.createElement('div');
+        div.textContent = text || '';
+        return div.innerHTML;
+    };
+    
+    container.innerHTML = photos.map(photo => {
+        const title = escapeHtml(photo.title || 'Sin título');
+        const description = escapeHtml(photo.description || '');
+        const image = photo.image || 'img/bluseraflier.jpg';
+        
+        return `
+            <div class="admin-photo-card" data-id="${photo.id}">
+                <div class="admin-photo-image-wrapper">
+                    <img src="${image}" class="admin-photo-image" alt="${title}" onerror="this.src='img/bluseraflier.jpg'">
+                    <div class="admin-photo-overlay">
+                        <button class="btn btn-danger-admin btn-sm" onclick="deletePhoto('${photo.id}')">
+                            <i class="bi bi-trash"></i> Eliminar
+                        </button>
+                    </div>
+                </div>
+                <div class="admin-photo-content">
+                    <h6 class="admin-photo-title">${title}</h6>
+                    ${description ? `<p class="admin-photo-description">${description}</p>` : ''}
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+async function handlePhotoSubmit(e) {
+    e.preventDefault();
+    if (isSubmitting) return;
+    isSubmitting = true;
+    
+    try {
+        // Verificar límite de fotos (máximo 8)
+        const currentPhotos = await api.getPhotos();
+        if (currentPhotos.length >= 8) {
+            notify('❌ Límite alcanzado: Solo se pueden tener 8 fotos. Elimina una para agregar otra.', 'error');
+            isSubmitting = false;
+            return;
+        }
+        
+        const title = document.getElementById('photoTitle').value.trim();
+        const description = document.getElementById('photoDescription').value.trim();
+        const imageFile = document.getElementById('photoImage').files[0];
+        
+        if (!imageFile || imageFile.size === 0) {
+            throw new Error('Debes subir una imagen');
+        }
+        
+        const photoData = {
+            title: title || 'Foto sin título',
+            description: description || ''
+        };
+        
+        console.log('🔄 Subiendo imagen a Cloudinary...');
+        const cloudinaryResult = await uploadToCloudinary(imageFile, 'drmalestar/photos');
+        photoData.image = cloudinaryResult.url;
+        
+        await api.addPhoto(photoData);
+        await loadPhotos();
+        e.target.reset();
+        clearPreview('photoPreview');
+        notify(`✅ Foto agregada correctamente (${currentPhotos.length + 1}/8)`, 'success');
+        
+        // Actualizar estado del botón
+        updatePhotoButtonState();
+        
+        if (window.opener) {
+            window.opener.postMessage('contentUpdated', '*');
+        }
+        } catch (error) {
+        console.error('❌ Error agregando foto:', error);
+        notify('Error agregando foto: ' + error.message, 'error');
+    } finally {
+        isSubmitting = false;
+    }
+}
+
+// Actualizar estado del botón de agregar foto
+async function updatePhotoButtonState() {
+    try {
+        const photos = await api.getPhotos();
+        const addButton = photoForm?.querySelector('button[type="submit"]');
+        if (addButton) {
+            if (photos.length >= 8) {
+                addButton.disabled = true;
+                addButton.innerHTML = '<i class="bi bi-exclamation-triangle"></i> Límite alcanzado (8/8)';
+                addButton.className = 'btn btn-warning w-100';
+            } else {
+                addButton.disabled = false;
+                addButton.innerHTML = '<i class="bi bi-plus-circle"></i> Agregar Foto';
+                addButton.className = 'btn btn-admin w-100';
+            }
+        }
+    } catch (error) {
+        console.error('Error actualizando estado del botón:', error);
+    }
+}
+
+async function deletePhoto(id) {
+    if (!confirm('¿Estás seguro de eliminar esta foto?')) return;
+    
+    try {
+        await api.deletePhoto(id);
+        await loadPhotos();
+        notify('Foto eliminada. Ya puedes agregar otra.', 'success');
+        
+        if (window.opener) {
+            window.opener.postMessage('contentUpdated', '*');
+        }
+    } catch (error) {
+        console.error('❌ Error eliminando foto:', error);
+        notify('Error eliminando foto', 'error');
+    }
+}
+
+// ===========================================
+// VIDEOS
+// ===========================================
+
+async function loadVideos() {
+    try {
+        const videos = await api.getVideos();
+        displayVideos(videos);
+        updateVideoButtonState();
+        
+        // Mostrar contador
+        const counter = document.getElementById('videosCounter');
+        if (counter) {
+            counter.textContent = `Videos: ${videos.length}/6`;
+            if (videos.length >= 6) {
+                counter.className = 'badge bg-warning';
+            } else {
+                counter.className = 'badge bg-info';
+            }
+        }
+    } catch (error) {
+        console.error('❌ Error cargando videos:', error);
+        document.getElementById('videosList').innerHTML = '<p class="text-danger">Error cargando videos</p>';
+    }
+}
+
+function displayVideos(videos) {
+    const container = document.getElementById('videosList');
+    if (videos.length === 0) {
+        container.innerHTML = '<p class="text-muted text-center py-4">No hay videos disponibles</p>';
+            return;
+        }
+        
+    // Escapar HTML
+    const escapeHtml = (text) => {
+        const div = document.createElement('div');
+        div.textContent = text || '';
+        return div.innerHTML;
+    };
+    
+    container.innerHTML = videos.map(video => {
+        const title = escapeHtml(video.title || 'Sin título');
+        const description = escapeHtml(video.description || '');
+        const url = escapeHtml(video.url || '');
+        const videoId = video.videoId || '';
+        const embedUrl = videoId ? `https://www.youtube.com/embed/${videoId}` : '';
+        
+        return `
+            <div class="admin-video-card" data-id="${video.id}">
+                ${embedUrl ? `
+                <div class="admin-video-thumbnail">
+                    <iframe 
+                        src="${embedUrl}" 
+                        frameborder="0" 
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                        allowfullscreen
+                        loading="lazy"
+                        style="width: 100%; height: 100%; border: none;">
+                    </iframe>
+            </div>
+                ` : `
+                <div class="admin-video-placeholder">
+                    <i class="bi bi-youtube" style="font-size: 3rem; color: var(--primary-color);"></i>
+            </div>
+                `}
+                <div class="admin-video-content">
+                    <h5 class="admin-video-title">${title}</h5>
+                    ${description ? `<p class="admin-video-description">${description}</p>` : ''}
+                    <div class="admin-video-actions">
+                        <a href="${url}" target="_blank" class="btn btn-secondary btn-sm">
+                            <i class="bi bi-youtube"></i> Ver en YouTube
+                        </a>
+                        <button class="btn btn-danger-admin btn-sm" onclick="deleteVideo('${video.id}')">
+                    <i class="bi bi-trash"></i> Eliminar
+                </button>
+                    </div>
+            </div>
+        </div>
+    `;
+    }).join('');
+}
+
+async function handleVideoSubmit(e) {
+    e.preventDefault();
+    if (isSubmitting) return;
+    isSubmitting = true;
+    
+    try {
+        // Verificar límite de videos (máximo 6)
+        const currentVideos = await api.getVideos();
+        if (currentVideos.length >= 6) {
+            notify('❌ Límite alcanzado: Solo se pueden tener 6 videos. Elimina uno para agregar otro.', 'error');
+            isSubmitting = false;
+            return;
+        }
+        
+        let url = document.getElementById('videoUrl').value.trim();
+        const title = document.getElementById('videoTitle').value.trim();
+        const description = document.getElementById('videoDescription').value.trim();
+        
+        if (!url) {
+            throw new Error('Debes ingresar una URL de YouTube o el ID del video');
+        }
+        
+        // Si es solo un ID (11 caracteres), convertir a URL completa
+        const originalUrl = url;
+        if (/^[a-zA-Z0-9_-]{11}$/.test(url)) {
+            url = `https://www.youtube.com/watch?v=${url}`;
+            console.log('🔄 ID detectado, convirtiendo a URL:', url);
+        }
+        
+        // Validar que sea una URL de YouTube o un ID válido (antes de convertir)
+        if (!url.includes('youtube.com') && !url.includes('youtu.be') && !/^[a-zA-Z0-9_-]{11}$/.test(originalUrl)) {
+            throw new Error('Debes ingresar una URL válida de YouTube o el ID del video (11 caracteres)');
+        }
+        
+        // Función mejorada para extraer ID del video de YouTube
+        function extractYouTubeId(url) {
+            if (!url) return null;
             
-            const files = e.dataTransfer.files;
-            if (files.length > 0) {
-                const fileInput = this.querySelector('input[type="file"]');
-                if (fileInput) {
-                    fileInput.files = files;
-                    fileInput.dispatchEvent(new Event('change'));
+            // Limpiar URL
+            let cleanUrl = url.trim();
+            
+            // Remover espacios y parámetros adicionales que puedan causar problemas
+            if (cleanUrl.includes('&')) {
+                cleanUrl = cleanUrl.split('&')[0];
+            }
+            if (cleanUrl.includes('?')) {
+                const parts = cleanUrl.split('?');
+                cleanUrl = parts[0] + (parts[1] ? '?' + parts[1].split('&')[0] : '');
+            }
+            
+            // Diferentes patrones de URLs de YouTube (IDs tienen 11 caracteres)
+            // Incluir soporte para Shorts/Reels
+            const patterns = [
+                /(?:youtube\.com\/watch\?v=|youtube\.com\/watch\?.*&v=)([a-zA-Z0-9_-]{11})/,
+                /youtube\.com\/shorts\/([a-zA-Z0-9_-]{11})/,  // Shorts/Reels
+                /youtu\.be\/([a-zA-Z0-9_-]{11})/,
+                /youtube\.com\/embed\/([a-zA-Z0-9_-]{11})/,
+                /youtube\.com\/v\/([a-zA-Z0-9_-]{11})/,
+                /youtube\.com\/.*[?&]v=([a-zA-Z0-9_-]{11})/,
+                /^([a-zA-Z0-9_-]{11})$/  // Si solo es el ID
+            ];
+            
+            for (const pattern of patterns) {
+                const match = cleanUrl.match(pattern);
+                if (match && match[1] && match[1].length === 11) {
+                    return match[1];
                 }
             }
+            
+            // Extracción manual si los patrones fallan
+            if (cleanUrl.includes('v=')) {
+                const parts = cleanUrl.split('v=');
+                if (parts.length > 1) {
+                    const possibleId = parts[1].split(/[&?#]/)[0].trim();
+                    if (possibleId.length === 11 && /^[a-zA-Z0-9_-]+$/.test(possibleId)) {
+                        return possibleId;
+                    }
+                }
+            }
+            
+            if (cleanUrl.includes('youtu.be/')) {
+                const parts = cleanUrl.split('youtu.be/');
+                if (parts.length > 1) {
+                    const possibleId = parts[1].split(/[?&#]/)[0].trim();
+                    if (possibleId.length === 11 && /^[a-zA-Z0-9_-]+$/.test(possibleId)) {
+                        return possibleId;
+                    }
+                }
+            }
+            
+            // Extraer de URLs de Shorts/Reels
+            if (cleanUrl.includes('/shorts/')) {
+                const parts = cleanUrl.split('/shorts/');
+                if (parts.length > 1) {
+                    const possibleId = parts[1].split(/[?&#]/)[0].trim();
+                    if (possibleId.length === 11 && /^[a-zA-Z0-9_-]+$/.test(possibleId)) {
+                        return possibleId;
+                    }
+                }
+            }
+            
+            // Si la URL contiene solo caracteres que parecen un ID de 11 caracteres
+            const directIdMatch = cleanUrl.match(/([a-zA-Z0-9_-]{11})/);
+            if (directIdMatch && directIdMatch[1].length === 11) {
+                return directIdMatch[1];
+            }
+            
+            return null;
+        }
+        
+        // Extraer ID del video
+        const videoId = extractYouTubeId(url);
+        
+        console.log('🔍 Extracción de ID de YouTube:', {
+            urlOriginal: originalUrl,
+            urlProcesada: url,
+            videoIdExtraido: videoId,
+            longitud: videoId ? videoId.length : 0
         });
+        
+        if (!videoId || videoId.length !== 11) {
+            console.error('❌ URL de video inválida:', url, 'ID extraído:', videoId);
+            throw new Error(`No se pudo extraer el ID del video de YouTube. 
+            
+URL recibida: ${url}
+ID extraído: ${videoId || 'ninguno'}
+
+Formato esperado:
+- https://www.youtube.com/watch?v=VIDEO_ID
+- https://youtu.be/VIDEO_ID
+- VIDEO_ID (solo el ID de 11 caracteres)
+
+Verifica que la URL sea válida y que el video esté disponible públicamente.`);
+        }
+        
+        console.log('✅ Video ID válido extraído:', videoId);
+        
+        const videoData = {
+            title: title || 'Video sin título',
+            description: description || '',
+            url: url,
+            videoId: videoId
+        };
+        
+        await api.addVideo(videoData);
+        await loadVideos();
+        e.target.reset();
+        notify(`✅ Video agregado correctamente (${currentVideos.length + 1}/6)`, 'success');
+        
+        // Actualizar estado del botón
+        updateVideoButtonState();
+        
+        if (window.opener) {
+            window.opener.postMessage('contentUpdated', '*');
+        }
+    } catch (error) {
+        console.error('❌ Error agregando video:', error);
+        notify('Error agregando video: ' + error.message, 'error');
+    } finally {
+        isSubmitting = false;
+    }
+}
+
+// Actualizar estado del botón de agregar video
+async function updateVideoButtonState() {
+    try {
+        const videos = await api.getVideos();
+        const addButton = videoForm?.querySelector('button[type="submit"]');
+        if (addButton) {
+            if (videos.length >= 6) {
+                addButton.disabled = true;
+                addButton.innerHTML = '<i class="bi bi-exclamation-triangle"></i> Límite alcanzado (6/6)';
+                addButton.className = 'btn btn-warning w-100';
+            } else {
+                addButton.disabled = false;
+                addButton.innerHTML = '<i class="bi bi-plus-circle"></i> Agregar Video';
+                addButton.className = 'btn btn-admin w-100';
+            }
+        }
+    } catch (error) {
+        console.error('Error actualizando estado del botón:', error);
+    }
+}
+
+async function deleteVideo(id) {
+    if (!confirm('¿Estás seguro de eliminar este video?')) return;
+    
+    try {
+        await api.deleteVideo(id);
+        await loadVideos();
+        notify('Video eliminado. Ya puedes agregar otro.', 'success');
+        
+        if (window.opener) {
+            window.opener.postMessage('contentUpdated', '*');
+        }
+        } catch (error) {
+        console.error('❌ Error eliminando video:', error);
+        notify('Error eliminando video', 'error');
+    }
+}
+
+// ===========================================
+// CLOUDINARY
+// ===========================================
+
+async function uploadToCloudinary(file, folder = 'drmalestar') {
+    const cloudName = window.CONFIG?.CLOUDINARY_CLOUD_NAME || 'daoo9nvfc';
+    // Intentar diferentes presets desde config o usar defaults
+    const uploadPresets = window.CONFIG?.CLOUDINARY_UPLOAD_PRESETS || ['drmalestar_upload', 'drmalestar', 'ml_default'];
+    const uploadUrl = `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`;
+    
+    let lastError = null;
+    
+    // Intentar con cada preset
+    for (const preset of uploadPresets) {
+        try {
+            console.log(`🔄 Intentando subir con preset: ${preset}...`);
+            
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('upload_preset', preset);
+            formData.append('folder', folder);
+            
+            const response = await fetch(uploadUrl, {
+                method: 'POST',
+                body: formData
+            });
+            
+            if (!response.ok) {
+                const errorText = await response.text();
+                console.error(`❌ Error con preset ${preset}:`, response.status, errorText);
+                lastError = `HTTP ${response.status}: ${errorText}`;
+                continue; // Intentar siguiente preset
+            }
+            
+            const result = await response.json();
+            console.log('✅ Imagen subida exitosamente:', result.secure_url);
+            return { url: result.secure_url, publicId: result.public_id };
+            
+        } catch (error) {
+            console.error(`❌ Error con preset ${preset}:`, error);
+            lastError = error.message;
+            continue;
+        }
+    }
+    
+    // Si todos los presets fallaron, usar base64 como fallback
+    console.warn('⚠️ Cloudinary falló, usando base64 como fallback...');
+    return await convertToBase64(file);
+}
+
+// Convertir imagen a base64 como fallback
+async function convertToBase64(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const base64 = e.target.result;
+            console.log('✅ Imagen convertida a base64');
+            resolve({ 
+                url: base64, 
+                publicId: null,
+                isBase64: true 
+            });
+        };
+        reader.onerror = function() {
+            reject(new Error('Error leyendo archivo'));
+        };
+        reader.readAsDataURL(file);
     });
 }
 
 // ===========================================
 // UTILIDADES
 // ===========================================
-function formatDate(dateString) {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('es-ES', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric'
-    });
+
+function clearPreview(id) {
+    const preview = document.getElementById(id);
+    if (preview) preview.innerHTML = '';
 }
 
-function showNotification(message, type = 'info') {
-    // Crear notificación
+function notify(message, type = 'info') {
+    // Crear notificación simple
     const notification = document.createElement('div');
-    notification.className = `notification notification-${type}`;
+    notification.className = `alert alert-${type === 'error' ? 'danger' : type === 'success' ? 'success' : 'info'} alert-dismissible fade show position-fixed`;
+    notification.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
     notification.innerHTML = `
-        <div class="notification-content">
-            <i class="bi bi-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'}"></i>
-            <span>${message}</span>
-        </div>
-    `;
-    
-    // Estilos para la notificación
-    const colors = {
-        success: '#28a745',
-        error: '#dc3545',
-        info: '#17a2b8'
-    };
-    
-    notification.style.cssText = `
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        background: ${colors[type]};
-        color: white;
-        padding: 1rem 1.5rem;
-        border-radius: 8px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-        z-index: 10000;
-        transform: translateX(100%);
-        transition: transform 0.3s ease;
-        max-width: 300px;
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     `;
     
     document.body.appendChild(notification);
     
-    // Animar entrada
     setTimeout(() => {
-        notification.style.transform = 'translateX(0)';
-    }, 100);
-    
-    // Remover después de 3 segundos
-    setTimeout(() => {
-        notification.style.transform = 'translateX(100%)';
-        setTimeout(() => {
-            if (document.body.contains(notification)) {
-                document.body.removeChild(notification);
-            }
-        }, 300);
+        if (notification.parentNode) {
+            notification.parentNode.removeChild(notification);
+        }
     }, 3000);
 }
 
-// ===========================================
-// FUNCIONES PÚBLICAS
-// ===========================================
+// Funciones globales para llamadas desde HTML
 window.deleteFlyer = deleteFlyer;
 window.deletePhoto = deletePhoto;
 window.deleteVideo = deleteVideo;
-
-// Función para recargar contenido
-window.reloadAdminContent = async function() {
-    await loadFlyers();
-    await loadPhotos();
-    await loadVideos();
-    showNotification('Contenido recargado', 'info');
-};
-
-// Función para verificar el estado de la API
-window.checkAdminAPI = function() {
-    console.log('🔍 Verificando estado de la API en admin...');
-    console.log('cloudAPI disponible:', typeof cloudAPI !== 'undefined');
-    if (typeof cloudAPI !== 'undefined') {
-        console.log('Bin ID:', cloudAPI.binId);
-        console.log('API Key:', cloudAPI.apiKey ? 'Configurada' : 'No configurada');
+window.handleImageChange = function(input, previewId) {
+    const file = input.files[0];
+    if (!file) {
+        clearPreview(previewId);
+        return;
     }
-    showNotification('Estado de API verificado en consola', 'info');
-};
-
-// Función para limpiar imágenes rotas
-window.cleanBrokenImages = async function() {
-    console.log('🧹 Limpiando imágenes rotas...');
-    try {
-        const data = await cloudAPI.getData();
-        let cleaned = false;
-        
-        // Limpiar flyers con imágenes blob rotas
-        data.flyers = data.flyers.filter(flyer => {
-            if (flyer.image && flyer.image.startsWith('blob:')) {
-                console.log('🗑️ Eliminando flyer con imagen blob rota:', flyer.title);
-                cleaned = true;
-                return false;
-            }
-            return true;
-        });
-        
-        // Limpiar fotos con imágenes blob rotas
-        data.photos = data.photos.filter(photo => {
-            if (photo.image && photo.image.startsWith('blob:')) {
-                console.log('🗑️ Eliminando foto con imagen blob rota:', photo.title);
-                cleaned = true;
-                return false;
-            }
-            return true;
-        });
-        
-        if (cleaned) {
-            await cloudAPI.updateData(data);
-            console.log('✅ Imágenes rotas eliminadas');
-            showNotification('Imágenes rotas eliminadas', 'info');
-            await loadAllContent();
-        } else {
-            console.log('✅ No hay imágenes rotas');
-            showNotification('No hay imágenes rotas', 'info');
+    
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        const preview = document.getElementById(previewId);
+        if (preview) {
+            preview.innerHTML = `<img src="${e.target.result}" style="max-width: 200px; max-height: 200px; border-radius: 8px; margin-top: 10px;">`;
         }
-    } catch (error) {
-        console.error('❌ Error limpiando imágenes:', error);
-        showNotification('Error limpiando imágenes', 'error');
-    }
+    };
+    reader.readAsDataURL(file);
 };
 
-// ===========================================
-// FUNCIÓN DE COMPRESIÓN DE IMÁGENES
-// ===========================================
-
-// Función para comprimir y convertir imagen a base64
-async function compressAndConvertToBase64(file, maxWidth = 600, quality = 0.6) {
-    return new Promise((resolve) => {
-        const canvas = document.createElement('canvas');
-        const ctx = canvas.getContext('2d');
-        const img = new Image();
-        
-        img.onload = function() {
-            // Calcular nuevas dimensiones manteniendo proporción
-            let { width, height } = img;
-            
-            if (width > maxWidth) {
-                height = (height * maxWidth) / width;
-                width = maxWidth;
-            }
-            
-            // Configurar canvas
-            canvas.width = width;
-            canvas.height = height;
-            
-            // Dibujar imagen comprimida
-            ctx.drawImage(img, 0, 0, width, height);
-            
-            // Convertir a base64 con compresión agresiva
-            let compressedBase64 = canvas.toDataURL('image/jpeg', quality);
-            
-            // Verificar tamaño y comprimir más si es necesario
-            let sizeKB = (compressedBase64.length * 0.75) / 1024;
-            console.log(`📏 Imagen comprimida: ${sizeKB.toFixed(1)}KB`);
-            
-            // Si sigue siendo muy grande, comprimir más agresivamente
-            if (sizeKB > 50) {
-                console.log('⚠️ Imagen muy grande, comprimiendo más...');
-                compressedBase64 = canvas.toDataURL('image/jpeg', 0.4);
-                sizeKB = (compressedBase64.length * 0.75) / 1024;
-                console.log(`📏 Imagen re-comprimida: ${sizeKB.toFixed(1)}KB`);
-            }
-            
-            // Si aún es muy grande, reducir más el tamaño
-            if (sizeKB > 50) {
-                console.log('⚠️ Imagen aún muy grande, reduciendo tamaño...');
-                const smallerWidth = Math.min(width, 400);
-                const smallerHeight = (height * smallerWidth) / width;
-                
-                canvas.width = smallerWidth;
-                canvas.height = smallerHeight;
-                ctx.drawImage(img, 0, 0, smallerWidth, smallerHeight);
-                
-                compressedBase64 = canvas.toDataURL('image/jpeg', 0.3);
-                sizeKB = (compressedBase64.length * 0.75) / 1024;
-                console.log(`📏 Imagen final: ${sizeKB.toFixed(1)}KB`);
-            }
-            
-            resolve(compressedBase64);
-        };
-        
-        img.src = URL.createObjectURL(file);
-    });
-}
+console.log('✅ Admin Simplificado listo');

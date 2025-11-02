@@ -1,11 +1,13 @@
 // ===========================================
-// SIMPLE STORAGE - Dr.Malestar
-// Sistema de almacenamiento simple y confiable
+// LOCAL STORAGE API - Dr.Malestar
+// Sistema de desarrollo con archivos locales
 // ===========================================
 
-class SimpleStorage {
+console.log('💾 Local Storage API - Dr.Malestar cargado');
+
+class LocalStorageAPI {
     constructor() {
-        this.storageKey = 'drmalestar_data';
+        this.storageKey = 'drmalestar_local_data';
         this.initializeData();
     }
 
@@ -19,7 +21,7 @@ class SimpleStorage {
                 lastUpdated: new Date().toISOString()
             };
             localStorage.setItem(this.storageKey, JSON.stringify(initialData));
-            console.log('✅ Datos iniciales creados en localStorage');
+            console.log('✅ Datos locales inicializados');
         }
     }
 
@@ -29,7 +31,7 @@ class SimpleStorage {
             const data = localStorage.getItem(this.storageKey);
             return JSON.parse(data);
         } catch (error) {
-            console.error('❌ Error obteniendo datos:', error);
+            console.error('❌ Error obteniendo datos locales:', error);
             this.initializeData();
             return this.getData();
         }
@@ -40,10 +42,10 @@ class SimpleStorage {
         try {
             data.lastUpdated = new Date().toISOString();
             localStorage.setItem(this.storageKey, JSON.stringify(data));
-            console.log('✅ Datos guardados en localStorage');
+            console.log('✅ Datos locales guardados');
             return true;
         } catch (error) {
-            console.error('❌ Error guardando datos:', error);
+            console.error('❌ Error guardando datos locales:', error);
             return false;
         }
     }
@@ -51,7 +53,7 @@ class SimpleStorage {
     // Agregar flyer
     addFlyer(flyer) {
         try {
-            console.log('🔄 Agregando flyer...');
+            console.log('🔄 Agregando flyer local...');
             const data = this.getData();
             
             const newFlyer = {
@@ -63,10 +65,10 @@ class SimpleStorage {
             data.flyers.unshift(newFlyer);
             this.saveData(data);
             
-            console.log('✅ Flyer agregado:', newFlyer.title);
+            console.log('✅ Flyer agregado localmente:', newFlyer.title);
             return newFlyer;
         } catch (error) {
-            console.error('❌ Error agregando flyer:', error);
+            console.error('❌ Error agregando flyer local:', error);
             throw error;
         }
     }
@@ -77,7 +79,7 @@ class SimpleStorage {
             const data = this.getData();
             return data.flyers || [];
         } catch (error) {
-            console.error('❌ Error obteniendo flyers:', error);
+            console.error('❌ Error obteniendo flyers locales:', error);
             return [];
         }
     }
@@ -85,14 +87,14 @@ class SimpleStorage {
     // Eliminar flyer
     deleteFlyer(id) {
         try {
-            console.log('🔄 Eliminando flyer:', id);
+            console.log('🔄 Eliminando flyer local:', id);
             const data = this.getData();
             data.flyers = data.flyers.filter(flyer => flyer.id !== id);
             this.saveData(data);
-            console.log('✅ Flyer eliminado');
+            console.log('✅ Flyer eliminado localmente');
             return true;
         } catch (error) {
-            console.error('❌ Error eliminando flyer:', error);
+            console.error('❌ Error eliminando flyer local:', error);
             throw error;
         }
     }
@@ -100,7 +102,7 @@ class SimpleStorage {
     // Agregar foto
     addPhoto(photo) {
         try {
-            console.log('🔄 Agregando foto...');
+            console.log('🔄 Agregando foto local...');
             const data = this.getData();
             
             const newPhoto = {
@@ -112,10 +114,10 @@ class SimpleStorage {
             data.photos.unshift(newPhoto);
             this.saveData(data);
             
-            console.log('✅ Foto agregada:', newPhoto.title);
+            console.log('✅ Foto agregada localmente:', newPhoto.title);
             return newPhoto;
         } catch (error) {
-            console.error('❌ Error agregando foto:', error);
+            console.error('❌ Error agregando foto local:', error);
             throw error;
         }
     }
@@ -126,7 +128,7 @@ class SimpleStorage {
             const data = this.getData();
             return data.photos || [];
         } catch (error) {
-            console.error('❌ Error obteniendo fotos:', error);
+            console.error('❌ Error obteniendo fotos locales:', error);
             return [];
         }
     }
@@ -134,14 +136,14 @@ class SimpleStorage {
     // Eliminar foto
     deletePhoto(id) {
         try {
-            console.log('🔄 Eliminando foto:', id);
+            console.log('🔄 Eliminando foto local:', id);
             const data = this.getData();
             data.photos = data.photos.filter(photo => photo.id !== id);
             this.saveData(data);
-            console.log('✅ Foto eliminada');
+            console.log('✅ Foto eliminada localmente');
             return true;
         } catch (error) {
-            console.error('❌ Error eliminando foto:', error);
+            console.error('❌ Error eliminando foto local:', error);
             throw error;
         }
     }
@@ -149,7 +151,7 @@ class SimpleStorage {
     // Agregar video
     addVideo(video) {
         try {
-            console.log('🔄 Agregando video...');
+            console.log('🔄 Agregando video local...');
             const data = this.getData();
             
             const newVideo = {
@@ -161,10 +163,10 @@ class SimpleStorage {
             data.videos.unshift(newVideo);
             this.saveData(data);
             
-            console.log('✅ Video agregado:', newVideo.title);
+            console.log('✅ Video agregado localmente:', newVideo.title);
             return newVideo;
         } catch (error) {
-            console.error('❌ Error agregando video:', error);
+            console.error('❌ Error agregando video local:', error);
             throw error;
         }
     }
@@ -175,7 +177,7 @@ class SimpleStorage {
             const data = this.getData();
             return data.videos || [];
         } catch (error) {
-            console.error('❌ Error obteniendo videos:', error);
+            console.error('❌ Error obteniendo videos locales:', error);
             return [];
         }
     }
@@ -183,14 +185,14 @@ class SimpleStorage {
     // Eliminar video
     deleteVideo(id) {
         try {
-            console.log('🔄 Eliminando video:', id);
+            console.log('🔄 Eliminando video local:', id);
             const data = this.getData();
             data.videos = data.videos.filter(video => video.id !== id);
             this.saveData(data);
-            console.log('✅ Video eliminado');
+            console.log('✅ Video eliminado localmente');
             return true;
         } catch (error) {
-            console.error('❌ Error eliminando video:', error);
+            console.error('❌ Error eliminando video local:', error);
             throw error;
         }
     }
@@ -200,10 +202,10 @@ class SimpleStorage {
         try {
             localStorage.removeItem(this.storageKey);
             this.initializeData();
-            console.log('✅ Todos los datos limpiados');
+            console.log('✅ Todos los datos locales limpiados');
             return true;
         } catch (error) {
-            console.error('❌ Error limpiando datos:', error);
+            console.error('❌ Error limpiando datos locales:', error);
             return false;
         }
     }
@@ -219,37 +221,67 @@ class SimpleStorage {
                 lastUpdated: data.lastUpdated
             };
         } catch (error) {
-            console.error('❌ Error obteniendo estadísticas:', error);
+            console.error('❌ Error obteniendo estadísticas locales:', error);
             return { flyers: 0, photos: 0, videos: 0, lastUpdated: null };
+        }
+    }
+
+    // Exportar datos para Git
+    exportData() {
+        try {
+            const data = this.getData();
+            const exportData = {
+                flyers: data.flyers,
+                photos: data.photos,
+                videos: data.videos,
+                exportedAt: new Date().toISOString()
+            };
+            
+            // Crear archivo JSON para descargar
+            const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `drmalestar-data-${new Date().toISOString().split('T')[0]}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            console.log('✅ Datos exportados para Git');
+            return true;
+        } catch (error) {
+            console.error('❌ Error exportando datos:', error);
+            return false;
         }
     }
 }
 
 // Crear instancia global
-const simpleStorage = new SimpleStorage();
+const localAPI = new LocalStorageAPI();
 
 // Funciones de debugging
-window.testSimpleStorage = async function() {
-    console.log('🧪 Probando SimpleStorage...');
+window.testLocalAPI = async function() {
+    console.log('🧪 Probando Local Storage API...');
     
     try {
         // Probar agregar flyer
         const testFlyer = {
-            title: 'Flyer de Prueba SimpleStorage',
+            title: 'Flyer de Prueba Local',
             date: '2024-12-31',
             time: '22:00',
             location: 'Lugar de Prueba',
-            description: 'Este es un flyer de prueba',
+            description: 'Este es un flyer de prueba local',
             image: 'img/bluseraflier.jpg'
         };
         
         console.log('🔄 Agregando flyer de prueba...');
-        const result = await simpleStorage.addFlyer(testFlyer);
+        const result = await localAPI.addFlyer(testFlyer);
         console.log('✅ Flyer agregado:', result);
         
         // Verificar que se guardó
         console.log('🔄 Verificando que se guardó...');
-        const flyers = simpleStorage.getFlyers();
+        const flyers = localAPI.getFlyers();
         console.log('📋 Flyers en storage:', flyers.length);
         
         const found = flyers.find(f => f.id === result.id);
@@ -260,7 +292,7 @@ window.testSimpleStorage = async function() {
         }
         
         // Mostrar estadísticas
-        const stats = simpleStorage.getStats();
+        const stats = localAPI.getStats();
         console.log('📊 Estadísticas:', stats);
         
         return true;
@@ -270,10 +302,16 @@ window.testSimpleStorage = async function() {
     }
 };
 
-window.clearSimpleStorage = function() {
-    console.log('🧹 Limpiando SimpleStorage...');
-    simpleStorage.clearAll();
-    console.log('✅ SimpleStorage limpiado');
+window.clearLocalAPI = function() {
+    console.log('🧹 Limpiando Local Storage API...');
+    localAPI.clearAll();
+    console.log('✅ Local Storage API limpiado');
 };
 
-console.log('✅ SimpleStorage cargado');
+window.exportLocalData = function() {
+    console.log('📤 Exportando datos locales...');
+    localAPI.exportData();
+};
+
+console.log('✅ Local Storage API listo');
+

@@ -206,50 +206,54 @@
                 <div class="admin-header">
                     <h1 class="admin-title">Panel de Administración</h1>
                     <p class="admin-subtitle">Dr.Malestar - Gestión de Contenido</p>
-                    <div class="admin-actions">
-                        <button id="exportBtn" class="btn btn-secondary">Exportar Datos</button>
-                        <button id="importBtn" class="btn btn-secondary">Importar Datos</button>
-                        <button id="logoutBtn" class="btn btn-danger-admin">Cerrar Sesión</button>
-                        <input type="file" id="importFile" accept=".json" style="display: none;">
+                    <div class="admin-actions mb-3">
+                        <button id="syncBtn" class="btn btn-primary">
+                            <i class="bi bi-arrow-clockwise"></i> Recargar
+                        </button>
+                        <button id="logoutBtn" class="btn btn-danger-admin">
+                            <i class="bi bi-box-arrow-right"></i> Cerrar Sesión
+                        </button>
                     </div>
                 </div>
                 
                 <!-- Gestión de Flyers -->
                 <div class="admin-card">
                     <div class="form-section">
-                        <h3><i class="bi bi-calendar-event"></i> Gestión de Flyers</h3>
+                        <h3><i class="bi bi-calendar-event"></i> Gestión de Flyers 
+                            <span id="flyersCounter" class="badge bg-info ms-2">Flyers: 0/4</span>
+                        </h3>
                         
                         <form id="flyerForm">
                             <div class="row">
                                 <div class="col-md-6">
                                     <div class="mb-3">
                                         <label for="flyerTitle" class="form-label">Título del Show</label>
-                                        <input type="text" class="form-control" id="flyerTitle" required>
+                                        <input type="text" class="form-control" id="flyerTitle" name="title" required>
                                     </div>
                                     <div class="mb-3">
                                         <label for="flyerDate" class="form-label">Fecha</label>
-                                        <input type="date" class="form-control" id="flyerDate" required>
+                                        <input type="date" class="form-control" id="flyerDate" name="date" required>
                                     </div>
                                     <div class="mb-3">
                                         <label for="flyerLocation" class="form-label">Lugar</label>
-                                        <input type="text" class="form-control" id="flyerLocation" required>
+                                        <input type="text" class="form-control" id="flyerLocation" name="location" required>
                                     </div>
                                     <div class="mb-3">
                                         <label for="flyerTime" class="form-label">Hora</label>
-                                        <input type="time" class="form-control" id="flyerTime" required>
+                                        <input type="time" class="form-control" id="flyerTime" name="time" required>
                                     </div>
                                 </div>
                                 <div class="col-md-6">
                                     <div class="mb-3">
                                         <label for="flyerDescription" class="form-label">Descripción</label>
-                                        <textarea class="form-control" id="flyerDescription" rows="4"></textarea>
+                                        <textarea class="form-control" id="flyerDescription" name="description" rows="4"></textarea>
                                     </div>
                                     <div class="mb-3">
                                         <label for="flyerImage" class="form-label">Imagen del Flyer</label>
                                         <div class="file-upload-area" onclick="document.getElementById('flyerImage').click()">
                                             <i class="bi bi-cloud-upload upload-icon"></i>
                                             <p>Haz clic para subir o arrastra una imagen</p>
-                                            <input type="file" id="flyerImage" accept="image/*" style="display: none;">
+                                            <input type="file" id="flyerImage" name="image" accept="image/*" style="display: none;" onchange="handleImageChange(this, 'flyerPreview')">
                                         </div>
                                         <div id="flyerPreview"></div>
                                     </div>
@@ -271,18 +275,20 @@
                 <!-- Gestión de Fotos -->
                 <div class="admin-card">
                     <div class="form-section">
-                        <h3><i class="bi bi-images"></i> Gestión de Fotos</h3>
+                        <h3><i class="bi bi-images"></i> Gestión de Fotos 
+                            <span id="photosCounter" class="badge bg-info ms-2">Fotos: 0/8</span>
+                        </h3>
                         
                         <form id="photoForm">
                             <div class="row">
                                 <div class="col-md-6">
                                     <div class="mb-3">
                                         <label for="photoTitle" class="form-label">Título de la Foto</label>
-                                        <input type="text" class="form-control" id="photoTitle" required>
+                                        <input type="text" class="form-control" id="photoTitle" name="title">
                                     </div>
                                     <div class="mb-3">
                                         <label for="photoDescription" class="form-label">Descripción</label>
-                                        <textarea class="form-control" id="photoDescription" rows="3"></textarea>
+                                        <textarea class="form-control" id="photoDescription" name="description" rows="3"></textarea>
                                     </div>
                                 </div>
                                 <div class="col-md-6">
@@ -291,7 +297,7 @@
                                         <div class="file-upload-area" onclick="document.getElementById('photoImage').click()">
                                             <i class="bi bi-cloud-upload upload-icon"></i>
                                             <p>Haz clic para subir o arrastra una imagen</p>
-                                            <input type="file" id="photoImage" accept="image/*" style="display: none;">
+                                            <input type="file" id="photoImage" name="image" accept="image/*" style="display: none;" onchange="handleImageChange(this, 'photoPreview')">
                                         </div>
                                         <div id="photoPreview"></div>
                                     </div>
@@ -313,27 +319,28 @@
                 <!-- Gestión de Videos -->
                 <div class="admin-card">
                     <div class="form-section">
-                        <h3><i class="bi bi-youtube"></i> Gestión de Videos</h3>
+                        <h3><i class="bi bi-youtube"></i> Gestión de Videos 
+                            <span id="videosCounter" class="badge bg-info ms-2">Videos: 0/6</span>
+                        </h3>
                         
                         <form id="videoForm">
                             <div class="row">
                                 <div class="col-md-6">
                                     <div class="mb-3">
                                         <label for="videoTitle" class="form-label">Título del Video</label>
-                                        <input type="text" class="form-control" id="videoTitle" required>
+                                        <input type="text" class="form-control" id="videoTitle" name="title">
                                     </div>
                                     <div class="mb-3">
                                         <label for="videoDescription" class="form-label">Descripción</label>
-                                        <textarea class="form-control" id="videoDescription" rows="3"></textarea>
+                                        <textarea class="form-control" id="videoDescription" name="description" rows="3"></textarea>
                                     </div>
                                 </div>
                                 <div class="col-md-6">
                                     <div class="mb-3">
                                         <label for="videoUrl" class="form-label">URL de YouTube</label>
-                                        <input type="url" class="form-control" id="videoUrl" placeholder="https://www.youtube.com/watch?v=..." required>
-                                        <div class="form-text">Pega aquí el enlace completo de YouTube</div>
+                                        <input type="text" class="form-control" id="videoUrl" name="url" placeholder="https://www.youtube.com/watch?v=... o solo el ID del video" required>
+                                        <div class="form-text">Pega aquí el enlace completo de YouTube o solo el ID del video (11 caracteres)</div>
                                     </div>
-                                    <div id="videoPreview"></div>
                                 </div>
                             </div>
                             <button type="submit" class="btn btn-admin">Agregar Video</button>
@@ -354,8 +361,8 @@
     
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="../js/cloud-api.js"></script>
-    <script src="../js/cloudinary-upload.js"></script>
+    <script src="../config.js"></script>
+    <script src="../js/api.js"></script>
     <script src="admin.js"></script>
 </body>
 </html>

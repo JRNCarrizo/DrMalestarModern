@@ -96,13 +96,26 @@ document.addEventListener('DOMContentLoaded', function() {
     setupScrollAnimations();
 });
 
-function initializeApp() {
+async function initializeApp() {
     console.log('Dr.Malestar - Aplicación inicializada');
     
-    // Cargar contenido inicial
+    // Cargar contenido inicial SIEMPRE
     loadFlyers();
     loadPhotos();
     loadVideos();
+    
+    // Solo sincronizar si no se ha hecho antes en esta sesión (sin recargar)
+    if (!sessionStorage.getItem('adminSynced') && typeof syncAdminToMain === 'function') {
+        try {
+            console.log('🔄 Intentando sincronizar datos del admin (sin recargar)...');
+            await syncAdminToMainWithoutReload();
+            sessionStorage.setItem('adminSynced', 'true');
+        } catch (error) {
+            console.log('⚠️ No se pudo sincronizar datos del admin:', error.message);
+        }
+    } else {
+        console.log('ℹ️ Sincronización del admin ya realizada o no disponible');
+    }
 }
 
 // ===========================================
@@ -152,9 +165,17 @@ function setupEventListeners() {
 // ===========================================
 // CARGA DE CONTENIDO
 // ===========================================
-function loadContent() {
-    // En una implementación real, aquí harías fetch a una API
-    console.log('Cargando contenido...');
+async function loadContent() {
+    console.log('🚀 Cargando contenido desde API...');
+    try {
+        // Cargar flyers, fotos y videos
+        await loadFlyers();
+        await loadPhotos();
+        await loadVideos();
+        console.log('✅ Contenido cargado correctamente');
+    } catch (error) {
+        console.error('❌ Error cargando contenido:', error);
+    }
 }
 
 async function loadFlyers() {
@@ -164,8 +185,8 @@ async function loadFlyers() {
     container.innerHTML = '<div class="text-center"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Cargando...</span></div></div>';
     
     try {
-        // Cargar desde CloudAPI (temporalmente deshabilitado)
-        if (false && typeof cloudAPI !== 'undefined') {
+        // Intentar cargar desde CloudAPI primero
+        if (typeof cloudAPI !== 'undefined') {
             try {
                 console.log('🔄 Cargando flyers desde CloudAPI...');
                 const flyers = await cloudAPI.getFlyers();
@@ -179,26 +200,26 @@ async function loadFlyers() {
                     console.log('✅ Flyers cargados desde CloudAPI');
                     return;
                 } else {
-                    console.log('⚠️ No hay flyers en CloudAPI');
+                    console.log('⚠️ No hay flyers en CloudAPI, usando datos de ejemplo');
                 }
             } catch (error) {
                 console.log('❌ Error cargando desde CloudAPI:', error);
+                console.log('🔄 Usando datos de ejemplo...');
             }
         } else {
-            console.log('📋 Usando datos predeterminados');
+            console.log('📋 CloudAPI no disponible, usando datos de ejemplo');
         }
         
-        // Fallback a datos locales
-        const adminData = getAdminData();
-        const flyers = adminData ? adminData.flyers : sampleData.flyers;
-        
+        // Fallback a datos de ejemplo
         container.innerHTML = '';
-        flyers.forEach(flyer => {
+        sampleData.flyers.forEach(flyer => {
             const flyerCard = createFlyerCard(flyer);
             container.appendChild(flyerCard);
         });
+        console.log('✅ Flyers de ejemplo cargados');
+        
     } catch (error) {
-        console.error('Error cargando flyers:', error);
+        console.error('❌ Error cargando flyers:', error);
         // Fallback a datos de ejemplo
         container.innerHTML = '';
         sampleData.flyers.forEach(flyer => {
@@ -215,8 +236,8 @@ async function loadPhotos() {
     container.innerHTML = '<div class="text-center"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Cargando...</span></div></div>';
     
     try {
-        // Cargar desde CloudAPI (temporalmente deshabilitado)
-        if (false && typeof cloudAPI !== 'undefined') {
+        // Cargar desde CloudAPI
+        if (typeof cloudAPI !== 'undefined') {
             try {
                 console.log('🔄 Cargando fotos desde CloudAPI...');
                 const photos = await cloudAPI.getPhotos();
@@ -230,26 +251,26 @@ async function loadPhotos() {
                     console.log('✅ Fotos cargadas desde CloudAPI');
                     return;
                 } else {
-                    console.log('⚠️ No hay fotos en CloudAPI');
+                    console.log('⚠️ No hay fotos en CloudAPI, usando datos de ejemplo');
                 }
             } catch (error) {
                 console.log('❌ Error cargando desde CloudAPI:', error);
+                console.log('🔄 Usando datos de ejemplo...');
             }
         } else {
-            console.log('📋 Usando datos predeterminados');
+            console.log('📋 CloudAPI no disponible, usando datos de ejemplo');
         }
         
-        // Fallback a datos locales
-        const adminData = getAdminData();
-        const photos = adminData ? adminData.photos : sampleData.photos;
-        
+        // Fallback a datos de ejemplo
         container.innerHTML = '';
-        photos.forEach(photo => {
+        sampleData.photos.forEach(photo => {
             const photoCard = createPhotoCard(photo);
             container.appendChild(photoCard);
         });
+        console.log('✅ Fotos de ejemplo cargadas');
+        
     } catch (error) {
-        console.error('Error cargando fotos:', error);
+        console.error('❌ Error cargando fotos:', error);
         // Fallback a datos de ejemplo
         container.innerHTML = '';
         sampleData.photos.forEach(photo => {
@@ -266,8 +287,8 @@ async function loadVideos() {
     container.innerHTML = '<div class="text-center"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Cargando...</span></div></div>';
     
     try {
-        // Cargar desde CloudAPI (temporalmente deshabilitado)
-        if (false && typeof cloudAPI !== 'undefined') {
+        // Cargar desde CloudAPI
+        if (typeof cloudAPI !== 'undefined') {
             try {
                 console.log('🔄 Cargando videos desde CloudAPI...');
                 const videos = await cloudAPI.getVideos();
@@ -281,26 +302,26 @@ async function loadVideos() {
                     console.log('✅ Videos cargados desde CloudAPI');
                     return;
                 } else {
-                    console.log('⚠️ No hay videos en CloudAPI');
+                    console.log('⚠️ No hay videos en CloudAPI, usando datos de ejemplo');
                 }
             } catch (error) {
                 console.log('❌ Error cargando desde CloudAPI:', error);
+                console.log('🔄 Usando datos de ejemplo...');
             }
         } else {
-            console.log('📋 Usando datos predeterminados');
+            console.log('📋 CloudAPI no disponible, usando datos de ejemplo');
         }
         
-        // Fallback a datos locales
-        const adminData = getAdminData();
-        const videos = adminData ? adminData.videos : sampleData.videos;
-        
+        // Fallback a datos de ejemplo
         container.innerHTML = '';
-        videos.forEach(video => {
+        sampleData.videos.forEach(video => {
             const videoCard = createVideoCard(video);
             container.appendChild(videoCard);
         });
+        console.log('✅ Videos de ejemplo cargados');
+        
     } catch (error) {
-        console.error('Error cargando videos:', error);
+        console.error('❌ Error cargando videos:', error);
         // Fallback a datos de ejemplo
         container.innerHTML = '';
         sampleData.videos.forEach(video => {
@@ -316,13 +337,20 @@ async function loadVideos() {
 function createFlyerCard(flyer) {
     const card = document.createElement('div');
     card.className = 'flyer-card fade-in';
+    
+    // Formatear fecha y hora
+    const dateFormatted = flyer.date ? formatDate(flyer.date) : 'Fecha por confirmar';
+    const timeFormatted = flyer.time ? ` a las ${flyer.time}` : '';
+    const locationFormatted = flyer.location || 'Lugar por confirmar';
+    const descriptionFormatted = flyer.description || '';
+    
     card.innerHTML = `
-        <img src="${flyer.image}" alt="${flyer.title}" class="flyer-image">
+        <img src="${flyer.image}" alt="${flyer.title}" class="flyer-image" onerror="this.src='img/bluseraflier.jpg'">
         <div class="flyer-info">
             <h3>${flyer.title}</h3>
-            <p><i class="bi bi-calendar"></i> ${formatDate(flyer.date)}</p>
-            <p><i class="bi bi-geo-alt"></i> ${flyer.location}</p>
-            <p>${flyer.description}</p>
+            <p><i class="bi bi-calendar"></i> ${dateFormatted}${timeFormatted}</p>
+            <p><i class="bi bi-geo-alt"></i> ${locationFormatted}</p>
+            ${descriptionFormatted ? `<p>${descriptionFormatted}</p>` : ''}
         </div>
         <div class="flyer-actions">
             <a href="${flyer.image}" download class="btn btn-primary">
@@ -714,6 +742,7 @@ function checkAPIStatus() {
 }
 
 // Hacer funciones disponibles globalmente
+window.loadContent = loadContent;
 window.reloadContent = reloadAllContent;
 window.checkAPI = checkAPIStatus;
 
