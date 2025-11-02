@@ -85,23 +85,55 @@ class SimpleAPI {
             console.log('✅ Datos cargados del bin:', this.binId);
             console.log(`📊 Contenido: ${flyersCount} flyers, ${photosCount} fotos, ${videosCount} videos (Total: ${total})`);
             
-            // Si el bin está vacío, intentar buscar en localStorage otro bin que tenga contenido
+            // Si el bin está vacío, buscar en otros lugares posibles
             if (total === 0) {
+                console.log('🔍 Bin está vacío, buscando contenido en otros bins...');
+                
+                // Buscar en localStorage
                 const localBinId = localStorage.getItem('drmalestar_bin_id');
+                const binsParaVerificar = [];
+                
                 if (localBinId && localBinId !== this.binId) {
-                    console.log('🔍 Bin configurado está vacío, verificando bin de localStorage...');
-                    const tieneContenido = await this.verificarBinConContenido(localBinId);
+                    binsParaVerificar.push(localBinId);
+                }
+                
+                // Verificar cada bin posible
+                for (const binId of binsParaVerificar) {
+                    console.log(`   🔍 Verificando bin: ${binId}...`);
+                    const tieneContenido = await this.verificarBinConContenido(binId);
                     if (tieneContenido) {
-                        console.log('✅ ¡Encontré contenido en otro bin!');
-                        console.log('📋 Bin ID con contenido:', localBinId);
-                        console.warn('⚠️ IMPORTANTE: Actualiza config.js con este Bin ID:', localBinId);
-                        // Usar ese bin temporalmente
-                        this.binId = localBinId;
+                        console.log('✅ ¡ENCONTRÉ CONTENIDO EN OTRO BIN!');
+                        console.log('%c═══════════════════════════════════════', 'background: #4ecdc4; color: white; font-size: 14px; padding: 5px;');
+                        console.log('%c📋 BIN ID CON CONTENIDO:', 'background: #4ecdc4; color: white; font-size: 16px; font-weight: bold; padding: 5px;');
+                        console.log('%c' + binId, 'background: #4ecdc4; color: white; font-size: 18px; font-weight: bold; padding: 10px;');
+                        console.log('%c⚠️ ACTUALIZA config.js con este Bin ID', 'background: #ff6b6b; color: white; font-size: 14px; padding: 5px;');
+                        console.log('%c═══════════════════════════════════════', 'background: #4ecdc4; color: white; font-size: 14px; padding: 5px;');
+                        
+                        // Usar ese bin para esta sesión
+                        this.binId = binId;
+                        localStorage.setItem('drmalestar_bin_id', binId);
+                        
                         // Obtener datos de ese bin
                         return await this.getData(); // Recursión para obtener datos del bin correcto
                     }
                 }
-                console.warn('⚠️ El bin está vacío. El contenido puede estar en otro bin o necesitas cargarlo.');
+                
+                console.warn('⚠️ No se encontró contenido en otros bins.');
+                console.warn('💡 Si cargaste contenido en modo incógnito, ejecuta esto en la consola de ese modo:');
+                console.warn('   localStorage.getItem("drmalestar_bin_id")');
+                console.warn('   Luego copia ese Bin ID y actualízalo en config.js');
+            } else {
+                // Si hay contenido, asegurar que el Bin ID esté guardado correctamente
+                console.log(`✅ Bin ${this.binId} tiene ${total} elementos de contenido`);
+                console.log('💡 Este es el Bin ID correcto que debe estar en config.js');
+                
+                // Mostrar el Bin ID de forma destacada
+                console.log('%c═══════════════════════════════════════', 'background: #4ecdc4; color: white; font-size: 14px; padding: 5px;');
+                console.log('%c📋 BIN ID CON CONTENIDO:', 'background: #4ecdc4; color: white; font-size: 16px; font-weight: bold; padding: 5px;');
+                console.log('%c' + this.binId, 'background: #4ecdc4; color: white; font-size: 18px; font-weight: bold; padding: 10px;');
+                console.log('%c⚠️ COPIA ESTE VALOR Y ACTUALÍZALO EN config.js', 'background: #ff6b6b; color: white; font-size: 14px; padding: 5px;');
+                console.log('%cPara que todos los dispositivos vean el mismo contenido', 'background: #4ecdc4; color: white; font-size: 12px; padding: 3px;');
+                console.log('%c═══════════════════════════════════════', 'background: #4ecdc4; color: white; font-size: 14px; padding: 5px;');
             }
             
             return data;
