@@ -10,22 +10,42 @@ class SimpleAPI {
         this.apiKey = window.CONFIG?.API_KEY || '$2a$10$oYe3uG0XIyCLhNeLvtrZjOSEAkLtqlABuEdQbM9QRKK0FRGVRdxfC';
         this.baseUrl = 'https://api.jsonbin.io/v3';
         
-        // PRIORIDAD: Usar el BIN_ID del config (compartido para todos)
+        // PRIORIDAD ABSOLUTA: Usar SIEMPRE el BIN_ID del config.js (compartido para todos)
+        // Esto asegura que todos los dispositivos usen el mismo bin
         const configBinId = window.CONFIG?.BIN_ID;
         const localBinId = localStorage.getItem('drmalestar_bin_id');
         
-        // Usar el Bin ID del config si existe
-        if (configBinId) {
-            this.binId = configBinId;
-            // Guardar también en localStorage para sincronización
-            localStorage.setItem('drmalestar_bin_id', configBinId);
+        // SIEMPRE usar el Bin ID del config si existe (esto es crítico para producción)
+        if (configBinId && configBinId.trim() !== '') {
+            this.binId = configBinId.trim();
+            // Forzar que localStorage use el mismo Bin ID del config
+            // Esto previene que dispositivos diferentes usen bins diferentes
+            if (localBinId !== this.binId) {
+                console.log('🔄 Sincronizando localStorage con config.js...');
+                console.log('   LocalStorage tenía:', localBinId || 'nada');
+                console.log('   Actualizando a:', this.binId);
+            }
+            localStorage.setItem('drmalestar_bin_id', this.binId);
         } else {
             // Si no hay config, usar localStorage como fallback
             this.binId = localBinId || null;
+            console.warn('⚠️ No hay BIN_ID en config.js. Usando localStorage como fallback.');
+            console.warn('⚠️ Esto puede causar problemas en otros dispositivos.');
         }
         
-        console.log('📋 Bin ID configurado:', this.binId || 'No configurado (se creará automáticamente)');
-        console.log('📋 Fuente:', configBinId ? 'Config.js' : localBinId ? 'LocalStorage' : 'Se creará nuevo');
+        console.log('═══════════════════════════════════════');
+        console.log('📋 CONFIGURACIÓN DE BIN ID');
+        console.log('   Bin ID:', this.binId || 'No configurado');
+        console.log('   Fuente:', configBinId ? '✅ config.js' : localBinId ? '⚠️ localStorage (fallback)' : '❌ Se creará nuevo');
+        console.log('   API Key:', this.apiKey ? '✅ Configurada' : '❌ Faltante');
+        console.log('═══════════════════════════════════════');
+        
+        // Advertencia si no hay Bin ID
+        if (!this.binId) {
+            console.error('❌ NO HAY BIN_ID CONFIGURADO');
+            console.error('   Todos los dispositivos deben usar el mismo Bin ID.');
+            console.error('   Actualiza config.js con el Bin ID correcto.');
+        }
     }
     
     // Método para verificar si un bin tiene contenido

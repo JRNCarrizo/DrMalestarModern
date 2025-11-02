@@ -231,18 +231,13 @@ function displayPhotos(photos) {
             const title = escapeHtml(photo.title || 'Sin título');
             const description = photo.description ? escapeHtml(photo.description) : '';
             const image = photo.image || 'img/bluseraflier.jpg';
-            const safeImage = image.replace(/'/g, "\\'").replace(/"/g, '&quot;');
-            const safeTitle = title.replace(/'/g, "\\'").replace(/"/g, '&quot;');
             
             return `
-                <div class="photo-card" onclick="openModal('${safeImage}', '${safeTitle}')">
+                <div class="photo-card">
                     <img src="${image}" class="photo-image" alt="${title}" onerror="this.src='img/bluseraflier.jpg'">
                     <div class="photo-overlay">
                         <h4 class="photo-title">${title}</h4>
                         ${description ? `<p class="photo-description">${description}</p>` : ''}
-                        <div class="photo-zoom-icon">
-                            <i class="bi bi-zoom-in"></i>
-                        </div>
                     </div>
                 </div>
             `;
@@ -640,41 +635,5 @@ function setupSyncListener() {
     });
 }
 
-// Función para abrir modal de imagen
-function openModal(imageSrc, imageTitle) {
-    const modal = document.getElementById('imageModal');
-    const modalImage = document.getElementById('modalImage');
-    const modalCaption = document.getElementById('modalCaption');
-    
-    if (modal && modalImage && modalCaption) {
-        modalImage.src = imageSrc;
-        modalCaption.textContent = imageTitle || '';
-        
-        // Mostrar modal (usando Bootstrap si está disponible)
-        if (typeof bootstrap !== 'undefined') {
-            const bsModal = new bootstrap.Modal(modal);
-            bsModal.show();
-        } else {
-            modal.style.display = 'block';
-        }
-    }
-}
-
-// Función para cerrar modal
-function closeModal() {
-    const modal = document.getElementById('imageModal');
-    if (modal) {
-        if (typeof bootstrap !== 'undefined') {
-            const bsModal = bootstrap.Modal.getInstance(modal);
-            if (bsModal) bsModal.hide();
-        } else {
-            modal.style.display = 'none';
-        }
-    }
-}
-
-// Hacer funciones globales
-window.openModal = openModal;
-window.closeModal = closeModal;
 
 console.log('✅ Loader Simplificado listo');
