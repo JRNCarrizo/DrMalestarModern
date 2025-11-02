@@ -59,13 +59,22 @@ async function loadFlyers() {
     try {
         console.log('🔄 Cargando flyers...');
         const flyers = await api.getFlyers();
-        console.log('📋 Flyers obtenidos:', flyers?.length || 0, flyers);
-        displayFlyers(flyers);
+        console.log('📋 Flyers obtenidos:', flyers?.length || 0);
+        
+        // Asegurar que flyers sea un array
+        const flyersArray = Array.isArray(flyers) ? flyers : [];
+        displayFlyers(flyersArray);
     } catch (error) {
         console.error('❌ Error cargando flyers:', error);
         const container = document.getElementById('flyers-container');
         if (container) {
-            container.innerHTML = '<p class="text-center text-danger">Error cargando flyers: ' + error.message + '</p>';
+            // Mostrar mensaje más amigable
+            container.innerHTML = `
+                <div class="text-center text-muted" style="grid-column: 1/-1; padding: 3rem;">
+                    <p>No se pudieron cargar los flyers.</p>
+                    <small>Recarga la página o intenta más tarde.</small>
+                </div>
+            `;
         }
     }
 }
@@ -162,13 +171,22 @@ async function loadPhotos() {
     try {
         console.log('🔄 Cargando fotos...');
         const photos = await api.getPhotos();
-        console.log('📋 Fotos obtenidas:', photos?.length || 0, photos);
-        displayPhotos(photos);
+        console.log('📋 Fotos obtenidas:', photos?.length || 0);
+        
+        // Asegurar que photos sea un array
+        const photosArray = Array.isArray(photos) ? photos : [];
+        displayPhotos(photosArray);
     } catch (error) {
         console.error('❌ Error cargando fotos:', error);
         const container = document.getElementById('photos-container');
         if (container) {
-            container.innerHTML = '<p class="text-center text-danger">Error cargando fotos: ' + error.message + '</p>';
+            // Mostrar mensaje más amigable
+            container.innerHTML = `
+                <div class="text-center text-muted" style="grid-column: 1/-1; padding: 3rem;">
+                    <p>No se pudieron cargar las fotos.</p>
+                    <small>Recarga la página o intenta más tarde.</small>
+                </div>
+            `;
         }
     }
 }
@@ -238,13 +256,22 @@ async function loadVideos() {
     try {
         console.log('🔄 Cargando videos...');
         const videos = await api.getVideos();
-        console.log('📋 Videos obtenidos:', videos?.length || 0, videos);
-        displayVideos(videos);
+        console.log('📋 Videos obtenidos:', videos?.length || 0);
+        
+        // Asegurar que videos sea un array
+        const videosArray = Array.isArray(videos) ? videos : [];
+        displayVideos(videosArray);
     } catch (error) {
         console.error('❌ Error cargando videos:', error);
         const container = document.getElementById('videos-container');
         if (container) {
-            container.innerHTML = '<p class="text-center text-danger">Error cargando videos: ' + error.message + '</p>';
+            // Mostrar mensaje más amigable
+            container.innerHTML = `
+                <div class="text-center text-muted" style="grid-column: 1/-1; padding: 3rem;">
+                    <p>No se pudieron cargar los videos.</p>
+                    <small>Recarga la página o intenta más tarde.</small>
+                </div>
+            `;
         }
     }
 }

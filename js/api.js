@@ -10,33 +10,38 @@ class SimpleAPI {
         this.apiKey = window.CONFIG?.API_KEY || '$2a$10$oYe3uG0XIyCLhNeLvtrZjOSEAkLtqlABuEdQbM9QRKK0FRGVRdxfC';
         this.baseUrl = 'https://api.jsonbin.io/v3';
         
-        // PRIORIDAD: Primero usar el BIN_ID del config (compartido para todos)
-        // Solo usar localStorage si el config no tiene BIN_ID
+        // PRIORIDAD: Siempre usar el BIN_ID del config primero (compartido para todos)
         // Esto asegura que todos los usuarios usen el mismo bin
         const configBinId = window.CONFIG?.BIN_ID;
         const localBinId = localStorage.getItem('drmalestar_bin_id');
         
-        // Si el config tiene un bin ID válido (no es placeholder), usarlo
-        if (configBinId && configBinId !== '67b0a0b8-5c4a-4b8a-9c1a-1a2b3c4d5e6f') {
+        // Usar el Bin ID del config si existe, incluso si parece placeholder
+        // El código intentará usarlo y si falla, creará uno nuevo automáticamente
+        if (configBinId) {
             this.binId = configBinId;
             // Sincronizar localStorage con el config para consistencia
-            if (localBinId !== configBinId) {
-                localStorage.setItem('drmalestar_bin_id', configBinId);
+            if (localBinId && localBinId !== configBinId) {
+                // Si hay un bin local diferente, puede que sea más reciente
+                // Pero priorizamos el config para que todos usen el mismo
+                console.log('⚠️ Bin ID en localStorage diferente al config. Usando config para consistencia.');
             }
+            localStorage.setItem('drmalestar_bin_id', configBinId);
         } else {
-            // Si no hay config válido, usar localStorage o intentar crear uno
+            // Si no hay config, usar localStorage como fallback
             this.binId = localBinId || null;
         }
         
-        console.log('📋 Bin ID:', this.binId || 'No configurado');
-        console.log('📋 Fuente:', configBinId && configBinId !== '67b0a0b8-5c4a-4b8a-9c1a-1a2b3c4d5e6f' ? 'Config' : localBinId ? 'LocalStorage' : 'Ninguna');
+        console.log('📋 Bin ID:', this.binId || 'No configurado (se creará automáticamente)');
+        console.log('📋 Fuente:', configBinId ? 'Config.js' : localBinId ? 'LocalStorage' : 'Se creará nuevo');
     }
 
     // Obtener todos los datos
     async getData() {
         try {
+            // Si no hay bin ID, crear uno nuevo automáticamente
             if (!this.binId) {
-                throw new Error('Bin ID no configurado. Usa createBin() primero.');
+                console.log('📦 No hay Bin ID configurado, creando uno nuevo...');
+                return await this.createBin();
             }
 
             const response = await fetch(`${this.baseUrl}/b/${this.binId}`, {
@@ -47,16 +52,31 @@ class SimpleAPI {
 
             if (!response.ok) {
                 if (response.status === 400 || response.status === 404) {
-                    console.log('🔄 Bin no válido, creando nuevo...');
+                    console.log('🔄 Bin no válido o no encontrado, creando nuevo...');
+                    console.log('⚠️ El Bin ID anterior era:', this.binId);
+                    // Crear nuevo bin y retornar datos vacíos
                     return await this.createBin();
                 }
                 throw new Error(`HTTP ${response.status}: ${response.statusText}`);
             }
 
             const result = await response.json();
-            return result.record || { flyers: [], photos: [], videos: [] };
+            const data = result.record || { flyers: [], photos: [], videos: [] };
+            console.log('✅ Datos cargados correctamente');
+            return data;
         } catch (error) {
             console.error('❌ Error obteniendo datos:', error);
+            // Si es un error de red u otro, intentar crear un bin nuevo
+            if (error.message.includes('fetch')) {
+                console.log('🔄 Error de conexión, intentando crear nuevo bin...');
+                try {
+                    return await this.createBin();
+                } catch (createError) {
+                    console.error('❌ Error creando bin:', createError);
+                    // Retornar estructura vacía como último recurso
+                    return { flyers: [], photos: [], videos: [] };
+                }
+            }
             throw error;
         }
     }
