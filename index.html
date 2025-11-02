@@ -375,6 +375,18 @@
                 audioContext = new (window.AudioContext || window.webkitAudioContext)();
             } catch (e) {
                 console.warn('Web Audio API no disponible, usando método estándar');
+                audioContext = null;
+            }
+            
+            // Función para activar el contexto de audio (requerido por algunos navegadores)
+            function resumeAudioContext() {
+                if (audioContext && audioContext.state === 'suspended') {
+                    audioContext.resume().then(() => {
+                        console.log('🔊 AudioContext activado');
+                    }).catch(err => {
+                        console.warn('⚠️ No se pudo activar AudioContext:', err);
+                    });
+                }
             }
             
             // Función para cargar el audio
@@ -382,13 +394,20 @@
                 if (!audioContext || audioLoaded) return;
                 
                 try {
+                    // Asegurar que el contexto esté activo antes de cargar
+                    resumeAudioContext();
+                    
                     const response = await fetch('audio/bucle cadillac.mp3');
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
                     const arrayBuffer = await response.arrayBuffer();
                     audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
                     audioLoaded = true;
                     console.log('📊 Audio cargado:', audioBuffer.duration, 'segundos');
                 } catch (error) {
                     console.error('❌ Error cargando audio:', error);
+                    console.log('🔄 Usando método estándar como fallback');
                     // Fallback al método estándar
                     useStandardAudio();
                 }
@@ -399,6 +418,9 @@
                 if (!audioContext || !audioBuffer || sourceNode) return;
                 
                 try {
+                    // Asegurar que el contexto esté activo
+                    resumeAudioContext();
+                    
                     // Crear nodo de ganancia para controlar el volumen
                     gainNode = audioContext.createGain();
                     gainNode.gain.value = 0.3;
@@ -418,7 +440,9 @@
                     console.log('🔊 Audio iniciado con Web Audio API (loop perfecto)');
                 } catch (error) {
                     console.error('❌ Error reproduciendo audio:', error);
-                    useStandardAudio();
+                    // Si falla Web Audio API, usar método estándar
+                    if (!audioElement) useStandardAudio();
+                    if (window.startAudioStandard) window.startAudioStandard();
                 }
             }
             
@@ -540,6 +564,9 @@
             if (audioToggle) {
                 // Manejar click en el botón de audio
                 audioToggle.addEventListener('click', function() {
+                    // Activar contexto de audio con la interacción del usuario
+                    resumeAudioContext();
+                    
                     if (!isPlaying) {
                         startAudio();
                     } else {
@@ -549,7 +576,11 @@
                 
                 // Cargar audio al inicio si tenemos Web Audio API
                 if (audioContext) {
-                    loadAudio();
+                    // Intentar cargar, pero si falla usar método estándar
+                    loadAudio().catch(() => {
+                        console.log('🔄 Web Audio API no disponible, usando método estándar');
+                        useStandardAudio();
+                    });
                 } else {
                     useStandardAudio();
                 }
@@ -559,6 +590,7 @@
                 const shouldAutoPlay = audioPreference !== 'false';
                 
                 // Intentar reproducir automáticamente al cargar la página
+                // Pero Web Audio API puede requerir interacción del usuario primero
                 if (shouldAutoPlay) {
                     setTimeout(() => {
                         startAudio();
@@ -566,6 +598,10 @@
                 } else {
                     updateUI(false);
                 }
+                
+                // También activar contexto con cualquier clic en la página (para auto-play)
+                document.addEventListener('click', resumeAudioContext, { once: true });
+                document.addEventListener('touchstart', resumeAudioContext, { once: true });
             }
         });
     </script>
