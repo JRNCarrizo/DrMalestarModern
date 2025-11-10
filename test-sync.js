@@ -103,3 +103,4 @@ console.log('💡 Usa testSync() para probar la carga de flyers');
 console.log('💡 Usa simulateFlyerDeletion() para simular eliminación');
 console.log('💡 Usa checkSyncStatus() para verificar el estado');
 
+

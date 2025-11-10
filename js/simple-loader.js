@@ -219,3 +219,4 @@ window.showImageModal = showImageModal;
 
 console.log('✅ Simple Loader listo');
 
+

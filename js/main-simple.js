@@ -226,3 +226,4 @@ console.log('   - loadSimplePhotos() - para cargar solo fotos');
 console.log('   - loadSimpleVideos() - para cargar solo videos');
 
 
+

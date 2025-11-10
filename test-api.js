@@ -137,3 +137,4 @@ window.checkSync = checkSync;
 console.log('✅ Test API listo');
 console.log('💡 Usa checkSync() para verificar el estado');
 
+

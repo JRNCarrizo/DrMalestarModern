@@ -282,6 +282,21 @@ class SimpleAPI {
         await this.saveData(data);
     }
 
+    async updateFlyer(id, updates) {
+        const data = await this.getData();
+        const index = data.flyers.findIndex(f => f.id === id);
+        if (index === -1) {
+            throw new Error('Flyer no encontrado');
+        }
+        data.flyers[index] = {
+            ...data.flyers[index],
+            ...updates,
+            id
+        };
+        await this.saveData(data);
+        return data.flyers[index];
+    }
+
     // Agregar foto
     async addPhoto(photoData) {
         const data = await this.getData();
@@ -308,6 +323,21 @@ class SimpleAPI {
         await this.saveData(data);
     }
 
+    async updatePhoto(id, updates) {
+        const data = await this.getData();
+        const index = data.photos.findIndex(p => p.id === id);
+        if (index === -1) {
+            throw new Error('Foto no encontrada');
+        }
+        data.photos[index] = {
+            ...data.photos[index],
+            ...updates,
+            id
+        };
+        await this.saveData(data);
+        return data.photos[index];
+    }
+
     // Agregar video
     async addVideo(videoData) {
         const data = await this.getData();
@@ -332,6 +362,21 @@ class SimpleAPI {
         const data = await this.getData();
         data.videos = data.videos.filter(v => v.id !== id);
         await this.saveData(data);
+    }
+
+    async updateVideo(id, updates) {
+        const data = await this.getData();
+        const index = data.videos.findIndex(v => v.id === id);
+        if (index === -1) {
+            throw new Error('Video no encontrado');
+        }
+        data.videos[index] = {
+            ...data.videos[index],
+            ...updates,
+            id
+        };
+        await this.saveData(data);
+        return data.videos[index];
     }
 }
 

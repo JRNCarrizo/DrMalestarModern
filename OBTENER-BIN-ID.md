@@ -50,3 +50,4 @@ Si no ves el mensaje en la consola, también puedes:
 3. Ejecutar: `localStorage.getItem('drmalestar_bin_id')`
 4. Eso te mostrará el Bin ID guardado en tu navegador
 
+

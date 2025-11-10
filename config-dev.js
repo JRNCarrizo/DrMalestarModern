@@ -18,3 +18,4 @@ window.CONFIG = CONFIG;
 console.log('✅ Configuración de desarrollo cargada');
 console.log('📝 Usando localStorage para desarrollo');
 
+

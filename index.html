@@ -479,7 +479,9 @@
                 
                 // Función para iniciar reproducción
                 function startAudioStandard() {
-                    if (!isPlaying) {
+                    if (!isPlaying && audioElement) {
+                        // Asegurar que no esté muteado antes de reproducir
+                        audioElement.muted = false;
                         isPlaying = true;
                         audioElement.play().then(() => {
                             updateUI(true);
@@ -488,7 +490,16 @@
                         }).catch(error => {
                             console.error('❌ Error reproduciendo audio:', error);
                             isPlaying = false;
-                            updateUI(false);
+                            // Mantener el botón en estado activo para que el usuario intente manualmente
+                            updateUI(!audioElement.muted);
+                            // Intentar de nuevo después de un delay (por si el navegador permite luego de una interacción)
+                            setTimeout(() => {
+                                if (audioElement && !isPlaying) {
+                                    audioElement.play().catch(() => {
+                                        console.log('⚠️ Auto-play bloqueado, se requiere interacción del usuario');
+                                    });
+                                }
+                            }, 1000);
                         });
                     }
                 }
@@ -597,11 +608,19 @@
                 }
                 
                 // Verificar preferencia guardada (pero por defecto reproducir automáticamente)
-                const audioPreference = localStorage.getItem('drmalestar_audio_enabled');
-                
+                let audioPreference = localStorage.getItem('drmalestar_audio_enabled');
+                if (audioPreference === null || audioPreference === undefined) {
+                    audioPreference = 'true';
+                    localStorage.setItem('drmalestar_audio_enabled', 'true');
+                    console.log('✅ Preferencia de audio no encontrada. Estableciendo reproducción por defecto.');
+                }
+                console.log('🎚️ Preferencia de audio:', audioPreference);
+
                 // Intentar reproducir automáticamente con método estándar
                 // Solo no reproducir si explícitamente el usuario lo silenció antes
                 if (audioPreference !== 'false') {
+                    // Mostrar UI como activo por defecto
+                    updateUI(true);
                     setTimeout(() => {
                         if (window.startAudioStandard) {
                             window.startAudioStandard();
@@ -614,7 +633,8 @@
                                 console.log('🔊 Audio iniciado automáticamente');
                             }).catch(error => {
                                 console.log('⚠️ Auto-play bloqueado, usuario debe hacer clic:', error);
-                                updateUI(false);
+                                // Mantener el botón visible como activo aunque el navegador bloquee el audio
+                                updateUI(true);
                             });
                         }
                     }, 300);

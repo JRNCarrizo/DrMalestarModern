@@ -105,3 +105,4 @@ Si todo está configurado correctamente, deberías poder:
 - ✅ Subir imágenes
 - ✅ Todo se sincroniza automáticamente
 
+

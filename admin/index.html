@@ -220,7 +220,7 @@
                 <div class="admin-card">
                     <div class="form-section">
                         <h3><i class="bi bi-calendar-event"></i> Gestión de Flyers 
-                            <span id="flyersCounter" class="badge bg-info ms-2">Flyers: 0/4</span>
+                            <span id="flyersCounter" class="badge bg-info ms-2">Flyers: 0/6</span>
                         </h3>
                         
                         <form id="flyerForm">
@@ -259,7 +259,12 @@
                                     </div>
                                 </div>
                             </div>
-                            <button type="submit" class="btn btn-admin">Agregar Flyer</button>
+                            <div class="d-flex flex-wrap gap-2">
+                                <button type="submit" class="btn btn-admin">Agregar Flyer</button>
+                                <button type="button" class="btn btn-outline-secondary d-none" id="flyerCancelEdit" onclick="cancelFlyerEdit()">
+                                    <i class="bi bi-x-circle"></i> Cancelar edición
+                                </button>
+                            </div>
                         </form>
                     </div>
                     
@@ -276,7 +281,7 @@
                 <div class="admin-card">
                     <div class="form-section">
                         <h3><i class="bi bi-images"></i> Gestión de Fotos 
-                            <span id="photosCounter" class="badge bg-info ms-2">Fotos: 0/8</span>
+                            <span id="photosCounter" class="badge bg-info ms-2">Fotos: 0/10</span>
                         </h3>
                         
                         <form id="photoForm">
@@ -303,7 +308,12 @@
                                     </div>
                                 </div>
                             </div>
-                            <button type="submit" class="btn btn-admin">Agregar Foto</button>
+                            <div class="d-flex flex-wrap gap-2">
+                                <button type="submit" class="btn btn-admin">Agregar Foto</button>
+                                <button type="button" class="btn btn-outline-secondary d-none" id="photoCancelEdit" onclick="cancelPhotoEdit()">
+                                    <i class="bi bi-x-circle"></i> Cancelar edición
+                                </button>
+                            </div>
                         </form>
                     </div>
                     
@@ -320,7 +330,7 @@
                 <div class="admin-card">
                     <div class="form-section">
                         <h3><i class="bi bi-youtube"></i> Gestión de Videos 
-                            <span id="videosCounter" class="badge bg-info ms-2">Videos: 0/6</span>
+                            <span id="videosCounter" class="badge bg-info ms-2">Videos: 0/8</span>
                         </h3>
                         
                         <form id="videoForm">
@@ -343,7 +353,12 @@
                                     </div>
                                 </div>
                             </div>
-                            <button type="submit" class="btn btn-admin">Agregar Video</button>
+                            <div class="d-flex flex-wrap gap-2">
+                                <button type="submit" class="btn btn-admin">Agregar Video</button>
+                                <button type="button" class="btn btn-outline-secondary d-none" id="videoCancelEdit" onclick="cancelVideoEdit()">
+                                    <i class="bi bi-x-circle"></i> Cancelar edición
+                                </button>
+                            </div>
                         </form>
                     </div>
                     

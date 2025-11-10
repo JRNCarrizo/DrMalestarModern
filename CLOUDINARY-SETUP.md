@@ -78,3 +78,4 @@ Si Cloudinary no está configurado o falla, el sistema automáticamente:
 ---
 
 **Consejo**: Es mejor usar Cloudinary cuando sea posible para ahorrar espacio en JSONBin.
+

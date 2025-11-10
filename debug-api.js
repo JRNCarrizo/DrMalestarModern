@@ -172,3 +172,4 @@ console.log('💡 Usa testAddFlyer() para probar agregar un flyer');
 console.log('💡 Usa checkSync() para verificar sincronización');
 console.log('💡 Usa resetEverything() para limpiar todo');
 
+

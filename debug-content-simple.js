@@ -244,3 +244,4 @@ window.loadDebugVideos = loadDebugVideos;
 console.log('🎵 Debug Content Simple - Dr.Malestar listo');
 
 
+

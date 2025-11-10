@@ -9,6 +9,16 @@ console.log('🔧 Admin Simplificado - Dr.Malestar cargado');
 let isAuthenticated = false;
 let isSubmitting = false;
 
+// Estado de edición
+let editingFlyerId = null;
+let editingFlyerImage = null;
+let editingPhotoId = null;
+let editingPhotoImage = null;
+let editingVideoId = null;
+let cachedFlyers = [];
+let cachedPhotos = [];
+let cachedVideos = [];
+
 // Inicializar cuando el DOM esté listo
 document.addEventListener('DOMContentLoaded', function() {
     console.log('🚀 Inicializando Admin...');
@@ -116,8 +126,8 @@ async function loadFlyers() {
         // Mostrar contador
         const counter = document.getElementById('flyersCounter');
         if (counter) {
-            counter.textContent = `Flyers: ${flyers.length}/4`;
-            if (flyers.length >= 4) {
+            counter.textContent = `Flyers: ${flyers.length}/6`;
+            if (flyers.length >= 6) {
                 counter.className = 'badge bg-warning';
             } else {
                 counter.className = 'badge bg-info';
@@ -131,7 +141,11 @@ async function loadFlyers() {
 
 function displayFlyers(flyers) {
     const container = document.getElementById('flyersList');
-    if (flyers.length === 0) {
+    cachedFlyers = Array.isArray(flyers) ? flyers.map(f => ({ ...f })) : [];
+
+    if (!container) return;
+
+    if (cachedFlyers.length === 0) {
         container.innerHTML = '<p class="text-muted text-center py-4">No hay flyers disponibles</p>';
         return;
     }
@@ -143,7 +157,7 @@ function displayFlyers(flyers) {
         return div.innerHTML;
     };
     
-    container.innerHTML = flyers.map(flyer => {
+    container.innerHTML = cachedFlyers.map(flyer => {
         const title = escapeHtml(flyer.title || 'Sin título');
         const date = escapeHtml(flyer.date || 'Sin fecha');
         const time = escapeHtml(flyer.time || 'Sin hora');
@@ -174,7 +188,10 @@ function displayFlyers(flyers) {
                         </div>
                     </div>
                     ${description ? `<p class="admin-flyer-description">${description}</p>` : ''}
-                    <div class="admin-flyer-actions">
+                    <div class="admin-flyer-actions d-flex flex-wrap gap-2">
+                        <button class="btn btn-outline-secondary btn-sm" onclick="startFlyerEdit('${flyer.id}')">
+                            <i class="bi bi-pencil-square"></i> Editar
+                        </button>
                         <button class="btn btn-danger-admin btn-sm" onclick="deleteFlyer('${flyer.id}')">
                             <i class="bi bi-trash"></i> Eliminar
                         </button>
@@ -185,18 +202,95 @@ function displayFlyers(flyers) {
     }).join('');
 }
 
+function startFlyerEdit(id) {
+    const flyer = cachedFlyers.find(item => item.id === id);
+    if (!flyer) {
+        notify('No se encontró la información del flyer a editar.', 'error');
+        return;
+    }
+
+    editingFlyerId = id;
+    editingFlyerImage = flyer.image || 'img/bluseraflier.jpg';
+
+    const form = document.getElementById('flyerForm');
+    if (!form) return;
+
+    const titleInput = document.getElementById('flyerTitle');
+    const dateInput = document.getElementById('flyerDate');
+    const timeInput = document.getElementById('flyerTime');
+    const locationInput = document.getElementById('flyerLocation');
+    const descriptionInput = document.getElementById('flyerDescription');
+    const preview = document.getElementById('flyerPreview');
+    const submitBtn = form.querySelector('button[type="submit"]');
+    const cancelBtn = document.getElementById('flyerCancelEdit');
+    const imageInput = document.getElementById('flyerImage');
+
+    if (titleInput) titleInput.value = flyer.title || '';
+    if (dateInput) dateInput.value = flyer.date || '';
+    if (timeInput) timeInput.value = flyer.time || '';
+    if (locationInput) locationInput.value = flyer.location || '';
+    if (descriptionInput) descriptionInput.value = flyer.description || '';
+    if (imageInput) imageInput.value = '';
+    if (preview) {
+        preview.innerHTML = flyer.image ? `<img src="${flyer.image}" alt="${flyer.title || ''}" class="img-fluid rounded shadow-sm">` : '';
+    }
+    if (submitBtn) {
+        if (!submitBtn.dataset.defaultText) {
+            submitBtn.dataset.defaultText = submitBtn.innerHTML;
+        }
+        submitBtn.innerHTML = '<i class="bi bi-save"></i> Guardar cambios';
+    }
+    if (cancelBtn) cancelBtn.classList.remove('d-none');
+
+    form.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    notify('Editando flyer. Realiza los cambios y guarda.', 'info');
+}
+
+function cancelFlyerEdit(showMessage = true) {
+    editingFlyerId = null;
+    editingFlyerImage = null;
+
+    const form = document.getElementById('flyerForm');
+    if (form) {
+        form.reset();
+        const submitBtn = form.querySelector('button[type="submit"]');
+        if (submitBtn) {
+            submitBtn.innerHTML = submitBtn.dataset.defaultText || 'Agregar Flyer';
+        }
+    }
+
+    clearPreview('flyerPreview');
+    const cancelBtn = document.getElementById('flyerCancelEdit');
+    if (cancelBtn) cancelBtn.classList.add('d-none');
+
+    const imageInput = document.getElementById('flyerImage');
+    if (imageInput) imageInput.value = '';
+
+    updateFlyerButtonState();
+
+    if (showMessage) {
+        notify('Edición de flyer cancelada', 'info');
+    }
+}
+
 async function handleFlyerSubmit(e) {
     e.preventDefault();
     if (isSubmitting) return;
     isSubmitting = true;
     
     try {
-        // Verificar límite de flyers (máximo 4)
-        const currentFlyers = await api.getFlyers();
-        if (currentFlyers.length >= 4) {
-            notify('❌ Límite alcanzado: Solo se pueden tener 4 flyers. Elimina uno para agregar otro.', 'error');
-            isSubmitting = false;
-            return;
+        const isEditing = Boolean(editingFlyerId);
+        let currentFlyers = [];
+        
+        if (!isEditing) {
+            currentFlyers = await api.getFlyers();
+            if (currentFlyers.length >= 6) {
+                notify('❌ Límite alcanzado: Solo se pueden tener 6 flyers. Elimina uno para agregar otro.', 'error');
+                isSubmitting = false;
+                return;
+            }
+        } else {
+            currentFlyers = cachedFlyers;
         }
         
         const formData = new FormData(e.target);
@@ -210,30 +304,40 @@ async function handleFlyerSubmit(e) {
         
         // Subir imagen si existe
         const imageFile = formData.get('image');
+        let finalImage = editingFlyerImage || 'img/bluseraflier.jpg';
+        
         if (imageFile && imageFile.size > 0) {
             console.log('🔄 Subiendo imagen a Cloudinary...');
             const cloudinaryResult = await uploadToCloudinary(imageFile, 'drmalestar/flyers');
-            flyerData.image = cloudinaryResult.url;
-        } else {
-            flyerData.image = 'img/bluseraflier.jpg'; // Imagen por defecto
+            finalImage = cloudinaryResult.url;
+        } else if (!isEditing) {
+            finalImage = 'img/bluseraflier.jpg';
         }
         
-        await api.addFlyer(flyerData);
-        await loadFlyers();
-        e.target.reset();
-        clearPreview('flyerPreview');
-        notify(`✅ Flyer agregado correctamente (${currentFlyers.length + 1}/4)`, 'success');
+        flyerData.image = finalImage;
         
-        // Actualizar estado del botón
-        updateFlyerButtonState();
+        if (isEditing) {
+            await api.updateFlyer(editingFlyerId, flyerData);
+            await loadFlyers();
+            notify('✅ Flyer actualizado correctamente', 'success');
+            cancelFlyerEdit(false);
+            updateFlyerButtonState();
+        } else {
+            await api.addFlyer(flyerData);
+            await loadFlyers();
+            e.target.reset();
+            clearPreview('flyerPreview');
+            notify(`✅ Flyer agregado correctamente (${currentFlyers.length + 1}/6)`, 'success');
+            updateFlyerButtonState();
+        }
         
         // Notificar a la página principal
         if (window.opener) {
             window.opener.postMessage('contentUpdated', '*');
         }
-    } catch (error) {
-        console.error('❌ Error agregando flyer:', error);
-        notify('Error agregando flyer: ' + error.message, 'error');
+        } catch (error) {
+        console.error('❌ Error guardando flyer:', error);
+        notify('Error guardando flyer: ' + error.message, 'error');
     } finally {
         isSubmitting = false;
     }
@@ -243,16 +347,20 @@ async function handleFlyerSubmit(e) {
 async function updateFlyerButtonState() {
     try {
         const flyers = await api.getFlyers();
-        const addButton = flyerForm?.querySelector('button[type="submit"]');
-        if (addButton) {
-            if (flyers.length >= 4) {
+        const form = document.getElementById('flyerForm');
+        const addButton = form?.querySelector('button[type="submit"]');
+        if (addButton && !addButton.dataset.defaultText) {
+            addButton.dataset.defaultText = addButton.innerHTML;
+        }
+        if (addButton && !editingFlyerId) {
+            if (flyers.length >= 6) {
                 addButton.disabled = true;
-                addButton.innerHTML = '<i class="bi bi-exclamation-triangle"></i> Límite alcanzado (4/4)';
+                addButton.innerHTML = '<i class="bi bi-exclamation-triangle"></i> Límite alcanzado (6/6)';
                 addButton.className = 'btn btn-warning w-100';
         } else {
                 addButton.disabled = false;
-                addButton.innerHTML = '<i class="bi bi-plus-circle"></i> Agregar Flyer';
-                addButton.className = 'btn btn-admin w-100';
+                addButton.innerHTML = addButton.dataset.defaultText;
+                addButton.className = 'btn btn-admin';
             }
         }
     } catch (error) {
@@ -263,15 +371,15 @@ async function updateFlyerButtonState() {
 async function deleteFlyer(id) {
     if (!confirm('¿Estás seguro de eliminar este flyer?')) return;
     
-    try {
+        try {
         await api.deleteFlyer(id);
         await loadFlyers();
         notify('Flyer eliminado. Ya puedes agregar otro.', 'success');
-        
+            
         // Notificar a la página principal
         if (window.opener) {
             window.opener.postMessage('contentUpdated', '*');
-        }
+            }
     } catch (error) {
         console.error('❌ Error eliminando flyer:', error);
         notify('Error eliminando flyer', 'error');
@@ -291,14 +399,14 @@ async function loadPhotos() {
         // Mostrar contador
         const counter = document.getElementById('photosCounter');
         if (counter) {
-            counter.textContent = `Fotos: ${photos.length}/8`;
-            if (photos.length >= 8) {
+            counter.textContent = `Fotos: ${photos.length}/10`;
+            if (photos.length >= 10) {
                 counter.className = 'badge bg-warning';
             } else {
                 counter.className = 'badge bg-info';
             }
         }
-        } catch (error) {
+    } catch (error) {
         console.error('❌ Error cargando fotos:', error);
         document.getElementById('photosList').innerHTML = '<p class="text-danger">Error cargando fotos</p>';
     }
@@ -306,21 +414,26 @@ async function loadPhotos() {
 
 function displayPhotos(photos) {
     const container = document.getElementById('photosList');
-    if (photos.length === 0) {
-        container.innerHTML = '<p class="text-muted text-center py-4">No hay fotos disponibles</p>';
+    cachedPhotos = Array.isArray(photos) ? photos.map(p => ({ ...p })) : [];
+    if (!container) {
+        console.error('❌ Contenedor de fotos no encontrado');
         return;
     }
     
-    // Escapar HTML
+    if (!Array.isArray(cachedPhotos) || cachedPhotos.length === 0) {
+        container.innerHTML = '<p class="text-muted text-center py-4">No hay fotos disponibles</p>';
+            return;
+        }
+        
     const escapeHtml = (text) => {
         const div = document.createElement('div');
         div.textContent = text || '';
         return div.innerHTML;
     };
     
-    container.innerHTML = photos.map(photo => {
+    container.innerHTML = cachedPhotos.map(photo => {
         const title = escapeHtml(photo.title || 'Sin título');
-        const description = escapeHtml(photo.description || '');
+        const description = photo.description ? escapeHtml(photo.description) : '';
         const image = photo.image || 'img/bluseraflier.jpg';
         
         return `
@@ -328,18 +441,88 @@ function displayPhotos(photos) {
                 <div class="admin-photo-image-wrapper">
                     <img src="${image}" class="admin-photo-image" alt="${title}" onerror="this.src='img/bluseraflier.jpg'">
                     <div class="admin-photo-overlay">
-                        <button class="btn btn-danger-admin btn-sm" onclick="deletePhoto('${photo.id}')">
-                            <i class="bi bi-trash"></i> Eliminar
-                        </button>
+                        <div class="d-flex flex-column gap-2">
+                            <button class="btn btn-outline-secondary btn-sm" onclick="startPhotoEdit('${photo.id}')">
+                                <i class="bi bi-pencil-square"></i> Editar
+                            </button>
+                            <button class="btn btn-danger-admin btn-sm" onclick="deletePhoto('${photo.id}')">
+                    <i class="bi bi-trash"></i> Eliminar
+                </button>
+                        </div>
                     </div>
                 </div>
                 <div class="admin-photo-content">
                     <h6 class="admin-photo-title">${title}</h6>
                     ${description ? `<p class="admin-photo-description">${description}</p>` : ''}
-                </div>
             </div>
-        `;
+        </div>
+    `;
     }).join('');
+}
+
+function startPhotoEdit(id) {
+    const photo = cachedPhotos.find(item => item.id === id);
+    if (!photo) {
+        notify('No se encontró la información de la foto a editar.', 'error');
+        return;
+    }
+
+    editingPhotoId = id;
+    editingPhotoImage = photo.image || 'img/bluseraflier.jpg';
+
+    const form = document.getElementById('photoForm');
+    if (!form) return;
+
+    const titleInput = document.getElementById('photoTitle');
+    const descriptionInput = document.getElementById('photoDescription');
+    const imageInput = document.getElementById('photoImage');
+    const preview = document.getElementById('photoPreview');
+    const submitBtn = form.querySelector('button[type="submit"]');
+    const cancelBtn = document.getElementById('photoCancelEdit');
+
+    if (titleInput) titleInput.value = photo.title || '';
+    if (descriptionInput) descriptionInput.value = photo.description || '';
+    if (imageInput) imageInput.value = '';
+    if (preview) {
+        preview.innerHTML = photo.image ? `<img src="${photo.image}" alt="${photo.title || ''}" class="img-fluid rounded shadow-sm">` : '';
+    }
+    if (submitBtn) {
+        if (!submitBtn.dataset.defaultText) {
+            submitBtn.dataset.defaultText = submitBtn.innerHTML;
+        }
+        submitBtn.innerHTML = '<i class="bi bi-save"></i> Guardar cambios';
+    }
+    if (cancelBtn) cancelBtn.classList.remove('d-none');
+
+    form.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    notify('Editando foto. Realiza los cambios y guarda.', 'info');
+}
+
+function cancelPhotoEdit(showMessage = true) {
+    editingPhotoId = null;
+    editingPhotoImage = null;
+
+    const form = document.getElementById('photoForm');
+    if (form) {
+        form.reset();
+        const submitBtn = form.querySelector('button[type="submit"]');
+        if (submitBtn) {
+            submitBtn.innerHTML = submitBtn.dataset.defaultText || 'Agregar Foto';
+        }
+    }
+
+    clearPreview('photoPreview');
+    const cancelBtn = document.getElementById('photoCancelEdit');
+    if (cancelBtn) cancelBtn.classList.add('d-none');
+
+    const imageInput = document.getElementById('photoImage');
+    if (imageInput) imageInput.value = '';
+
+    updatePhotoButtonState();
+
+    if (showMessage) {
+        notify('Edición de foto cancelada', 'info');
+    }
 }
 
 async function handlePhotoSubmit(e) {
@@ -348,47 +531,67 @@ async function handlePhotoSubmit(e) {
     isSubmitting = true;
     
     try {
-        // Verificar límite de fotos (máximo 8)
-        const currentPhotos = await api.getPhotos();
-        if (currentPhotos.length >= 8) {
-            notify('❌ Límite alcanzado: Solo se pueden tener 8 fotos. Elimina una para agregar otra.', 'error');
-            isSubmitting = false;
-            return;
+        const isEditing = Boolean(editingPhotoId);
+        let currentPhotos = [];
+        if (!isEditing) {
+            currentPhotos = await api.getPhotos();
+            if (currentPhotos.length >= 10) {
+                notify('❌ Límite alcanzado: Solo se pueden tener 10 fotos. Elimina una para agregar otra.', 'error');
+                isSubmitting = false;
+                return;
+            }
+        } else {
+            currentPhotos = cachedPhotos;
         }
         
         const title = document.getElementById('photoTitle').value.trim();
         const description = document.getElementById('photoDescription').value.trim();
-        const imageFile = document.getElementById('photoImage').files[0];
+        const imageInput = document.getElementById('photoImage');
+        const imageFile = imageInput?.files[0];
         
-        if (!imageFile || imageFile.size === 0) {
-            throw new Error('Debes subir una imagen');
+        let finalImage = editingPhotoImage || '';
+        
+        if (imageFile && imageFile.size > 0) {
+            console.log('🔄 Subiendo imagen a Cloudinary...');
+            const cloudinaryResult = await uploadToCloudinary(imageFile, 'drmalestar/photos');
+            finalImage = cloudinaryResult.url;
+        } else if (!isEditing) {
+            if (!finalImage) {
+                throw new Error('Debes subir una imagen');
+            }
         }
         
         const photoData = {
             title: title || 'Foto sin título',
-            description: description || ''
+            description: description || '',
+            image: finalImage || editingPhotoImage || ''
         };
         
-        console.log('🔄 Subiendo imagen a Cloudinary...');
-        const cloudinaryResult = await uploadToCloudinary(imageFile, 'drmalestar/photos');
-        photoData.image = cloudinaryResult.url;
-        
-        await api.addPhoto(photoData);
-        await loadPhotos();
+        if (isEditing) {
+            await api.updatePhoto(editingPhotoId, photoData);
+            await loadPhotos();
+            notify('✅ Foto actualizada correctamente', 'success');
+            cancelPhotoEdit(false);
+            updatePhotoButtonState();
+        } else {
+            await api.addPhoto(photoData);
+            await loadPhotos();
         e.target.reset();
-        clearPreview('photoPreview');
-        notify(`✅ Foto agregada correctamente (${currentPhotos.length + 1}/8)`, 'success');
-        
-        // Actualizar estado del botón
-        updatePhotoButtonState();
+            clearPreview('photoPreview');
+            notify(`✅ Foto agregada correctamente (${currentPhotos.length + 1}/10)`, 'success');
+            updatePhotoButtonState();
+        }
         
         if (window.opener) {
             window.opener.postMessage('contentUpdated', '*');
         }
-        } catch (error) {
-        console.error('❌ Error agregando foto:', error);
-        notify('Error agregando foto: ' + error.message, 'error');
+    } catch (error) {
+        console.error('❌ Error guardando foto:', error);
+        notify('Error guardando foto: ' + error.message, 'error');
     } finally {
+        if (document.getElementById('photoImage')) {
+            document.getElementById('photoImage').value = '';
+        }
         isSubmitting = false;
     }
 }
@@ -397,16 +600,20 @@ async function handlePhotoSubmit(e) {
 async function updatePhotoButtonState() {
     try {
         const photos = await api.getPhotos();
-        const addButton = photoForm?.querySelector('button[type="submit"]');
-        if (addButton) {
-            if (photos.length >= 8) {
+        const form = document.getElementById('photoForm');
+        const addButton = form?.querySelector('button[type="submit"]');
+        if (addButton && !addButton.dataset.defaultText) {
+            addButton.dataset.defaultText = addButton.innerHTML;
+        }
+        if (addButton && !editingPhotoId) {
+            if (photos.length >= 10) {
                 addButton.disabled = true;
-                addButton.innerHTML = '<i class="bi bi-exclamation-triangle"></i> Límite alcanzado (8/8)';
+                addButton.innerHTML = '<i class="bi bi-exclamation-triangle"></i> Límite alcanzado (10/10)';
                 addButton.className = 'btn btn-warning w-100';
             } else {
                 addButton.disabled = false;
-                addButton.innerHTML = '<i class="bi bi-plus-circle"></i> Agregar Foto';
-                addButton.className = 'btn btn-admin w-100';
+                addButton.innerHTML = addButton.dataset.defaultText;
+                addButton.className = 'btn btn-admin';
             }
         }
     } catch (error) {
@@ -425,7 +632,7 @@ async function deletePhoto(id) {
         if (window.opener) {
             window.opener.postMessage('contentUpdated', '*');
         }
-    } catch (error) {
+        } catch (error) {
         console.error('❌ Error eliminando foto:', error);
         notify('Error eliminando foto', 'error');
     }
@@ -444,8 +651,8 @@ async function loadVideos() {
         // Mostrar contador
         const counter = document.getElementById('videosCounter');
         if (counter) {
-            counter.textContent = `Videos: ${videos.length}/6`;
-            if (videos.length >= 6) {
+            counter.textContent = `Videos: ${videos.length}/8`;
+            if (videos.length >= 8) {
                 counter.className = 'badge bg-warning';
             } else {
                 counter.className = 'badge bg-info';
@@ -459,11 +666,16 @@ async function loadVideos() {
 
 function displayVideos(videos) {
     const container = document.getElementById('videosList');
-    if (videos.length === 0) {
+    cachedVideos = Array.isArray(videos) ? videos.map(v => ({ ...v })) : [];
+    if (!container) {
+        console.error('❌ Contenedor de videos no encontrado');
+        return;
+    }
+    if (cachedVideos.length === 0) {
         container.innerHTML = '<p class="text-muted text-center py-4">No hay videos disponibles</p>';
-            return;
-        }
-        
+        return;
+    }
+    
     // Escapar HTML
     const escapeHtml = (text) => {
         const div = document.createElement('div');
@@ -471,7 +683,7 @@ function displayVideos(videos) {
         return div.innerHTML;
     };
     
-    container.innerHTML = videos.map(video => {
+    container.innerHTML = cachedVideos.map(video => {
         const title = escapeHtml(video.title || 'Sin título');
         const description = escapeHtml(video.description || '');
         const url = escapeHtml(video.url || '');
@@ -490,7 +702,7 @@ function displayVideos(videos) {
                         loading="lazy"
                         style="width: 100%; height: 100%; border: none;">
                     </iframe>
-            </div>
+                </div>
                 ` : `
                 <div class="admin-video-placeholder">
                     <i class="bi bi-youtube" style="font-size: 3rem; color: var(--primary-color);"></i>
@@ -499,10 +711,13 @@ function displayVideos(videos) {
                 <div class="admin-video-content">
                     <h5 class="admin-video-title">${title}</h5>
                     ${description ? `<p class="admin-video-description">${description}</p>` : ''}
-                    <div class="admin-video-actions">
+                    <div class="admin-video-actions d-flex flex-wrap gap-2">
                         <a href="${url}" target="_blank" class="btn btn-secondary btn-sm">
                             <i class="bi bi-youtube"></i> Ver en YouTube
                         </a>
+                        <button class="btn btn-outline-secondary btn-sm" onclick="startVideoEdit('${video.id}')">
+                            <i class="bi bi-pencil-square"></i> Editar
+                        </button>
                         <button class="btn btn-danger-admin btn-sm" onclick="deleteVideo('${video.id}')">
                     <i class="bi bi-trash"></i> Eliminar
                 </button>
@@ -513,18 +728,78 @@ function displayVideos(videos) {
     }).join('');
 }
 
+function startVideoEdit(id) {
+    const video = cachedVideos.find(item => item.id === id);
+    if (!video) {
+        notify('No se encontró la información del video a editar.', 'error');
+        return;
+    }
+
+    editingVideoId = id;
+
+    const form = document.getElementById('videoForm');
+    if (!form) return;
+
+    const titleInput = document.getElementById('videoTitle');
+    const descriptionInput = document.getElementById('videoDescription');
+    const urlInput = document.getElementById('videoUrl');
+    const submitBtn = form.querySelector('button[type="submit"]');
+    const cancelBtn = document.getElementById('videoCancelEdit');
+
+    if (titleInput) titleInput.value = video.title || '';
+    if (descriptionInput) descriptionInput.value = video.description || '';
+    if (urlInput) urlInput.value = video.url || video.videoId || '';
+    if (submitBtn) {
+        if (!submitBtn.dataset.defaultText) {
+            submitBtn.dataset.defaultText = submitBtn.innerHTML;
+        }
+        submitBtn.innerHTML = '<i class="bi bi-save"></i> Guardar cambios';
+    }
+    if (cancelBtn) cancelBtn.classList.remove('d-none');
+
+    form.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    notify('Editando video. Realiza los cambios y guarda.', 'info');
+}
+
+function cancelVideoEdit(showMessage = true) {
+    editingVideoId = null;
+
+    const form = document.getElementById('videoForm');
+    if (form) {
+        form.reset();
+        const submitBtn = form.querySelector('button[type="submit"]');
+        if (submitBtn) {
+            submitBtn.innerHTML = submitBtn.dataset.defaultText || 'Agregar Video';
+        }
+    }
+
+    const cancelBtn = document.getElementById('videoCancelEdit');
+    if (cancelBtn) cancelBtn.classList.add('d-none');
+
+    updateVideoButtonState();
+
+    if (showMessage) {
+        notify('Edición de video cancelada', 'info');
+    }
+}
+
 async function handleVideoSubmit(e) {
-    e.preventDefault();
+            e.preventDefault();
     if (isSubmitting) return;
     isSubmitting = true;
     
     try {
-        // Verificar límite de videos (máximo 6)
-        const currentVideos = await api.getVideos();
-        if (currentVideos.length >= 6) {
-            notify('❌ Límite alcanzado: Solo se pueden tener 6 videos. Elimina uno para agregar otro.', 'error');
-            isSubmitting = false;
-            return;
+        const isEditing = Boolean(editingVideoId);
+        let currentVideos = [];
+        if (!isEditing) {
+            currentVideos = await api.getVideos();
+            if (currentVideos.length >= 8) {
+                notify('❌ Límite alcanzado: Solo se pueden tener 8 videos. Elimina uno para agregar otro.', 'error');
+                isSubmitting = false;
+                return;
+            }
+        } else {
+            currentVideos = cachedVideos;
         }
         
         let url = document.getElementById('videoUrl').value.trim();
@@ -603,17 +878,6 @@ async function handleVideoSubmit(e) {
                 }
             }
             
-            // Extraer de URLs de Shorts/Reels
-            if (cleanUrl.includes('/shorts/')) {
-                const parts = cleanUrl.split('/shorts/');
-                if (parts.length > 1) {
-                    const possibleId = parts[1].split(/[?&#]/)[0].trim();
-                    if (possibleId.length === 11 && /^[a-zA-Z0-9_-]+$/.test(possibleId)) {
-                        return possibleId;
-                    }
-                }
-            }
-            
             // Si la URL contiene solo caracteres que parecen un ID de 11 caracteres
             const directIdMatch = cleanUrl.match(/([a-zA-Z0-9_-]{11})/);
             if (directIdMatch && directIdMatch[1].length === 11) {
@@ -623,54 +887,38 @@ async function handleVideoSubmit(e) {
             return null;
         }
         
-        // Extraer ID del video
         const videoId = extractYouTubeId(url);
-        
-        console.log('🔍 Extracción de ID de YouTube:', {
-            urlOriginal: originalUrl,
-            urlProcesada: url,
-            videoIdExtraido: videoId,
-            longitud: videoId ? videoId.length : 0
-        });
-        
-        if (!videoId || videoId.length !== 11) {
-            console.error('❌ URL de video inválida:', url, 'ID extraído:', videoId);
-            throw new Error(`No se pudo extraer el ID del video de YouTube. 
-            
-URL recibida: ${url}
-ID extraído: ${videoId || 'ninguno'}
-
-Formato esperado:
-- https://www.youtube.com/watch?v=VIDEO_ID
-- https://youtu.be/VIDEO_ID
-- VIDEO_ID (solo el ID de 11 caracteres)
-
-Verifica que la URL sea válida y que el video esté disponible públicamente.`);
+        if (!videoId) {
+            throw new Error('No se pudo extraer el ID del video de YouTube. Verifica la URL.');
         }
-        
-        console.log('✅ Video ID válido extraído:', videoId);
         
         const videoData = {
             title: title || 'Video sin título',
             description: description || '',
-            url: url,
-            videoId: videoId
+            url,
+            videoId
         };
         
-        await api.addVideo(videoData);
-        await loadVideos();
-        e.target.reset();
-        notify(`✅ Video agregado correctamente (${currentVideos.length + 1}/6)`, 'success');
-        
-        // Actualizar estado del botón
-        updateVideoButtonState();
+        if (isEditing) {
+            await api.updateVideo(editingVideoId, videoData);
+            await loadVideos();
+            notify('✅ Video actualizado correctamente', 'success');
+            cancelVideoEdit(false);
+            updateVideoButtonState();
+        } else {
+            await api.addVideo(videoData);
+            await loadVideos();
+            e.target.reset();
+            notify(`✅ Video agregado correctamente (${currentVideos.length + 1}/8)`, 'success');
+            updateVideoButtonState();
+        }
         
         if (window.opener) {
             window.opener.postMessage('contentUpdated', '*');
         }
     } catch (error) {
-        console.error('❌ Error agregando video:', error);
-        notify('Error agregando video: ' + error.message, 'error');
+        console.error('❌ Error guardando video:', error);
+        notify('Error guardando video: ' + error.message, 'error');
     } finally {
         isSubmitting = false;
     }
@@ -680,16 +928,20 @@ Verifica que la URL sea válida y que el video esté disponible públicamente.`)
 async function updateVideoButtonState() {
     try {
         const videos = await api.getVideos();
-        const addButton = videoForm?.querySelector('button[type="submit"]');
-        if (addButton) {
-            if (videos.length >= 6) {
+        const form = document.getElementById('videoForm');
+        const addButton = form?.querySelector('button[type="submit"]');
+        if (addButton && !addButton.dataset.defaultText) {
+            addButton.dataset.defaultText = addButton.innerHTML;
+        }
+        if (addButton && !editingVideoId) {
+            if (videos.length >= 8) {
                 addButton.disabled = true;
-                addButton.innerHTML = '<i class="bi bi-exclamation-triangle"></i> Límite alcanzado (6/6)';
+                addButton.innerHTML = '<i class="bi bi-exclamation-triangle"></i> Límite alcanzado (8/8)';
                 addButton.className = 'btn btn-warning w-100';
             } else {
                 addButton.disabled = false;
-                addButton.innerHTML = '<i class="bi bi-plus-circle"></i> Agregar Video';
-                addButton.className = 'btn btn-admin w-100';
+                addButton.innerHTML = addButton.dataset.defaultText;
+                addButton.className = 'btn btn-admin';
             }
         }
     } catch (error) {
@@ -752,7 +1004,7 @@ async function uploadToCloudinary(file, folder = 'drmalestar') {
             console.log('✅ Imagen subida exitosamente:', result.secure_url);
             return { url: result.secure_url, publicId: result.public_id };
             
-        } catch (error) {
+    } catch (error) {
             console.error(`❌ Error con preset ${preset}:`, error);
             lastError = error.message;
             continue;
@@ -816,9 +1068,14 @@ function notify(message, type = 'info') {
 window.deleteFlyer = deleteFlyer;
 window.deletePhoto = deletePhoto;
 window.deleteVideo = deleteVideo;
+window.startFlyerEdit = startFlyerEdit;
+window.cancelFlyerEdit = cancelFlyerEdit;
+window.startPhotoEdit = startPhotoEdit;
+window.cancelPhotoEdit = cancelPhotoEdit;
+window.startVideoEdit = startVideoEdit;
+window.cancelVideoEdit = cancelVideoEdit;
 window.handleImageChange = function(input, previewId) {
-    const file = input.files[0];
-    if (!file) {
+    if (!input || !input.files || input.files.length === 0) {
         clearPreview(previewId);
         return;
     }

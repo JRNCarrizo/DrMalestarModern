@@ -141,3 +141,4 @@ El sistema está diseñado específicamente para funcionar en Netlify:
 
 **Solo asegúrate de tener las API keys correctas en `config.js` antes de desplegar.**
 
+

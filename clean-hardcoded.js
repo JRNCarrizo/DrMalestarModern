@@ -81,3 +81,4 @@ console.log('💡 Usa cleanHardcodedData() para limpiar datos hardcodeados');
 console.log('💡 Usa checkLocalStorage() para verificar localStorage');
 console.log('💡 Usa resetSimpleStorage() para resetear SimpleStorage');
 
+

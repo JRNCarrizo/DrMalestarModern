@@ -105,3 +105,4 @@ window.handleImageChange = function(input, previewId) {
 
 console.log('✅ Image Handler listo');
 
+

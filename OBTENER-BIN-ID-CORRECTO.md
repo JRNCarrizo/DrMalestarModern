@@ -32,3 +32,4 @@ api.getData().then(d => {
 
 Si prefieres, puedo hacer que el código detecte automáticamente y use el bin con contenido, sin necesidad de actualizar manualmente el config.js cada vez. ¿Quieres que implemente esa solución?
 
+
