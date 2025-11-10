@@ -339,8 +339,26 @@
                 });
             });
             
-            // Botón de admin
             const adminToggle = document.getElementById('admin-toggle');
+            const heroSection = document.getElementById('hero');
+            const logoLinkSmall = document.getElementById('logoLinkSmall');
+            const logoLinkLarge = document.getElementById('logoLinkLarge');
+
+            function scrollToHero(event) {
+                event.preventDefault();
+                if (heroSection) {
+                    heroSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                } else {
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                }
+            }
+
+            if (logoLinkSmall) {
+                logoLinkSmall.addEventListener('click', scrollToHero);
+            }
+            if (logoLinkLarge) {
+                logoLinkLarge.addEventListener('click', scrollToHero);
+            }
             if (adminToggle) {
                 console.log('✅ Botón admin encontrado');
                 adminToggle.addEventListener('click', function(e) {
