@@ -22,7 +22,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
     
     <!-- Custom CSS -->
-    <link href="css/style.css?v=20250704" rel="stylesheet">
+    <link href="css/style.css?v=20250706" rel="stylesheet">
     
     <!-- Meta Tags para SEO -->
     <meta property="og:title" content="Dr.Malestar - Tributo a Pappo" />
@@ -77,21 +77,36 @@
                                     <i class="bi bi-calendar-event"></i> Shows
                                 </a>
                             </li>
-                            <li class="nav-item d-none d-lg-flex px-2">
+                            <li class="nav-item px-2 px-xl-3">
+                                <a class="nav-link nav-button nav-button--amp" href="#biografia">
+                                    <i class="bi bi-people"></i> Nosotros
+                                </a>
+                            </li>
+                            <li class="nav-item amp-navbar-logo-item d-none d-lg-flex px-2">
                                 <a class="navbar-brand amp-navbar-plate" href="#" id="logoLinkLarge">
                                     <span class="amp-navbar-plate-tag">Dr.Malestar</span>
                                     <img class="logo-main logo-navbar" src="img/logoNuevo-malestar.png" alt="Dr.Malestar Logo">
                                     <span class="amp-navbar-plate-sub">TRIBUTE · PAPPO</span>
                                 </a>
                             </li>
-                            <li class="nav-item px-2 px-xl-3">
-                                <a class="nav-link nav-button nav-button--amp" href="#biografia">
-                                    <i class="bi bi-people"></i> Nosotros
+                            <li class="nav-item amp-navbar-logo-item d-lg-none px-2">
+                                <a class="navbar-brand amp-navbar-plate amp-navbar-plate--mobile-nav" href="#" id="logoLinkMobile">
+                                    <img class="logo-main logo-navbar" src="img/logoNuevo-malestar.png" alt="Dr.Malestar Logo">
                                 </a>
                             </li>
                             <li class="nav-item px-2 px-xl-3">
                                 <a class="nav-link nav-button nav-button--amp" href="#contacto">
                                     <i class="bi bi-envelope"></i> Contacto
+                                </a>
+                            </li>
+                            <li class="nav-item px-2 px-xl-3">
+                                <a class="nav-link nav-button nav-button--amp" href="#rider">
+                                    <i class="bi bi-file-earmark-music"></i> Rider
+                                </a>
+                            </li>
+                            <li class="nav-item px-2 px-xl-3">
+                                <a class="nav-link nav-button nav-button--amp" href="#redes">
+                                    <i class="bi bi-share"></i> Redes
                                 </a>
                             </li>
                         </ul>
@@ -464,7 +479,7 @@
                 <div class="footer-logo">
                     <img src="img/logoNuevo-malestar.png" alt="Dr.Malestar" class="logo-footer">
                 </div>
-                <div class="footer-social">
+                <div id="redes" class="footer-social">
                     <a href="https://www.facebook.com/groups/846830548811844/?ref=share&mibextid=NSMWBT" target="_blank" class="social-link" title="Facebook - Dr.Malestar"><i class="bi bi-facebook"></i></a>
                     <a href="https://www.instagram.com/dr.malestar?igsh=Mmw2ZXluZzl2dzFq" target="_blank" class="social-link" title="Instagram - @dr.malestar"><i class="bi bi-instagram"></i></a>
                     <a href="https://youtube.com/@dr.malestar478?si=TfpVCdFJqLfBa18q" target="_blank" class="social-link" title="YouTube - Dr.Malestar"><i class="bi bi-youtube"></i></a>
@@ -572,9 +587,17 @@
             const heroSection = document.getElementById('hero');
             const logoLinkSmall = document.getElementById('logoLinkSmall');
             const logoLinkLarge = document.getElementById('logoLinkLarge');
+            const logoLinkMobile = document.getElementById('logoLinkMobile');
 
             function scrollToHero(event) {
                 event.preventDefault();
+                const navbarCollapse = document.getElementById('navbarNav');
+                if (navbarCollapse && navbarCollapse.classList.contains('show')) {
+                    const bsCollapse = bootstrap.Collapse.getInstance(navbarCollapse);
+                    if (bsCollapse) {
+                        bsCollapse.hide();
+                    }
+                }
                 if (heroSection) {
                     heroSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
                 } else {
@@ -587,6 +610,9 @@
             }
             if (logoLinkLarge) {
                 logoLinkLarge.addEventListener('click', scrollToHero);
+            }
+            if (logoLinkMobile) {
+                logoLinkMobile.addEventListener('click', scrollToHero);
             }
             if (adminToggle) {
                 console.log('✅ Botón admin encontrado');
