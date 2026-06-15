@@ -596,25 +596,95 @@
                 });
             });
             
-            // LEDs del navbar — una por botón, se encienden al hover/focus
+            // LEDs del navbar — scroll spy + hover/focus
             (function initNavbarNavLeds() {
                 const desktopGrille = document.querySelector('.amp-navbar-grille.d-none.d-lg-flex');
                 const navButtons = document.querySelectorAll('.amp-navbar-nav .nav-button--amp[data-nav-led]');
                 if (!navButtons.length) return;
 
-                function setLed(index, on) {
-                    document.querySelectorAll('.amp-navbar-grille [data-nav-led="' + index + '"]').forEach(function(led) {
-                        led.classList.toggle('amp-led--on', on);
+                let scrollLed = null;
+                let hoverLed = null;
+
+                function renderLeds() {
+                    const active = hoverLed !== null ? hoverLed : scrollLed;
+                    document.querySelectorAll('.amp-navbar-grille [data-nav-led]').forEach(function(led) {
+                        led.classList.toggle('amp-led--on', active !== null && led.dataset.navLed === active);
                     });
+                }
+
+                function setScrollLed(led) {
+                    const next = led == null ? null : String(led);
+                    if (scrollLed === next) return;
+                    scrollLed = next;
+                    renderLeds();
+                }
+
+                function setHover(led, on) {
+                    hoverLed = on ? String(led) : null;
+                    renderLeds();
                 }
 
                 navButtons.forEach(function(btn) {
                     const idx = btn.dataset.navLed;
-                    btn.addEventListener('mouseenter', function() { setLed(idx, true); });
-                    btn.addEventListener('mouseleave', function() { setLed(idx, false); });
-                    btn.addEventListener('focus', function() { setLed(idx, true); });
-                    btn.addEventListener('blur', function() { setLed(idx, false); });
+                    btn.addEventListener('mouseenter', function() { setHover(idx, true); });
+                    btn.addEventListener('mouseleave', function() { setHover(idx, false); });
+                    btn.addEventListener('focus', function() { setHover(idx, true); });
+                    btn.addEventListener('blur', function() { setHover(idx, false); });
                 });
+
+                const spyEntries = [];
+                navButtons.forEach(function(btn) {
+                    const href = btn.getAttribute('href');
+                    if (!href || href.charAt(0) !== '#') return;
+                    const el = document.querySelector(href);
+                    if (!el) return;
+                    spyEntries.push({ el: el, led: btn.dataset.navLed });
+                });
+
+                function sectionTop(el) {
+                    return el.getBoundingClientRect().top + window.scrollY;
+                }
+
+                function sortSpyEntries() {
+                    spyEntries.sort(function(a, b) {
+                        return sectionTop(a.el) - sectionTop(b.el);
+                    });
+                }
+
+                function getScrollLine() {
+                    const nav = document.querySelector('.amp-navbar');
+                    return window.scrollY + (nav ? nav.offsetHeight : 88) + 12;
+                }
+
+                function updateScrollSpy() {
+                    if (!spyEntries.length) return;
+                    sortSpyEntries();
+                    const line = getScrollLine();
+                    let active = null;
+
+                    for (let i = spyEntries.length - 1; i >= 0; i--) {
+                        if (sectionTop(spyEntries[i].el) <= line) {
+                            active = spyEntries[i].led;
+                            break;
+                        }
+                    }
+
+                    setScrollLed(active);
+                }
+
+                if (spyEntries.length) {
+                    let scrollPending = false;
+                    window.addEventListener('scroll', function() {
+                        if (scrollPending) return;
+                        scrollPending = true;
+                        requestAnimationFrame(function() {
+                            updateScrollSpy();
+                            scrollPending = false;
+                        });
+                    }, { passive: true });
+                    window.addEventListener('resize', updateScrollSpy);
+                    updateScrollSpy();
+                }
 
                 function syncNavbarLedPositions() {
                     if (!desktopGrille || window.innerWidth < 992) return;
