@@ -22,7 +22,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
     
     <!-- Custom CSS -->
-    <link href="css/style.css?v=20250737" rel="stylesheet">
+    <link href="css/style.css?v=20250740" rel="stylesheet">
     
     <!-- Meta Tags para SEO -->
     <meta property="og:title" content="Dr.Malestar - Tributo a Pappo" />
@@ -46,10 +46,27 @@
                 <span class="amp-navbar-power-label">POWER</span>
             </div>
             <div class="container-fluid amp-navbar-main">
-                <a class="navbar-brand d-lg-none amp-navbar-brand-mobile" href="#" id="logoLinkSmall">
+                <a class="navbar-brand d-lg-none amp-navbar-brand-mobile amp-navbar-logo-grille" href="#" id="logoLinkSmall">
+                    <span class="amp-navbar-logo-grille-mesh" aria-hidden="true"></span>
                     <img src="img/logoNuevo-malestar.png" alt="Dr.Malestar Logo" class="logo-navbar">
                 </a>
-                <button class="navbar-toggler amp-navbar-toggler ms-auto" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <div class="amp-navbar-mobile-knobs d-lg-none" aria-hidden="true">
+                    <div class="amp-knob-group amp-navbar-knobs">
+                        <div class="amp-knob amp-knob--xs">
+                            <span class="amp-knob-cap"><span class="amp-knob-notch"></span></span>
+                            <span class="amp-knob-name">VOL</span>
+                        </div>
+                        <div class="amp-knob amp-knob--xs">
+                            <span class="amp-knob-cap amp-knob-cap--mid"><span class="amp-knob-notch"></span></span>
+                            <span class="amp-knob-name">GAIN</span>
+                        </div>
+                        <div class="amp-knob amp-knob--xs">
+                            <span class="amp-knob-cap amp-knob-cap--low"><span class="amp-knob-notch"></span></span>
+                            <span class="amp-knob-name">BASS</span>
+                        </div>
+                    </div>
+                </div>
+                <button class="navbar-toggler amp-navbar-toggler d-lg-none" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
 
@@ -118,6 +135,15 @@
                         </div>
                     </div>
                 </div>
+            </div>
+
+            <div class="amp-grille amp-navbar-grille amp-navbar-grille--mobile d-lg-none" aria-hidden="true">
+                <span class="amp-led" data-nav-led="0"></span>
+                <span class="amp-led" data-nav-led="1"></span>
+                <span class="amp-led" data-nav-led="2"></span>
+                <span class="amp-led" data-nav-led="3"></span>
+                <span class="amp-led" data-nav-led="4"></span>
+                <span class="amp-led" data-nav-led="5"></span>
             </div>
 
             <div class="amp-grille amp-navbar-grille d-none d-lg-flex" aria-hidden="true">
@@ -572,22 +598,14 @@
             
             // LEDs del navbar — una por botón, se encienden al hover/focus
             (function initNavbarNavLeds() {
-                const grille = document.querySelector('.amp-navbar-grille');
-                if (!grille) return;
-
-                const leds = grille.querySelectorAll('[data-nav-led]');
-                const ledByIndex = new Map();
-                leds.forEach(function(led) {
-                    ledByIndex.set(led.dataset.navLed, led);
-                });
-
+                const desktopGrille = document.querySelector('.amp-navbar-grille.d-none.d-lg-flex');
                 const navButtons = document.querySelectorAll('.amp-navbar-nav .nav-button--amp[data-nav-led]');
+                if (!navButtons.length) return;
 
                 function setLed(index, on) {
-                    const led = ledByIndex.get(index);
-                    if (led) {
+                    document.querySelectorAll('.amp-navbar-grille [data-nav-led="' + index + '"]').forEach(function(led) {
                         led.classList.toggle('amp-led--on', on);
-                    }
+                    });
                 }
 
                 navButtons.forEach(function(btn) {
@@ -599,17 +617,17 @@
                 });
 
                 function syncNavbarLedPositions() {
-                    if (window.innerWidth < 992) return;
+                    if (!desktopGrille || window.innerWidth < 992) return;
 
-                    const grilleRect = grille.getBoundingClientRect();
+                    const grilleRect = desktopGrille.getBoundingClientRect();
                     navButtons.forEach(function(btn) {
-                        const led = ledByIndex.get(btn.dataset.navLed);
+                        const led = desktopGrille.querySelector('[data-nav-led="' + btn.dataset.navLed + '"]');
                         if (!led) return;
                         const btnRect = btn.getBoundingClientRect();
                         const centerX = btnRect.left + btnRect.width / 2 - grilleRect.left;
                         led.style.left = centerX + 'px';
                     });
-                    grille.classList.add('amp-navbar-grille--synced');
+                    desktopGrille.classList.add('amp-navbar-grille--synced');
                 }
 
                 syncNavbarLedPositions();
