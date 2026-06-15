@@ -29,6 +29,7 @@
     --gradient-dark: linear-gradient(135deg, var(--dark-bg), var(--darker-bg));
     --navbar-height: 118px;
     --admin-btn-gap: 44px;
+    --admin-btn-inset-right: 28px;
     --gallery-media-max-h: min(520px, calc(100vh - var(--navbar-height) - 17rem));
     --flyer-image-max-h: min(650px, calc(100vh - var(--navbar-height) - 12rem));
     --photo-card-max-h: var(--gallery-media-max-h);
@@ -46,6 +47,25 @@
 html {
     scroll-behavior: smooth;
     overflow-x: clip;
+    scrollbar-width: thin;
+    scrollbar-color: #3a3a42 transparent;
+}
+
+html::-webkit-scrollbar {
+    width: 6px;
+}
+
+html::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+html::-webkit-scrollbar-thumb {
+    background: #3a3a42;
+    border-radius: 999px;
+}
+
+html::-webkit-scrollbar-thumb:hover {
+    background: #4a4a52;
 }
 
 body {
@@ -616,10 +636,23 @@ body {
 }
 
 @media (min-width: 992px) {
+    .amp-navbar-main {
+        justify-content: center;
+    }
+
+    .amp-navbar-main .navbar-collapse {
+        flex: 1 1 100%;
+        width: 100%;
+        display: flex;
+        justify-content: center;
+    }
+
     .amp-navbar-strip {
         min-height: 72px;
         padding-left: 0;
         padding-right: 0;
+        width: 100%;
+        justify-content: center;
     }
 
     .amp-navbar-knobs {
@@ -642,18 +675,21 @@ body {
     .amp-navbar-nav {
         justify-content: center;
         width: auto;
-        max-width: calc(100% - 7rem);
-    }
-
-    .amp-navbar-main .navbar-collapse {
-        width: 100%;
-        justify-content: center;
+        max-width: 100%;
+        margin-left: 0 !important;
+        margin-right: 0 !important;
     }
 }
 
 @media (min-width: 992px) and (max-width: 1400px) {
     :root {
         --admin-btn-gap: 52px;
+        --admin-btn-inset-right: 36px;
+    }
+
+    .amp-navbar-nav .nav-item {
+        padding-left: 0.35rem !important;
+        padding-right: 0.35rem !important;
     }
 }
 
@@ -3104,7 +3140,7 @@ a.contact-card:hover {
 .console-command-btn {
     position: fixed;
     top: calc(var(--navbar-height) + var(--admin-btn-gap) + env(safe-area-inset-top, 0px));
-    right: max(10px, env(safe-area-inset-right, 0px));
+    right: max(var(--admin-btn-inset-right), env(safe-area-inset-right, 0px));
     transform: none;
     z-index: 1040;
     width: 72px;
@@ -5333,7 +5369,7 @@ a.contact-card:hover {
 
     .console-command-btn {
         width: 52px;
-        right: max(8px, env(safe-area-inset-right, 0px));
+        --admin-btn-inset-right: 24px;
     }
 
     .audio-controls {
