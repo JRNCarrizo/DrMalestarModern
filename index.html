@@ -482,18 +482,18 @@
     </section>
 
     <!-- Footer -->
-    <footer class="footer">
+    <footer id="redes" class="footer">
         <div class="footer-hazard-strip" aria-hidden="true"></div>
         <div class="container">
             <div class="footer-warnings" aria-hidden="true">
-                <div class="elec-sign elec-sign--triangle">
-                    <span class="elec-sign-bolt"><i class="bi bi-lightning-charge-fill"></i></span>
-                    <span class="elec-sign-line">DANGER</span>
-                </div>
                 <div class="elec-sign elec-sign--plate">
                     <span class="elec-sign-plate-top">HIGH VOLTAGE</span>
                     <span class="elec-sign-plate-icon"><i class="bi bi-lightning-charge-fill"></i></span>
                     <span class="elec-sign-plate-sub">KEEP OUT</span>
+                </div>
+                <div class="elec-sign elec-sign--triangle">
+                    <span class="elec-sign-bolt"><i class="bi bi-lightning-charge-fill"></i></span>
+                    <span class="elec-sign-line">DANGER</span>
                 </div>
                 <div class="elec-sign elec-sign--plate elec-sign--danger">
                     <span class="elec-sign-plate-top">CAUTION</span>
@@ -505,7 +505,7 @@
                 <div class="footer-logo">
                     <img src="img/logoNuevo-malestar.png" alt="Dr.Malestar" class="logo-footer">
                 </div>
-                <div id="redes" class="footer-social">
+                <div class="footer-social">
                     <a href="https://www.facebook.com/groups/846830548811844/?ref=share&mibextid=NSMWBT" target="_blank" class="social-link social-link--facebook" title="Facebook - Dr.Malestar"><i class="bi bi-facebook"></i></a>
                     <a href="https://www.instagram.com/dr.malestar?igsh=Mmw2ZXluZzl2dzFq" target="_blank" class="social-link social-link--instagram" title="Instagram - @dr.malestar"><i class="bi bi-instagram"></i></a>
                     <a href="https://youtube.com/@dr.malestar478?si=TfpVCdFJqLfBa18q" target="_blank" class="social-link social-link--youtube" title="YouTube - Dr.Malestar"><i class="bi bi-youtube"></i></a>
@@ -653,25 +653,33 @@
                     });
                 }
 
-                function getScrollLine() {
-                    const nav = document.querySelector('.amp-navbar');
-                    return window.scrollY + (nav ? nav.offsetHeight : 88) + 12;
-                }
-
                 function updateScrollSpy() {
                     if (!spyEntries.length) return;
                     sortSpyEntries();
-                    const line = getScrollLine();
                     let active = null;
 
+                    const redesEntry = spyEntries.find(function(entry) {
+                        return entry.el.id === 'redes';
+                    });
+                    const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+                    if (redesEntry && window.scrollY >= maxScroll - 40) {
+                        setScrollLed(redesEntry.led);
+                        return;
+                    }
+
                     for (let i = spyEntries.length - 1; i >= 0; i--) {
-                        if (sectionTop(spyEntries[i].el) <= line) {
+                        if (spyEntries[i].el.getBoundingClientRect().top <= getNavbarOffset()) {
                             active = spyEntries[i].led;
                             break;
                         }
                     }
 
                     setScrollLed(active);
+                }
+
+                function getNavbarOffset() {
+                    const nav = document.querySelector('.amp-navbar');
+                    return (nav ? nav.offsetHeight : 88) + 12;
                 }
 
                 if (spyEntries.length) {
