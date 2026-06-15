@@ -22,7 +22,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
     
     <!-- Custom CSS -->
-    <link href="css/style.css?v=20250716" rel="stylesheet">
+    <link href="css/style.css?v=20250726" rel="stylesheet">
     
     <!-- Meta Tags para SEO -->
     <meta property="og:title" content="Dr.Malestar - Tributo a Pappo" />
@@ -669,17 +669,24 @@
                 logoLinkMobile.addEventListener('click', scrollToHero);
             }
 
-            // Contorno del logo del hero — se enciende al hover/focus del logo del navbar
+            // Logo y título del hero — se encienden al hover/focus del logo del navbar
             (function initNavbarHeroLogoGlow() {
                 const heroLogo = document.querySelector('.hero-stage-glow');
+                const heroTitle = document.querySelector('.hero-title');
                 const logoLinks = [logoLinkSmall, logoLinkLarge, logoLinkMobile].filter(Boolean);
-                if (!heroLogo || !logoLinks.length) return;
+                if (!logoLinks.length) return;
 
                 let hoverCount = 0;
 
                 function setHeroGlow(on) {
                     hoverCount = Math.max(0, hoverCount + (on ? 1 : -1));
-                    heroLogo.classList.toggle('hero-stage-glow--active', hoverCount > 0);
+                    const active = hoverCount > 0;
+                    if (heroLogo) {
+                        heroLogo.classList.toggle('hero-stage-glow--active', active);
+                    }
+                    if (heroTitle) {
+                        heroTitle.classList.toggle('hero-title--amp-lit', active);
+                    }
                 }
 
                 logoLinks.forEach(function(link) {

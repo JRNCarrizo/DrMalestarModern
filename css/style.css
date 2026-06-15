@@ -447,6 +447,10 @@ body {
 }
 
 .amp-navbar-grille .amp-led--on {
+    background: var(--led-red);
+    box-shadow:
+        0 0 8px var(--glow-red),
+        inset 0 0 4px rgba(254, 202, 202, 0.35);
     animation: commandLedPulse 2.5s ease-in-out infinite;
 }
 
@@ -952,9 +956,36 @@ body {
     font-family: 'Orbitron', sans-serif;
     font-size: 2.6rem;
     font-weight: 900;
-    color: var(--led-red);
     margin: 0 0 0.25rem 0;
-    text-shadow: 0 0 24px var(--glow-red-soft), 0 2px 8px rgba(0, 0, 0, 0.45);
+    letter-spacing: 0.06em;
+    color: #ddd6cb;
+    text-shadow:
+        0 1px 0 rgba(255, 255, 255, 0.2),
+        0 0 20px rgba(180, 168, 152, 0.35),
+        0 2px 10px rgba(0, 0, 0, 0.55);
+    transition: color 0.35s ease, text-shadow 0.35s ease;
+}
+
+.hero-title.hero-title--amp-lit {
+    color: #ff2b2b;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.55);
+    animation: heroTitleLedPulse 2.5s ease-in-out infinite;
+}
+
+@keyframes heroTitleLedPulse {
+    0%, 100% {
+        color: #ef4444;
+    }
+    50% {
+        color: #ff5555;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .hero-title.hero-title--amp-lit {
+        animation: none;
+        color: #ff2b2b;
+    }
 }
 
 .hero-subtitle {
@@ -5244,7 +5275,7 @@ a.contact-card:hover {
 
     .hero-title {
         font-size: 2rem;
-        margin: 0 0 0.3rem 0; /* Mínimo margen en móviles */
+        margin: 0 0 0.3rem 0;
     }
     
     .hero-subtitle {
