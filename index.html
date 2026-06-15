@@ -46,7 +46,7 @@
                 <span class="amp-navbar-power-label">POWER</span>
             </div>
             <div class="container-fluid amp-navbar-main">
-                <a class="navbar-brand d-lg-none amp-navbar-brand-mobile amp-navbar-logo-grille" href="#" id="logoLinkSmall">
+                <a class="navbar-brand d-lg-none amp-navbar-brand-mobile amp-navbar-logo-grille" href="#hero" id="logoLinkSmall">
                     <span class="amp-navbar-logo-grille-mesh" aria-hidden="true"></span>
                     <img src="img/logoNuevo-malestar.png" alt="Dr.Malestar Logo" class="logo-navbar">
                 </a>
@@ -100,7 +100,7 @@
                                 </a>
                             </li>
                             <li class="nav-item amp-navbar-logo-item d-none d-lg-flex px-2">
-                                <a class="navbar-brand amp-navbar-plate" href="#" id="logoLinkLarge">
+                                <a class="navbar-brand amp-navbar-plate" href="#hero" id="logoLinkLarge">
                                     <span class="amp-navbar-plate-tag">Dr.Malestar</span>
                                     <img class="logo-main logo-navbar" src="img/logoNuevo-malestar.png" alt="Dr.Malestar Logo">
                                     <span class="amp-navbar-plate-sub">TRIBUTE · PAPPO</span>
@@ -585,8 +585,10 @@
             // Smooth scroll para enlaces internos
             document.querySelectorAll('a[href^="#"]').forEach(anchor => {
                 anchor.addEventListener('click', function (e) {
+                    const href = this.getAttribute('href');
+                    if (!href || href === '#') return;
                     e.preventDefault();
-                    const target = document.querySelector(this.getAttribute('href'));
+                    const target = document.querySelector(href);
                     if (target) {
                         target.scrollIntoView({
                             behavior: 'smooth',
