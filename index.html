@@ -22,7 +22,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
     
     <!-- Custom CSS -->
-    <link href="css/style.css?v=20250740" rel="stylesheet">
+    <link href="css/style.css?v=20250742" rel="stylesheet">
     
     <!-- Meta Tags para SEO -->
     <meta property="og:title" content="Dr.Malestar - Tributo a Pappo" />
@@ -50,7 +50,7 @@
                     <span class="amp-navbar-logo-grille-mesh" aria-hidden="true"></span>
                     <img src="img/logoNuevo-malestar.png" alt="Dr.Malestar Logo" class="logo-navbar">
                 </a>
-                <div class="amp-navbar-mobile-knobs d-lg-none" aria-hidden="true">
+                <div class="amp-navbar-mobile-knobs d-lg-none">
                     <div class="amp-knob-group amp-navbar-knobs">
                         <div class="amp-knob amp-knob--xs">
                             <span class="amp-knob-cap"><span class="amp-knob-notch"></span></span>
@@ -72,7 +72,7 @@
 
                 <div class="collapse navbar-collapse w-100" id="navbarNav">
                     <div class="amp-navbar-strip">
-                        <div class="amp-knob-group amp-navbar-knobs d-none d-lg-flex" aria-hidden="true">
+                        <div class="amp-knob-group amp-navbar-knobs d-none d-lg-flex">
                             <div class="amp-knob amp-knob--sm">
                                 <span class="amp-knob-cap"><span class="amp-knob-notch"></span></span>
                                 <span class="amp-knob-name">VOL</span>
@@ -123,7 +123,7 @@
                             </li>
                         </ul>
 
-                        <div class="amp-knob-group amp-navbar-knobs d-none d-lg-flex" aria-hidden="true">
+                        <div class="amp-knob-group amp-navbar-knobs d-none d-lg-flex">
                             <div class="amp-knob amp-knob--sm">
                                 <span class="amp-knob-cap amp-knob-cap--low"><span class="amp-knob-notch"></span></span>
                                 <span class="amp-knob-name">BASS</span>
@@ -189,7 +189,7 @@
             <div class="amp-head-header" aria-labelledby="cartelera-title">
                 <div class="amp-head-panel">
                     <div class="amp-head-controls">
-                        <div class="amp-knob-group" aria-hidden="true">
+                        <div class="amp-knob-group">
                             <div class="amp-knob">
                                 <span class="amp-knob-cap"><span class="amp-knob-notch"></span></span>
                                 <span class="amp-knob-name">VOL</span>
@@ -204,7 +204,7 @@
                             <h2 id="cartelera-title" class="amp-section-title">Próximas Fechas</h2>
                             <span class="amp-model">SHOWS · LIVE</span>
                         </div>
-                        <div class="amp-knob-group" aria-hidden="true">
+                        <div class="amp-knob-group">
                             <div class="amp-knob">
                                 <span class="amp-knob-cap amp-knob-cap--low"><span class="amp-knob-notch"></span></span>
                                 <span class="amp-knob-name">BASS</span>
@@ -215,10 +215,10 @@
                             </div>
                         </div>
                     </div>
-                    <div class="amp-grille" aria-hidden="true">
-                        <span class="amp-led"></span>
-                        <span class="amp-led amp-led--on"></span>
-                        <span class="amp-led"></span>
+                    <div class="amp-grille section-panel-grille">
+                        <span class="amp-led panel-toggle" role="button" tabindex="0" aria-pressed="false" aria-label="LED 1"></span>
+                        <span class="amp-led amp-led--on panel-toggle" role="button" tabindex="0" aria-pressed="true" aria-label="LED 2"></span>
+                        <span class="amp-led panel-toggle" role="button" tabindex="0" aria-pressed="false" aria-label="LED 3"></span>
                     </div>
                 </div>
             </div>
@@ -252,31 +252,31 @@
                                 <span class="vu-seg"></span>
                             </div>
                         </div>
-                        <div class="console-bank-controls" aria-hidden="true">
+                        <div class="console-bank-controls">
                             <div class="console-bank-group">
-                                <div class="console-bank-btn console-bank-btn--lit console-bank-btn--hot">
+                                <div class="console-bank-btn console-bank-btn--lit console-bank-btn--hot panel-toggle" role="button" tabindex="0" aria-pressed="true" aria-label="REC">
                                     <span class="console-bank-led"></span>
                                     <span class="console-bank-key">REC</span>
                                 </div>
-                                <div class="console-bank-btn">
+                                <div class="console-bank-btn panel-toggle" role="button" tabindex="0" aria-pressed="false" aria-label="VIEW">
                                     <span class="console-bank-led"></span>
                                     <span class="console-bank-key">VIEW</span>
                                 </div>
-                                <div class="console-bank-btn">
+                                <div class="console-bank-btn panel-toggle" role="button" tabindex="0" aria-pressed="false" aria-label="CH1">
                                     <span class="console-bank-led"></span>
                                     <span class="console-bank-key">CH1</span>
                                 </div>
                             </div>
                             <div class="console-bank-group">
-                                <div class="console-bank-btn">
+                                <div class="console-bank-btn panel-toggle" role="button" tabindex="0" aria-pressed="false" aria-label="CH2">
                                     <span class="console-bank-led"></span>
                                     <span class="console-bank-key">CH2</span>
                                 </div>
-                                <div class="console-bank-btn console-bank-btn--lit">
+                                <div class="console-bank-btn console-bank-btn--lit panel-toggle" role="button" tabindex="0" aria-pressed="true" aria-label="LIVE">
                                     <span class="console-bank-led"></span>
                                     <span class="console-bank-key">LIVE</span>
                                 </div>
-                                <div class="console-bank-btn">
+                                <div class="console-bank-btn panel-toggle" role="button" tabindex="0" aria-pressed="false" aria-label="SOLO">
                                     <span class="console-bank-led"></span>
                                     <span class="console-bank-key">SOLO</span>
                                 </div>
@@ -302,21 +302,21 @@
             <div class="broadcast-monitor-header" aria-labelledby="videos-title">
                 <div class="broadcast-monitor-panel">
                     <div class="broadcast-monitor-top">
-                        <div class="broadcast-status" aria-hidden="true">
-                            <span class="broadcast-on-air">
+                        <div class="broadcast-status">
+                            <span class="broadcast-on-air panel-toggle broadcast-status-btn--on" role="button" tabindex="0" aria-pressed="true" aria-label="ON AIR">
                                 <span class="on-air-led"></span>
                                 ON AIR
                             </span>
-                            <span class="broadcast-rec">
+                            <span class="broadcast-rec panel-toggle" role="button" tabindex="0" aria-pressed="false" aria-label="REC">
                                 <span class="rec-led"></span>
                                 REC
                             </span>
                         </div>
                         <span class="broadcast-timecode" aria-hidden="true">00:12:34:08</span>
-                        <div class="broadcast-signals" aria-hidden="true">
-                            <span class="signal-pill signal-pill--on">HD</span>
-                            <span class="signal-pill signal-pill--on">SYNC</span>
-                            <span class="signal-pill">PLAY</span>
+                        <div class="broadcast-signals">
+                            <span class="signal-pill signal-pill--on panel-toggle" role="button" tabindex="0" aria-pressed="true" aria-label="HD">HD</span>
+                            <span class="signal-pill signal-pill--on panel-toggle" role="button" tabindex="0" aria-pressed="true" aria-label="SYNC">SYNC</span>
+                            <span class="signal-pill panel-toggle" role="button" tabindex="0" aria-pressed="false" aria-label="PLAY">PLAY</span>
                         </div>
                     </div>
                     <div class="broadcast-screen">
@@ -326,10 +326,10 @@
                             <div class="broadcast-scanlines" aria-hidden="true"></div>
                         </div>
                     </div>
-                    <div class="broadcast-monitor-base" aria-hidden="true">
-                        <span class="base-led"></span>
-                        <span class="base-label">Dr.Malestar Broadcast</span>
-                        <span class="base-led base-led--on"></span>
+                    <div class="broadcast-monitor-base">
+                        <span class="base-led panel-toggle" role="button" tabindex="0" aria-pressed="false" aria-label="LED izquierdo"></span>
+                        <span class="base-label" aria-hidden="true">Dr.Malestar Broadcast</span>
+                        <span class="base-led base-led--on panel-toggle" role="button" tabindex="0" aria-pressed="true" aria-label="LED derecho"></span>
                     </div>
                 </div>
             </div>
@@ -469,10 +469,10 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="rider-amp-footer" aria-hidden="true">
-                                <span class="amp-led"></span>
-                                <span class="amp-led amp-led--on"></span>
-                                <span class="amp-led"></span>
+                            <div class="rider-amp-footer">
+                                <span class="amp-led panel-toggle" role="button" tabindex="0" aria-pressed="false" aria-label="LED 1"></span>
+                                <span class="amp-led amp-led--on panel-toggle" role="button" tabindex="0" aria-pressed="true" aria-label="LED 2"></span>
+                                <span class="amp-led panel-toggle" role="button" tabindex="0" aria-pressed="false" aria-label="LED 3"></span>
                             </div>
                         </div>
                     </div>
@@ -717,6 +717,121 @@
                 if (strip && 'ResizeObserver' in window) {
                     new ResizeObserver(syncNavbarLedPositions).observe(strip);
                 }
+            })();
+
+            // Botones decorativos de secciones — toggle on/off al click
+            (function initSectionPanelToggles() {
+                function bindToggle(el, isOn, setOn) {
+                    function toggle() {
+                        setOn(!isOn());
+                    }
+                    el.addEventListener('click', toggle);
+                    el.addEventListener('keydown', function(e) {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                            e.preventDefault();
+                            toggle();
+                        }
+                    });
+                }
+
+                document.querySelectorAll('.console-bank-btn.panel-toggle').forEach(function(btn) {
+                    bindToggle(btn,
+                        function() { return btn.classList.contains('console-bank-btn--lit'); },
+                        function(on) {
+                            btn.classList.toggle('console-bank-btn--lit', on);
+                            btn.setAttribute('aria-pressed', String(on));
+                        }
+                    );
+                });
+
+                document.querySelectorAll('.broadcast-on-air.panel-toggle, .broadcast-rec.panel-toggle').forEach(function(btn) {
+                    bindToggle(btn,
+                        function() { return btn.classList.contains('broadcast-status-btn--on'); },
+                        function(on) {
+                            btn.classList.toggle('broadcast-status-btn--on', on);
+                            btn.setAttribute('aria-pressed', String(on));
+                        }
+                    );
+                });
+
+                document.querySelectorAll('.signal-pill.panel-toggle').forEach(function(btn) {
+                    bindToggle(btn,
+                        function() { return btn.classList.contains('signal-pill--on'); },
+                        function(on) {
+                            btn.classList.toggle('signal-pill--on', on);
+                            btn.setAttribute('aria-pressed', String(on));
+                        }
+                    );
+                });
+
+                document.querySelectorAll('.base-led.panel-toggle').forEach(function(led) {
+                    bindToggle(led,
+                        function() { return led.classList.contains('base-led--on'); },
+                        function(on) {
+                            led.classList.toggle('base-led--on', on);
+                            led.setAttribute('aria-pressed', String(on));
+                        }
+                    );
+                });
+
+                document.querySelectorAll('.section-panel-grille .amp-led.panel-toggle, .rider-amp-footer .amp-led.panel-toggle').forEach(function(led) {
+                    bindToggle(led,
+                        function() { return led.classList.contains('amp-led--on'); },
+                        function(on) {
+                            led.classList.toggle('amp-led--on', on);
+                            led.setAttribute('aria-pressed', String(on));
+                        }
+                    );
+                });
+            })();
+
+            // Perillas interactivas — navbar y Próximas Fechas
+            (function initInteractiveKnobs() {
+                var stepDeg = 38;
+
+                function getBaseRotation(cap) {
+                    if (cap.classList.contains('amp-knob-cap--mid')) return 20;
+                    if (cap.classList.contains('amp-knob-cap--low')) return -55;
+                    if (cap.classList.contains('amp-knob-cap--high')) return 48;
+                    return -35;
+                }
+
+                document.querySelectorAll('.amp-head-controls .amp-knob, .amp-navbar-knobs .amp-knob').forEach(function(knob) {
+                    var cap = knob.querySelector('.amp-knob-cap');
+                    var notch = knob.querySelector('.amp-knob-notch');
+                    if (!cap || !notch) return;
+
+                    var base = getBaseRotation(cap);
+                    var turn = 0;
+                    var nameEl = knob.querySelector('.amp-knob-name');
+
+                    knob.classList.add('amp-knob--interactive');
+                    knob.setAttribute('role', 'button');
+                    knob.setAttribute('tabindex', '0');
+                    knob.setAttribute('aria-label', nameEl ? 'Perilla ' + nameEl.textContent.trim() : 'Perilla');
+
+                    function applyRotation() {
+                        notch.style.transform = 'rotate(' + (base + turn) + 'deg)';
+                    }
+
+                    function rotateKnob(delta) {
+                        turn += delta;
+                        applyRotation();
+                    }
+
+                    applyRotation();
+
+                    knob.addEventListener('click', function() {
+                        rotateKnob(stepDeg);
+                    });
+
+                    knob.addEventListener('keydown', function(e) {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                            e.preventDefault();
+                            rotateKnob(stepDeg);
+                        }
+                    });
+                });
             })();
 
             // Cerrar navbar en móviles

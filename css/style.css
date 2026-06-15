@@ -1293,6 +1293,33 @@ body {
     gap: 0.4rem;
 }
 
+.amp-knob--interactive {
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+}
+
+.amp-knob--interactive:focus-visible .amp-knob-cap {
+    outline: 2px solid rgba(74, 222, 128, 0.55);
+    outline-offset: 2px;
+}
+
+.amp-knob--interactive .amp-knob-notch {
+    transition: transform 0.22s cubic-bezier(0.34, 1.35, 0.64, 1);
+}
+
+.amp-knob--interactive .amp-knob-cap {
+    transition: transform 0.1s ease, box-shadow 0.1s ease;
+}
+
+.amp-knob--interactive:active .amp-knob-cap {
+    transform: translateY(1px);
+    box-shadow:
+        0 2px 0 #1a1a1e,
+        inset 0 1px 0 rgba(255, 255, 255, 0.45),
+        inset 0 -2px 4px rgba(0, 0, 0, 0.25);
+}
+
 .amp-knob-cap {
     position: relative;
     width: 34px;
@@ -1530,18 +1557,15 @@ body {
     min-width: 44px;
 }
 
-.console-bank-led {
-    width: 5px;
-    height: 5px;
-    border-radius: 50%;
-    background: #2a1510;
-    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.85);
+.panel-toggle {
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
 }
 
-.console-bank-btn--lit .console-bank-led {
-    background: var(--led-green);
-    box-shadow: 0 0 6px var(--glow-green);
-    animation: commandLedPulse 2.5s ease-in-out infinite;
+.panel-toggle:focus-visible {
+    outline: 2px solid rgba(74, 222, 128, 0.55);
+    outline-offset: 2px;
 }
 
 .console-bank-key {
@@ -1562,6 +1586,28 @@ body {
     font-weight: 700;
     letter-spacing: 0.1em;
     color: rgba(255, 255, 255, 0.75);
+    transition: transform 0.08s ease, box-shadow 0.12s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.console-bank-btn.panel-toggle:active .console-bank-key {
+    transform: translateY(1px);
+    box-shadow:
+        0 1px 0 #0e0e12,
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+.console-bank-led {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: #2a1510;
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.85);
+}
+
+.console-bank-btn--lit .console-bank-led {
+    background: var(--led-green);
+    box-shadow: 0 0 6px var(--glow-green);
+    animation: commandLedPulse 2.5s ease-in-out infinite;
 }
 
 .console-bank-btn--lit .console-bank-key {
@@ -1788,10 +1834,15 @@ body {
     font-size: 0.5rem;
     font-weight: 700;
     letter-spacing: 0.12em;
-    color: rgba(255, 255, 255, 0.55);
+    color: rgba(255, 255, 255, 0.35);
+    border: none;
+    background: transparent;
+    padding: 0.2rem 0.35rem;
+    border-radius: 4px;
+    transition: color 0.15s ease;
 }
 
-.broadcast-on-air {
+.broadcast-on-air.broadcast-status-btn--on {
     color: #ff8888;
 }
 
@@ -1801,21 +1852,24 @@ body {
     height: 7px;
     border-radius: 50%;
     flex-shrink: 0;
+    background: #3a1515;
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.8);
+    transition: background 0.15s ease, box-shadow 0.15s ease;
 }
 
-.on-air-led {
+.broadcast-on-air.broadcast-status-btn--on .on-air-led,
+.broadcast-rec.broadcast-status-btn--on .rec-led {
     background: #ef4444;
     box-shadow: 0 0 8px rgba(239, 68, 68, 0.9);
     animation: onAirBlink 1.4s ease-in-out infinite;
 }
 
-.rec-led {
-    background: #3a1515;
-    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.8);
+.broadcast-rec.broadcast-status-btn--on {
+    color: #ff8888;
 }
 
-.broadcast-rec {
-    animation: none;
+.broadcast-status-btn.panel-toggle:active {
+    transform: scale(0.97);
 }
 
 @keyframes onAirBlink {
@@ -1848,6 +1902,11 @@ body {
     font-weight: 700;
     letter-spacing: 0.1em;
     color: rgba(255, 255, 255, 0.3);
+    transition: transform 0.08s ease, color 0.15s ease, border-color 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
+}
+
+.signal-pill.panel-toggle:active {
+    transform: scale(0.94);
 }
 
 .signal-pill--on {
@@ -1949,11 +2008,34 @@ body {
     border-radius: 50%;
     background: #1a1a1f;
     box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.8);
+    transition: background 0.15s ease, box-shadow 0.15s ease, transform 0.08s ease;
+}
+
+.base-led.panel-toggle {
+    position: relative;
+}
+
+.base-led.panel-toggle::before {
+    content: '';
+    position: absolute;
+    inset: -10px;
 }
 
 .base-led--on {
     background: var(--led-red);
     box-shadow: 0 0 6px rgba(239, 68, 68, 0.8);
+}
+
+.section-panel-grille .amp-led.panel-toggle,
+.rider-amp-footer .amp-led.panel-toggle {
+    padding: 8px;
+    margin: -4px;
+    transition: transform 0.08s ease;
+}
+
+.section-panel-grille .amp-led.panel-toggle:active,
+.rider-amp-footer .amp-led.panel-toggle:active {
+    transform: scale(0.88);
 }
 
 @media (max-width: 600px) {
