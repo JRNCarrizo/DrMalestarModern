@@ -5,6 +5,35 @@
 
 console.log('🔧 Admin Simplificado - Dr.Malestar cargado');
 
+// Credenciales embebidas — el login no depende de que config.js cargue (caché / red)
+const ADMIN_AUTH = {
+    USER: 'drmalestar',
+    PASS: 'drmalestar2013'
+};
+
+function getAdminCredentials() {
+    return {
+        user: (window.CONFIG?.ADMIN_USER || ADMIN_AUTH.USER).trim(),
+        pass: window.CONFIG?.ADMIN_PASS || ADMIN_AUTH.PASS
+    };
+}
+
+function isConfigLoaded() {
+    return Boolean(window.CONFIG?.ADMIN_USER);
+}
+
+function updateConfigStatus() {
+    const el = document.getElementById('loginConfigStatus');
+    if (!el) return;
+    if (isConfigLoaded()) {
+        el.hidden = true;
+        el.textContent = '';
+        return;
+    }
+    el.hidden = false;
+    el.textContent = 'config.js no cargó — igual podés entrar con drmalestar / drmalestar2013';
+}
+
 // Estado
 let isAuthenticated = false;
 let isSubmitting = false;
@@ -22,6 +51,10 @@ let cachedVideos = [];
 // Inicializar cuando el DOM esté listo
 document.addEventListener('DOMContentLoaded', function() {
     console.log('🚀 Inicializando Admin...');
+    updateConfigStatus();
+    if (!isConfigLoaded()) {
+        console.warn('⚠️ config.js no cargó — login con credenciales embebidas');
+    }
     checkAuth();
     setupEventListeners();
 });
@@ -42,6 +75,8 @@ function showLoginForm() {
     document.getElementById('adminPanel').style.display = 'none';
     document.querySelector('.admin-container')?.classList.add('admin-container--login');
     isAuthenticated = false;
+    updateConfigStatus();
+    // No resetear contraseña acá: setPasswordVisible aún no está listo en el primer paint
 }
 
 // Mostrar panel de admin
@@ -53,10 +88,75 @@ async function showAdminPanel() {
     await loadAllContent();
 }
 
+function setupAdminPanelTabs() {
+    const tabs = document.querySelectorAll('.admin-panel-tab');
+    const sections = document.querySelectorAll('.admin-panel-section');
+    if (!tabs.length) return;
+
+    tabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+            const sectionKey = tab.dataset.section;
+            const sectionId = `adminSection${sectionKey.charAt(0).toUpperCase() + sectionKey.slice(1)}`;
+
+            tabs.forEach(t => {
+                const isActive = t === tab;
+                t.classList.toggle('active', isActive);
+                t.setAttribute('aria-selected', isActive ? 'true' : 'false');
+            });
+
+            sections.forEach(section => {
+                const isActive = section.id === sectionId;
+                section.classList.toggle('active', isActive);
+                if (isActive) {
+                    section.removeAttribute('hidden');
+                } else {
+                    section.setAttribute('hidden', '');
+                }
+            });
+        });
+    });
+}
+
+function switchAdminTab(sectionKey) {
+    const tab = document.querySelector(`.admin-panel-tab[data-section="${sectionKey}"]`);
+    if (tab) tab.click();
+}
+
+function updateSectionCounter(elementId, count, max) {
+    const counter = document.getElementById(elementId);
+    if (!counter) return;
+    counter.textContent = `${count}/${max}`;
+    counter.classList.toggle('admin-panel-tab-count--full', count >= max);
+}
+
+function setSubmitButtonContent(form, faceHtml) {
+    const btn = form?.querySelector('button[type="submit"]');
+    if (!btn) return;
+    const face = btn.querySelector('.admin-console-btn-face');
+    if (!face) return;
+    if (!btn.dataset.defaultText) {
+        btn.dataset.defaultText = face.innerHTML;
+    }
+    face.innerHTML = faceHtml;
+}
+
+function resetSubmitButton(form, fallbackHtml) {
+    const btn = form?.querySelector('button[type="submit"]');
+    if (!btn) return;
+    const face = btn.querySelector('.admin-console-btn-face');
+    if (!face) return;
+    face.innerHTML = btn.dataset.defaultText || fallbackHtml;
+    btn.disabled = false;
+    btn.className = 'admin-console-btn admin-console-btn--primary';
+}
+
 // Configurar event listeners
 function setupEventListeners() {
     // Login
     document.getElementById('loginForm').addEventListener('submit', handleLogin);
+
+    setupPasswordToggle();
+    setupAdminPanelTabs();
     
     // Logout
     document.getElementById('logoutBtn').addEventListener('click', handleLogout);
@@ -76,28 +176,136 @@ function setupEventListeners() {
     }
 }
 
+function setupPasswordToggle() {
+    const togglePassword = document.getElementById('togglePassword');
+    const passwordInput = document.getElementById('password');
+    const passwordReveal = document.getElementById('passwordReveal');
+    const passwordFields = document.getElementById('passwordFields');
+    if (!togglePassword || !passwordInput || !passwordReveal || !passwordFields) return;
+
+    passwordInput.addEventListener('input', function() {
+        if (passwordFields.classList.contains('is-revealed')) {
+            passwordReveal.value = passwordInput.value;
+        }
+    });
+
+    passwordInput.addEventListener('animationstart', function(e) {
+        if (e.animationName === 'adminAutofillStart') {
+            passwordReveal.value = passwordInput.value;
+        }
+    });
+
+    passwordReveal.addEventListener('input', function() {
+        passwordInput.value = passwordReveal.value;
+    });
+
+    togglePassword.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        const show = !passwordFields.classList.contains('is-revealed');
+        setPasswordVisible(show);
+    });
+}
+
+function setPasswordVisible(show) {
+    const togglePassword = document.getElementById('togglePassword');
+    const passwordInput = document.getElementById('password');
+    const passwordReveal = document.getElementById('passwordReveal');
+    const passwordFields = document.getElementById('passwordFields');
+    if (!togglePassword || !passwordInput || !passwordReveal || !passwordFields) return;
+
+    if (show) {
+        passwordReveal.value = passwordInput.value;
+        passwordFields.classList.add('is-revealed');
+        passwordReveal.tabIndex = 0;
+        passwordReveal.focus();
+        const len = passwordReveal.value.length;
+        passwordReveal.setSelectionRange(len, len);
+    } else {
+        passwordInput.value = passwordReveal.value;
+        passwordFields.classList.remove('is-revealed');
+        passwordReveal.tabIndex = -1;
+        passwordInput.focus();
+    }
+
+    togglePassword.setAttribute('aria-pressed', show ? 'true' : 'false');
+    togglePassword.setAttribute('aria-label', show ? 'Ocultar contraseña' : 'Mostrar contraseña');
+    togglePassword.setAttribute('title', show ? 'Ocultar contraseña' : 'Mostrar contraseña');
+    const icon = togglePassword.querySelector('i');
+    if (icon) {
+        icon.className = show ? 'bi bi-eye-slash' : 'bi bi-eye';
+    }
+}
+
+function getLoginPassword() {
+    syncPasswordFields();
+    const passwordFields = document.getElementById('passwordFields');
+    const passwordReveal = document.getElementById('passwordReveal');
+    const passwordInput = document.getElementById('password');
+    if (passwordFields?.classList.contains('is-revealed') && passwordReveal) {
+        return passwordReveal.value;
+    }
+    return passwordInput ? passwordInput.value : '';
+}
+
+function syncPasswordFields() {
+    const passwordFields = document.getElementById('passwordFields');
+    const passwordReveal = document.getElementById('passwordReveal');
+    const passwordInput = document.getElementById('password');
+    if (!passwordFields || !passwordReveal || !passwordInput) return;
+    if (passwordFields.classList.contains('is-revealed')) {
+        passwordInput.value = passwordReveal.value;
+    } else {
+        passwordReveal.value = passwordInput.value;
+    }
+}
+
 // Manejar login
 function handleLogin(e) {
     e.preventDefault();
-    const username = document.getElementById('username').value;
-    const password = document.getElementById('password').value;
-    
-    const validUser = window.CONFIG?.ADMIN_USER || 'admin';
-    const validPass = window.CONFIG?.ADMIN_PASS || 'admin123';
-    
-    if (username === validUser && password === validPass) {
+    syncPasswordFields();
+    const username = document.getElementById('username').value.trim();
+    const password = getLoginPassword();
+
+    const { user: validUser, pass: validPass } = getAdminCredentials();
+
+    const userOk = username.toLowerCase() === validUser.toLowerCase();
+    const passOk = password === validPass;
+
+    if (userOk && passOk) {
+        clearLoginError();
         localStorage.setItem('adminAuthenticated', 'true');
         showAdminPanel();
         notify('Sesión iniciada', 'success');
-    } else {
-        notify('Credenciales incorrectas', 'error');
+        return;
     }
+
+    const hint = isConfigLoaded()
+        ? 'Usuario o contraseña incorrectos.'
+        : 'Usuario o contraseña incorrectos. (config.js no cargó — probá drmalestar / drmalestar2013)';
+    showLoginError(hint);
+    notify('Credenciales incorrectas', 'error');
+}
+
+function showLoginError(message) {
+    const el = document.getElementById('loginError');
+    if (!el) return;
+    el.textContent = message;
+    el.hidden = false;
+}
+
+function clearLoginError() {
+    const el = document.getElementById('loginError');
+    if (!el) return;
+    el.textContent = '';
+    el.hidden = true;
 }
 
 // Manejar logout
 function handleLogout() {
     localStorage.removeItem('adminAuthenticated');
     showLoginForm();
+    setPasswordVisible(false);
     notify('Sesión cerrada', 'info');
 }
 
@@ -125,19 +333,10 @@ async function loadFlyers() {
         displayFlyers(flyers);
         updateFlyerButtonState();
         
-        // Mostrar contador
-        const counter = document.getElementById('flyersCounter');
-        if (counter) {
-            counter.textContent = `Flyers: ${flyers.length}/6`;
-            if (flyers.length >= 6) {
-                counter.className = 'badge bg-warning';
-            } else {
-                counter.className = 'badge bg-info';
-            }
-            }
+        updateSectionCounter('flyersCounter', flyers.length, 6);
         } catch (error) {
         console.error('❌ Error cargando flyers:', error);
-        document.getElementById('flyersList').innerHTML = '<p class="text-danger">Error cargando flyers</p>';
+        document.getElementById('flyersList').innerHTML = '<p class="admin-empty-state admin-empty-state--error"><i class="bi bi-exclamation-triangle"></i> Error cargando flyers</p>';
     }
 }
 
@@ -148,60 +347,18 @@ function displayFlyers(flyers) {
     if (!container) return;
 
     if (cachedFlyers.length === 0) {
-        container.innerHTML = '<p class="text-muted text-center py-4">No hay flyers disponibles</p>';
+        container.innerHTML = '<p class="admin-empty-state admin-empty-state--grid"><i class="bi bi-calendar-x"></i> No hay flyers publicados todavía.</p>';
         return;
     }
-    
-    // Escapar HTML para evitar problemas
-    const escapeHtml = (text) => {
-        const div = document.createElement('div');
-        div.textContent = text || '';
-        return div.innerHTML;
-    };
-    
-    container.innerHTML = cachedFlyers.map(flyer => {
-        const title = escapeHtml(flyer.title || 'Sin título');
-        const date = escapeHtml(flyer.date || 'Sin fecha');
-        const time = escapeHtml(flyer.time || 'Sin hora');
-        const location = escapeHtml(flyer.location || 'Sin lugar');
-        const description = escapeHtml(flyer.description || '');
-        const image = flyer.image || 'img/bluseraflier.jpg';
-        
-        return `
-            <div class="admin-flyer-card" data-id="${flyer.id}">
-                <div class="admin-flyer-image-wrapper">
-                    <img src="${image}" class="admin-flyer-image" alt="${title}" onerror="this.src='img/bluseraflier.jpg'">
-                    <div class="admin-flyer-badge">Show</div>
-                </div>
-                <div class="admin-flyer-content">
-                    <h5 class="admin-flyer-title">${title}</h5>
-                    <div class="admin-flyer-details">
-                        <div class="admin-detail-row">
-                            <i class="bi bi-calendar3"></i>
-                            <span>${date}</span>
-                        </div>
-                        <div class="admin-detail-row">
-                            <i class="bi bi-clock"></i>
-                            <span>${time}</span>
-                        </div>
-                        <div class="admin-detail-row">
-                            <i class="bi bi-geo-alt"></i>
-                            <span>${location}</span>
-                        </div>
-                    </div>
-                    ${description ? `<p class="admin-flyer-description">${description}</p>` : ''}
-                    <div class="admin-flyer-actions d-flex flex-wrap gap-2">
-                        <button class="btn btn-outline-secondary btn-sm" onclick="startFlyerEdit('${flyer.id}')">
-                            <i class="bi bi-pencil-square"></i> Editar
-                        </button>
-                        <button class="btn btn-danger-admin btn-sm" onclick="deleteFlyer('${flyer.id}')">
-                            <i class="bi bi-trash"></i> Eliminar
-                        </button>
-                    </div>
-                </div>
-            </div>
-        `;
-    }).join('');
+
+    if (window.FlyerRender) {
+        container.innerHTML = FlyerRender.buildFlyerGrid(cachedFlyers, {
+            adminList: true,
+            adminContext: true
+        });
+    } else {
+        container.innerHTML = '<p class="admin-empty-state admin-empty-state--error">No se pudo cargar la vista de cartelera.</p>';
+    }
 }
 
 function startFlyerEdit(id) {
@@ -222,8 +379,6 @@ function startFlyerEdit(id) {
     const timeInput = document.getElementById('flyerTime');
     const locationInput = document.getElementById('flyerLocation');
     const descriptionInput = document.getElementById('flyerDescription');
-    const preview = document.getElementById('flyerPreview');
-    const submitBtn = form.querySelector('button[type="submit"]');
     const cancelBtn = document.getElementById('flyerCancelEdit');
     const imageInput = document.getElementById('flyerImage');
 
@@ -233,17 +388,12 @@ function startFlyerEdit(id) {
     if (locationInput) locationInput.value = flyer.location || '';
     if (descriptionInput) descriptionInput.value = flyer.description || '';
     if (imageInput) imageInput.value = '';
-    if (preview) {
-        preview.innerHTML = flyer.image ? `<img src="${flyer.image}" alt="${flyer.title || ''}" class="img-fluid rounded shadow-sm">` : '';
-    }
-    if (submitBtn) {
-        if (!submitBtn.dataset.defaultText) {
-            submitBtn.dataset.defaultText = submitBtn.innerHTML;
-        }
-        submitBtn.innerHTML = '<i class="bi bi-save"></i> Guardar cambios';
+    if (form) {
+        setSubmitButtonContent(form, '<i class="bi bi-save"></i> GUARDAR CAMBIOS');
     }
     if (cancelBtn) cancelBtn.classList.remove('d-none');
 
+    switchAdminTab('flyers');
     form.scrollIntoView({ behavior: 'smooth', block: 'start' });
     notify('Editando flyer. Realiza los cambios y guarda.', 'info');
 }
@@ -255,13 +405,9 @@ function cancelFlyerEdit(showMessage = true) {
     const form = document.getElementById('flyerForm');
     if (form) {
         form.reset();
-        const submitBtn = form.querySelector('button[type="submit"]');
-        if (submitBtn) {
-            submitBtn.innerHTML = submitBtn.dataset.defaultText || 'Agregar Flyer';
-        }
+        resetSubmitButton(form, '<i class="bi bi-plus-lg"></i> AGREGAR FLYER');
     }
 
-    clearPreview('flyerPreview');
     const cancelBtn = document.getElementById('flyerCancelEdit');
     if (cancelBtn) cancelBtn.classList.add('d-none');
 
@@ -328,7 +474,6 @@ async function handleFlyerSubmit(e) {
             await api.addFlyer(flyerData);
             await loadFlyers();
             e.target.reset();
-            clearPreview('flyerPreview');
             notify(`✅ Flyer agregado correctamente (${currentFlyers.length + 1}/6)`, 'success');
             updateFlyerButtonState();
         }
@@ -351,22 +496,31 @@ async function updateFlyerButtonState() {
         const flyers = await api.getFlyers();
         const form = document.getElementById('flyerForm');
         const addButton = form?.querySelector('button[type="submit"]');
-        if (addButton && !addButton.dataset.defaultText) {
-            addButton.dataset.defaultText = addButton.innerHTML;
-        }
-        if (addButton && !editingFlyerId) {
-            if (flyers.length >= 6) {
-                addButton.disabled = true;
-                addButton.innerHTML = '<i class="bi bi-exclamation-triangle"></i> Límite alcanzado (6/6)';
-                addButton.className = 'btn btn-warning w-100';
+        if (!addButton || editingFlyerId) return;
+
+        if (flyers.length >= 6) {
+            addButton.disabled = true;
+            setSubmitButtonContent(form, '<i class="bi bi-exclamation-triangle"></i> LÍMITE 6/6');
         } else {
-                addButton.disabled = false;
-                addButton.innerHTML = addButton.dataset.defaultText;
-                addButton.className = 'btn btn-admin';
-            }
+            resetSubmitButton(form, '<i class="bi bi-plus-lg"></i> AGREGAR FLYER');
         }
     } catch (error) {
         console.error('Error actualizando estado del botón:', error);
+    }
+}
+
+async function moveFlyer(id, direction) {
+    if (!id || !direction) return;
+    try {
+        await api.moveFlyer(id, direction);
+        await loadFlyers();
+        notify('Orden de cartelera actualizado', 'success');
+        if (window.opener) {
+            window.opener.postMessage('contentUpdated', '*');
+        }
+    } catch (error) {
+        console.error('❌ Error moviendo flyer:', error);
+        notify('No se pudo cambiar la posición', 'error');
     }
 }
 
@@ -398,19 +552,10 @@ async function loadPhotos() {
         displayPhotos(photos);
         updatePhotoButtonState();
         
-        // Mostrar contador
-        const counter = document.getElementById('photosCounter');
-        if (counter) {
-            counter.textContent = `Fotos: ${photos.length}/10`;
-            if (photos.length >= 10) {
-                counter.className = 'badge bg-warning';
-            } else {
-                counter.className = 'badge bg-info';
-            }
-        }
+        updateSectionCounter('photosCounter', photos.length, 10);
     } catch (error) {
         console.error('❌ Error cargando fotos:', error);
-        document.getElementById('photosList').innerHTML = '<p class="text-danger">Error cargando fotos</p>';
+        document.getElementById('photosList').innerHTML = '<p class="admin-empty-state admin-empty-state--error"><i class="bi bi-exclamation-triangle"></i> Error cargando fotos</p>';
     }
 }
 
@@ -421,45 +566,20 @@ function displayPhotos(photos) {
         console.error('❌ Contenedor de fotos no encontrado');
         return;
     }
-    
+
     if (!Array.isArray(cachedPhotos) || cachedPhotos.length === 0) {
-        container.innerHTML = '<p class="text-muted text-center py-4">No hay fotos disponibles</p>';
-            return;
-        }
-        
-    const escapeHtml = (text) => {
-        const div = document.createElement('div');
-        div.textContent = text || '';
-        return div.innerHTML;
-    };
-    
-    container.innerHTML = cachedPhotos.map(photo => {
-        const title = escapeHtml(photo.title || 'Sin título');
-        const description = photo.description ? escapeHtml(photo.description) : '';
-        const image = photo.image || 'img/bluseraflier.jpg';
-        
-        return `
-            <div class="admin-photo-card" data-id="${photo.id}">
-                <div class="admin-photo-image-wrapper">
-                    <img src="${image}" class="admin-photo-image" alt="${title}" onerror="this.src='img/bluseraflier.jpg'">
-                    <div class="admin-photo-overlay">
-                        <div class="d-flex flex-column gap-2">
-                            <button class="btn btn-outline-secondary btn-sm" onclick="startPhotoEdit('${photo.id}')">
-                                <i class="bi bi-pencil-square"></i> Editar
-                            </button>
-                            <button class="btn btn-danger-admin btn-sm" onclick="deletePhoto('${photo.id}')">
-                    <i class="bi bi-trash"></i> Eliminar
-                </button>
-                        </div>
-                    </div>
-                </div>
-                <div class="admin-photo-content">
-                    <h6 class="admin-photo-title">${title}</h6>
-                    ${description ? `<p class="admin-photo-description">${description}</p>` : ''}
-            </div>
-        </div>
-    `;
-    }).join('');
+        container.innerHTML = '<p class="admin-empty-state admin-empty-state--grid"><i class="bi bi-image"></i> No hay fotos en la galería todavía.</p>';
+        return;
+    }
+
+    if (window.PhotoRender) {
+        container.innerHTML = PhotoRender.buildPhotoGrid(cachedPhotos, {
+            adminList: true,
+            adminContext: true
+        });
+    } else {
+        container.innerHTML = '<p class="admin-empty-state admin-empty-state--error">No se pudo cargar la vista de galería.</p>';
+    }
 }
 
 function startPhotoEdit(id) {
@@ -478,24 +598,17 @@ function startPhotoEdit(id) {
     const titleInput = document.getElementById('photoTitle');
     const descriptionInput = document.getElementById('photoDescription');
     const imageInput = document.getElementById('photoImage');
-    const preview = document.getElementById('photoPreview');
-    const submitBtn = form.querySelector('button[type="submit"]');
     const cancelBtn = document.getElementById('photoCancelEdit');
 
     if (titleInput) titleInput.value = photo.title || '';
     if (descriptionInput) descriptionInput.value = photo.description || '';
     if (imageInput) imageInput.value = '';
-    if (preview) {
-        preview.innerHTML = photo.image ? `<img src="${photo.image}" alt="${photo.title || ''}" class="img-fluid rounded shadow-sm">` : '';
-    }
-    if (submitBtn) {
-        if (!submitBtn.dataset.defaultText) {
-            submitBtn.dataset.defaultText = submitBtn.innerHTML;
-        }
-        submitBtn.innerHTML = '<i class="bi bi-save"></i> Guardar cambios';
+    if (form) {
+        setSubmitButtonContent(form, '<i class="bi bi-save"></i> GUARDAR CAMBIOS');
     }
     if (cancelBtn) cancelBtn.classList.remove('d-none');
 
+    switchAdminTab('photos');
     form.scrollIntoView({ behavior: 'smooth', block: 'start' });
     notify('Editando foto. Realiza los cambios y guarda.', 'info');
 }
@@ -507,13 +620,9 @@ function cancelPhotoEdit(showMessage = true) {
     const form = document.getElementById('photoForm');
     if (form) {
         form.reset();
-        const submitBtn = form.querySelector('button[type="submit"]');
-        if (submitBtn) {
-            submitBtn.innerHTML = submitBtn.dataset.defaultText || 'Agregar Foto';
-        }
+        resetSubmitButton(form, '<i class="bi bi-plus-lg"></i> AGREGAR FOTO');
     }
 
-    clearPreview('photoPreview');
     const cancelBtn = document.getElementById('photoCancelEdit');
     if (cancelBtn) cancelBtn.classList.add('d-none');
 
@@ -578,8 +687,7 @@ async function handlePhotoSubmit(e) {
         } else {
             await api.addPhoto(photoData);
             await loadPhotos();
-        e.target.reset();
-            clearPreview('photoPreview');
+            e.target.reset();
             notify(`✅ Foto agregada correctamente (${currentPhotos.length + 1}/10)`, 'success');
             updatePhotoButtonState();
         }
@@ -604,22 +712,31 @@ async function updatePhotoButtonState() {
         const photos = await api.getPhotos();
         const form = document.getElementById('photoForm');
         const addButton = form?.querySelector('button[type="submit"]');
-        if (addButton && !addButton.dataset.defaultText) {
-            addButton.dataset.defaultText = addButton.innerHTML;
-        }
-        if (addButton && !editingPhotoId) {
-            if (photos.length >= 10) {
-                addButton.disabled = true;
-                addButton.innerHTML = '<i class="bi bi-exclamation-triangle"></i> Límite alcanzado (10/10)';
-                addButton.className = 'btn btn-warning w-100';
-            } else {
-                addButton.disabled = false;
-                addButton.innerHTML = addButton.dataset.defaultText;
-                addButton.className = 'btn btn-admin';
-            }
+        if (!addButton || editingPhotoId) return;
+
+        if (photos.length >= 10) {
+            addButton.disabled = true;
+            setSubmitButtonContent(form, '<i class="bi bi-exclamation-triangle"></i> LÍMITE 10/10');
+        } else {
+            resetSubmitButton(form, '<i class="bi bi-plus-lg"></i> AGREGAR FOTO');
         }
     } catch (error) {
         console.error('Error actualizando estado del botón:', error);
+    }
+}
+
+async function movePhoto(id, direction) {
+    if (!id || !direction) return;
+    try {
+        await api.movePhoto(id, direction);
+        await loadPhotos();
+        notify('Orden de galería actualizado', 'success');
+        if (window.opener) {
+            window.opener.postMessage('contentUpdated', '*');
+        }
+    } catch (error) {
+        console.error('❌ Error moviendo foto:', error);
+        notify('No se pudo cambiar la posición', 'error');
     }
 }
 
@@ -650,19 +767,10 @@ async function loadVideos() {
         displayVideos(videos);
         updateVideoButtonState();
         
-        // Mostrar contador
-        const counter = document.getElementById('videosCounter');
-        if (counter) {
-            counter.textContent = `Videos: ${videos.length}/8`;
-            if (videos.length >= 8) {
-                counter.className = 'badge bg-warning';
-            } else {
-                counter.className = 'badge bg-info';
-            }
-        }
+        updateSectionCounter('videosCounter', videos.length, 8);
     } catch (error) {
         console.error('❌ Error cargando videos:', error);
-        document.getElementById('videosList').innerHTML = '<p class="text-danger">Error cargando videos</p>';
+        document.getElementById('videosList').innerHTML = '<p class="admin-empty-state admin-empty-state--error"><i class="bi bi-exclamation-triangle"></i> Error cargando videos</p>';
     }
 }
 
@@ -674,60 +782,32 @@ function displayVideos(videos) {
         return;
     }
     if (cachedVideos.length === 0) {
-        container.innerHTML = '<p class="text-muted text-center py-4">No hay videos disponibles</p>';
+        container.innerHTML = '<p class="admin-empty-state admin-empty-state--grid"><i class="bi bi-play-btn"></i> No hay videos publicados todavía.</p>';
         return;
     }
-    
-    // Escapar HTML
-    const escapeHtml = (text) => {
-        const div = document.createElement('div');
-        div.textContent = text || '';
-        return div.innerHTML;
-    };
-    
-    container.innerHTML = cachedVideos.map(video => {
-        const title = escapeHtml(video.title || 'Sin título');
-        const description = escapeHtml(video.description || '');
-        const url = escapeHtml(video.url || '');
-        const videoId = video.videoId || '';
-        const embedUrl = videoId ? `https://www.youtube.com/embed/${videoId}` : '';
-        
-        return `
-            <div class="admin-video-card" data-id="${video.id}">
-                ${embedUrl ? `
-                <div class="admin-video-thumbnail">
-                    <iframe 
-                        src="${embedUrl}" 
-                        frameborder="0" 
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-                        allowfullscreen
-                        loading="lazy"
-                        style="width: 100%; height: 100%; border: none;">
-                    </iframe>
-                </div>
-                ` : `
-                <div class="admin-video-placeholder">
-                    <i class="bi bi-youtube" style="font-size: 3rem; color: var(--primary-color);"></i>
-            </div>
-                `}
-                <div class="admin-video-content">
-                    <h5 class="admin-video-title">${title}</h5>
-                    ${description ? `<p class="admin-video-description">${description}</p>` : ''}
-                    <div class="admin-video-actions d-flex flex-wrap gap-2">
-                        <a href="${url}" target="_blank" class="btn btn-secondary btn-sm">
-                            <i class="bi bi-youtube"></i> Ver en YouTube
-                        </a>
-                        <button class="btn btn-outline-secondary btn-sm" onclick="startVideoEdit('${video.id}')">
-                            <i class="bi bi-pencil-square"></i> Editar
-                        </button>
-                        <button class="btn btn-danger-admin btn-sm" onclick="deleteVideo('${video.id}')">
-                    <i class="bi bi-trash"></i> Eliminar
-                </button>
-                    </div>
-            </div>
-        </div>
-    `;
-    }).join('');
+
+    if (window.VideoRender) {
+        container.innerHTML = VideoRender.buildVideoGrid(cachedVideos, {
+            adminList: true,
+            adminContext: true
+        });
+    } else {
+        container.innerHTML = '<p class="admin-empty-state admin-empty-state--error">No se pudo cargar la vista de videos.</p>';
+    }
+}
+
+async function moveVideo(id, direction) {
+    try {
+        await api.moveVideo(id, direction);
+        await loadVideos();
+        notify('Orden de videos actualizado', 'success');
+        if (window.opener) {
+            window.opener.postMessage('contentUpdated', '*');
+        }
+    } catch (error) {
+        console.error('❌ Error moviendo video:', error);
+        notify('No se pudo cambiar la posición', 'error');
+    }
 }
 
 function startVideoEdit(id) {
@@ -751,14 +831,12 @@ function startVideoEdit(id) {
     if (titleInput) titleInput.value = video.title || '';
     if (descriptionInput) descriptionInput.value = video.description || '';
     if (urlInput) urlInput.value = video.url || video.videoId || '';
-    if (submitBtn) {
-        if (!submitBtn.dataset.defaultText) {
-            submitBtn.dataset.defaultText = submitBtn.innerHTML;
-        }
-        submitBtn.innerHTML = '<i class="bi bi-save"></i> Guardar cambios';
+    if (form) {
+        setSubmitButtonContent(form, '<i class="bi bi-save"></i> GUARDAR CAMBIOS');
     }
     if (cancelBtn) cancelBtn.classList.remove('d-none');
 
+    switchAdminTab('videos');
     form.scrollIntoView({ behavior: 'smooth', block: 'start' });
     notify('Editando video. Realiza los cambios y guarda.', 'info');
 }
@@ -769,10 +847,7 @@ function cancelVideoEdit(showMessage = true) {
     const form = document.getElementById('videoForm');
     if (form) {
         form.reset();
-        const submitBtn = form.querySelector('button[type="submit"]');
-        if (submitBtn) {
-            submitBtn.innerHTML = submitBtn.dataset.defaultText || 'Agregar Video';
-        }
+        resetSubmitButton(form, '<i class="bi bi-plus-lg"></i> AGREGAR VIDEO');
     }
 
     const cancelBtn = document.getElementById('videoCancelEdit');
@@ -932,19 +1007,13 @@ async function updateVideoButtonState() {
         const videos = await api.getVideos();
         const form = document.getElementById('videoForm');
         const addButton = form?.querySelector('button[type="submit"]');
-        if (addButton && !addButton.dataset.defaultText) {
-            addButton.dataset.defaultText = addButton.innerHTML;
-        }
-        if (addButton && !editingVideoId) {
-            if (videos.length >= 8) {
-                addButton.disabled = true;
-                addButton.innerHTML = '<i class="bi bi-exclamation-triangle"></i> Límite alcanzado (8/8)';
-                addButton.className = 'btn btn-warning w-100';
-            } else {
-                addButton.disabled = false;
-                addButton.innerHTML = addButton.dataset.defaultText;
-                addButton.className = 'btn btn-admin';
-            }
+        if (!addButton || editingVideoId) return;
+
+        if (videos.length >= 8) {
+            addButton.disabled = true;
+            setSubmitButtonContent(form, '<i class="bi bi-exclamation-triangle"></i> LÍMITE 8/8');
+        } else {
+            resetSubmitButton(form, '<i class="bi bi-plus-lg"></i> AGREGAR VIDEO');
         }
     } catch (error) {
         console.error('Error actualizando estado del botón:', error);
@@ -1068,6 +1137,9 @@ function notify(message, type = 'info') {
 
 // Funciones globales para llamadas desde HTML
 window.deleteFlyer = deleteFlyer;
+window.moveFlyer = moveFlyer;
+window.movePhoto = movePhoto;
+window.moveVideo = moveVideo;
 window.deletePhoto = deletePhoto;
 window.deleteVideo = deleteVideo;
 window.startFlyerEdit = startFlyerEdit;
@@ -1086,7 +1158,7 @@ window.handleImageChange = function(input, previewId) {
     reader.onload = function(e) {
         const preview = document.getElementById(previewId);
         if (preview) {
-            preview.innerHTML = `<img src="${e.target.result}" style="max-width: 200px; max-height: 200px; border-radius: 8px; margin-top: 10px;">`;
+            preview.innerHTML = `<img src="${e.target.result}" alt="">`;
         }
     };
     reader.readAsDataURL(file);

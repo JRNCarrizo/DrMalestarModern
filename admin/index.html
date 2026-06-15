@@ -3,6 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <script>
+        (function () {
+            var path = window.location.pathname;
+            if (path.endsWith('/admin/index')) {
+                window.location.replace(path.slice(0, -'/index'.length) + '/' + window.location.search + window.location.hash);
+                return;
+            }
+            if (path.endsWith('/admin')) {
+                window.location.replace(path + '/' + window.location.search + window.location.hash);
+            }
+        })();
+    </script>
     <link rel="icon" type="image/x-icon" href="../img/malestaexport.ico">
     <title>Panel de Administración - Dr.Malestar</title>
     
@@ -18,155 +32,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
     
     <!-- Custom CSS -->
-    <link href="../css/style.css" rel="stylesheet">
-    
-    <style>
-        .admin-container {
-            min-height: 100vh;
-            padding: 2rem 0;
-        }
-
-        .admin-container:not(.admin-container--login) {
-            background: var(--gradient-dark);
-        }
-        
-        .admin-card {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid var(--border-color);
-            border-radius: 15px;
-            padding: 2rem;
-            margin-bottom: 2rem;
-            backdrop-filter: blur(10px);
-        }
-        
-        .admin-header {
-            text-align: center;
-            margin-bottom: 3rem;
-        }
-        
-        .admin-title {
-            color: var(--primary-color);
-            font-size: 2.5rem;
-            font-weight: bold;
-            margin-bottom: 1rem;
-        }
-        
-        .admin-subtitle {
-            color: var(--text-muted);
-            font-size: 1.2rem;
-        }
-        
-        .form-section {
-            margin-bottom: 2rem;
-        }
-        
-        .form-section h3 {
-            color: var(--primary-color);
-            border-bottom: 2px solid var(--primary-color);
-            padding-bottom: 0.5rem;
-            margin-bottom: 1.5rem;
-        }
-        
-        .file-upload-area {
-            border: 2px dashed var(--border-color);
-            border-radius: 10px;
-            padding: 2rem;
-            text-align: center;
-            transition: all 0.3s ease;
-            cursor: pointer;
-            background: rgba(255, 255, 255, 0.02);
-        }
-        
-        .file-upload-area:hover {
-            border-color: var(--primary-color);
-            background: rgba(34, 197, 94, 0.1);
-        }
-        
-        .file-upload-area.dragover {
-            border-color: var(--primary-color);
-            background: rgba(34, 197, 94, 0.2);
-        }
-        
-        .upload-icon {
-            font-size: 3rem;
-            color: var(--primary-color);
-            margin-bottom: 1rem;
-        }
-        
-        .media-preview {
-            max-width: 200px;
-            max-height: 200px;
-            border-radius: 10px;
-            margin-top: 1rem;
-        }
-        
-        .media-list {
-            max-height: 400px;
-            overflow-y: auto;
-        }
-        
-        .media-item {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid var(--border-color);
-            border-radius: 10px;
-            padding: 1rem;
-            margin-bottom: 1rem;
-            transition: all 0.3s ease;
-        }
-        
-        .media-item:hover {
-            background: rgba(255, 255, 255, 0.1);
-            transform: translateY(-2px);
-        }
-        
-        .media-item img {
-            width: 80px;
-            height: 80px;
-            object-fit: cover;
-            border-radius: 8px;
-        }
-        
-        .btn-admin {
-            background: var(--gradient-primary);
-            color: var(--text-light);
-            border: none;
-            padding: 0.75rem 1.5rem;
-            border-radius: 8px;
-            font-weight: 600;
-            transition: all 0.3s ease;
-        }
-        
-        .btn-admin:hover {
-            background: linear-gradient(45deg, var(--led-green-dark), var(--led-green));
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(34, 197, 94, 0.3);
-        }
-        
-        .btn-danger-admin {
-            background: linear-gradient(45deg, #dc3545, #c82333);
-            color: var(--text-light);
-            border: none;
-            padding: 0.5rem 1rem;
-            border-radius: 6px;
-            font-size: 0.9rem;
-        }
-        
-        .btn-danger-admin:hover {
-            background: linear-gradient(45deg, #c82333, #a71e2a);
-        }
-        
-        .login-section {
-            max-width: none;
-            margin: 0;
-        }
-        
-        .back-to-site {
-            position: fixed;
-            top: max(16px, env(safe-area-inset-top));
-            left: max(16px, env(safe-area-inset-left));
-            z-index: 1000;
-        }
-    </style>
+    <link href="../css/style.css?v=20250623" rel="stylesheet">
 </head>
 <body class="bodyP">
     <a href="../index.html" class="back-to-site console-back-btn">
@@ -208,7 +74,9 @@
                             <h2 class="admin-login-plate-title">Acceso Admin</h2>
                         </div>
 
-                        <form id="loginForm" class="admin-login-form">
+                        <form id="loginForm" class="admin-login-form" novalidate>
+                            <p id="loginConfigStatus" class="admin-login-config-status" hidden></p>
+                            <p id="loginError" class="admin-login-error" role="alert" hidden></p>
                             <div class="admin-login-field">
                                 <label for="username" class="admin-login-label">
                                     <span class="admin-login-label-led"></span>
@@ -221,7 +89,15 @@
                                     <span class="admin-login-label-led"></span>
                                     PASS
                                 </label>
-                                <input type="password" class="admin-login-input" id="password" placeholder="••••••••" autocomplete="current-password" required>
+                                <div class="admin-login-password-wrap">
+                                    <div class="admin-login-password-fields" id="passwordFields">
+                                        <input type="password" class="admin-login-input admin-login-input--mask" id="password" placeholder="••••••••" autocomplete="current-password" required>
+                                        <input type="text" class="admin-login-input admin-login-input--plain" id="passwordReveal" placeholder="••••••••" autocomplete="off" spellcheck="false" tabindex="-1" aria-label="Contraseña visible">
+                                    </div>
+                                    <button type="button" class="admin-login-toggle-pass" id="togglePassword" aria-label="Mostrar contraseña" aria-pressed="false" title="Mostrar contraseña">
+                                        <i class="bi bi-eye" aria-hidden="true"></i>
+                                    </button>
+                                </div>
                             </div>
                             <button type="submit" class="admin-login-submit">
                                 <span class="admin-login-submit-led"></span>
@@ -241,172 +117,230 @@
             </div>
             
             <!-- Admin Panel (inicialmente oculto) -->
-            <div id="adminPanel" style="display: none;">
-                <div class="admin-header">
-                    <h1 class="admin-title">Panel de Administración</h1>
-                    <p class="admin-subtitle">Dr.Malestar - Gestión de Contenido</p>
-                    <div class="admin-actions mb-3">
-                        <button id="syncBtn" class="btn btn-primary">
-                            <i class="bi bi-arrow-clockwise"></i> Recargar
-                        </button>
-                        <button id="logoutBtn" class="btn btn-danger-admin">
-                            <i class="bi bi-box-arrow-right"></i> Cerrar Sesión
-                        </button>
-                    </div>
-                </div>
-                
-                <!-- Gestión de Flyers -->
-                <div class="admin-card">
-                    <div class="form-section">
-                        <h3><i class="bi bi-calendar-event"></i> Gestión de Flyers 
-                            <span id="flyersCounter" class="badge bg-info ms-2">Flyers: 0/6</span>
-                        </h3>
-                        
-                        <form id="flyerForm">
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="mb-3">
-                                        <label for="flyerTitle" class="form-label">Título del Show</label>
-                                        <input type="text" class="form-control" id="flyerTitle" name="title" required>
+            <div id="adminPanel" class="admin-panel" style="display: none;">
+                <div class="admin-panel-rack">
+                    <div class="admin-panel-chassis">
+                        <div class="admin-panel-top-bar" aria-hidden="true">
+                            <span class="admin-login-led admin-login-led--on"></span>
+                            <span class="admin-panel-status">MIXING CONSOLE · CONTENT DESK</span>
+                            <span class="admin-login-led admin-login-led--pulse"></span>
+                        </div>
+
+                        <header class="admin-panel-header">
+                            <img src="../img/logoNuevo-malestar.png" alt="" class="admin-panel-logo" aria-hidden="true">
+                            <div class="console-section-header admin-panel-title-block">
+                                <span class="console-section-tag">DM-ADM · BACKSTAGE</span>
+                                <h1 class="console-section-title">Panel Admin</h1>
+                                <span class="console-section-line"></span>
+                            </div>
+                            <p class="admin-panel-desc">Gestioná el contenido que se publica en el sitio: fechas, galería y videos.</p>
+                            <div class="admin-panel-toolbar">
+                                <button type="button" id="syncBtn" class="admin-console-btn admin-console-btn--green">
+                                    <span class="admin-console-btn-led"></span>
+                                    <span class="admin-console-btn-face"><i class="bi bi-arrow-clockwise" aria-hidden="true"></i> RECARGAR</span>
+                                </button>
+                                <button type="button" id="logoutBtn" class="admin-console-btn admin-console-btn--red">
+                                    <span class="admin-console-btn-led"></span>
+                                    <span class="admin-console-btn-face"><i class="bi bi-box-arrow-right" aria-hidden="true"></i> SALIR</span>
+                                </button>
+                            </div>
+                        </header>
+
+                        <nav class="admin-panel-tabs" role="tablist" aria-label="Secciones del panel">
+                            <button type="button" class="admin-panel-tab active" role="tab" id="tabFlyers" data-section="flyers" aria-selected="true" aria-controls="adminSectionFlyers">
+                                <span class="admin-panel-tab-led" aria-hidden="true"></span>
+                                <i class="bi bi-calendar-event" aria-hidden="true"></i>
+                                <span class="admin-panel-tab-label">Próximas Fechas</span>
+                                <span class="admin-panel-tab-count" id="flyersCounter">0/6</span>
+                            </button>
+                            <button type="button" class="admin-panel-tab" role="tab" id="tabPhotos" data-section="photos" aria-selected="false" aria-controls="adminSectionPhotos">
+                                <span class="admin-panel-tab-led" aria-hidden="true"></span>
+                                <i class="bi bi-images" aria-hidden="true"></i>
+                                <span class="admin-panel-tab-label">Galería</span>
+                                <span class="admin-panel-tab-count" id="photosCounter">0/10</span>
+                            </button>
+                            <button type="button" class="admin-panel-tab" role="tab" id="tabVideos" data-section="videos" aria-selected="false" aria-controls="adminSectionVideos">
+                                <span class="admin-panel-tab-led" aria-hidden="true"></span>
+                                <i class="bi bi-youtube" aria-hidden="true"></i>
+                                <span class="admin-panel-tab-label">Videos</span>
+                                <span class="admin-panel-tab-count" id="videosCounter">0/8</span>
+                            </button>
+                        </nav>
+
+                        <div class="admin-panel-body">
+                            <!-- Flyers -->
+                            <section id="adminSectionFlyers" class="admin-panel-section active" role="tabpanel" aria-labelledby="tabFlyers">
+                                <div class="admin-console-module">
+                                    <div class="admin-console-module-head">
+                                        <span class="admin-console-module-tag">INPUT · CH 01</span>
+                                        <h2 class="admin-console-module-title">Nuevo flyer de show</h2>
+                                        <p class="admin-console-module-hint">Aparece en la sección <strong>Próximas Fechas</strong> de la home. Máximo 6 activos.</p>
                                     </div>
-                                    <div class="mb-3">
-                                        <label for="flyerDate" class="form-label">Fecha</label>
-                                        <input type="date" class="form-control" id="flyerDate" name="date" required>
-                                    </div>
-                                    <div class="mb-3">
-                                        <label for="flyerLocation" class="form-label">Lugar</label>
-                                        <input type="text" class="form-control" id="flyerLocation" name="location" required>
-                                    </div>
-                                    <div class="mb-3">
-                                        <label for="flyerTime" class="form-label">Hora</label>
-                                        <input type="time" class="form-control" id="flyerTime" name="time" required>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="mb-3">
-                                        <label for="flyerDescription" class="form-label">Descripción</label>
-                                        <textarea class="form-control" id="flyerDescription" name="description" rows="4"></textarea>
-                                    </div>
-                                    <div class="mb-3">
-                                        <label for="flyerImage" class="form-label">Imagen del Flyer</label>
-                                        <div class="file-upload-area" onclick="document.getElementById('flyerImage').click()">
-                                            <i class="bi bi-cloud-upload upload-icon"></i>
-                                            <p>Haz clic para subir o arrastra una imagen</p>
-                                            <input type="file" id="flyerImage" name="image" accept="image/*" style="display: none;" onchange="handleImageChange(this, 'flyerPreview')">
+                                    <form id="flyerForm" class="admin-console-form">
+                                        <div class="admin-console-form-grid">
+                                            <div class="admin-console-form-col">
+                                                <div class="admin-login-field">
+                                                    <label for="flyerTitle" class="admin-login-label"><span class="admin-login-label-led"></span>TÍTULO</label>
+                                                    <input type="text" class="admin-login-input" id="flyerTitle" name="title" placeholder="Nombre del show" required>
+                                                </div>
+                                                <div class="admin-login-field">
+                                                    <label for="flyerDate" class="admin-login-label"><span class="admin-login-label-led"></span>FECHA</label>
+                                                    <input type="date" class="admin-login-input" id="flyerDate" name="date" required>
+                                                </div>
+                                                <div class="admin-login-field">
+                                                    <label for="flyerLocation" class="admin-login-label"><span class="admin-login-label-led"></span>LUGAR</label>
+                                                    <input type="text" class="admin-login-input" id="flyerLocation" name="location" placeholder="Venue / ciudad" required>
+                                                </div>
+                                                <div class="admin-login-field">
+                                                    <label for="flyerTime" class="admin-login-label"><span class="admin-login-label-led"></span>HORA</label>
+                                                    <input type="time" class="admin-login-input" id="flyerTime" name="time" required>
+                                                </div>
+                                            </div>
+                                            <div class="admin-console-form-col">
+                                                <div class="admin-login-field">
+                                                    <label for="flyerDescription" class="admin-login-label"><span class="admin-login-label-led"></span>DESCRIPCIÓN</label>
+                                                    <textarea class="admin-login-input admin-login-input--area" id="flyerDescription" name="description" rows="4" placeholder="Detalle opcional del evento"></textarea>
+                                                </div>
+                                                <div class="admin-login-field">
+                                                    <span class="admin-login-label"><span class="admin-login-label-led"></span>IMAGEN</span>
+                                                    <div class="admin-console-dropzone" onclick="document.getElementById('flyerImage').click()">
+                                                        <i class="bi bi-cloud-upload admin-console-dropzone-icon" aria-hidden="true"></i>
+                                                        <p class="admin-console-dropzone-title">Subir flyer</p>
+                                                        <p class="admin-console-dropzone-hint">Clic para elegir JPG o PNG</p>
+                                                        <input type="file" id="flyerImage" name="image" accept="image/*" hidden>
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </div>
-                                        <div id="flyerPreview"></div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="d-flex flex-wrap gap-2">
-                                <button type="submit" class="btn btn-admin">Agregar Flyer</button>
-                                <button type="button" class="btn btn-outline-secondary d-none" id="flyerCancelEdit" onclick="cancelFlyerEdit()">
-                                    <i class="bi bi-x-circle"></i> Cancelar edición
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-                    
-                    <!-- Lista de Flyers -->
-                    <div class="form-section">
-                        <h4>Flyers Existentes</h4>
-                        <div id="flyersList" class="media-list">
-                            <!-- Los flyers se cargarán aquí -->
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Gestión de Fotos -->
-                <div class="admin-card">
-                    <div class="form-section">
-                        <h3><i class="bi bi-images"></i> Gestión de Fotos 
-                            <span id="photosCounter" class="badge bg-info ms-2">Fotos: 0/10</span>
-                        </h3>
-                        
-                        <form id="photoForm">
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="mb-3">
-                                        <label for="photoTitle" class="form-label">Título de la Foto</label>
-                                        <input type="text" class="form-control" id="photoTitle" name="title">
-                                    </div>
-                                    <div class="mb-3">
-                                        <label for="photoDescription" class="form-label">Descripción</label>
-                                        <textarea class="form-control" id="photoDescription" name="description" rows="3"></textarea>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="mb-3">
-                                        <label for="photoImage" class="form-label">Imagen</label>
-                                        <div class="file-upload-area" onclick="document.getElementById('photoImage').click()">
-                                            <i class="bi bi-cloud-upload upload-icon"></i>
-                                            <p>Haz clic para subir o arrastra una imagen</p>
-                                            <input type="file" id="photoImage" name="image" accept="image/*" style="display: none;" onchange="handleImageChange(this, 'photoPreview')">
+
+                                        <div class="admin-console-form-actions">
+                                            <button type="submit" class="admin-console-btn admin-console-btn--primary">
+                                                <span class="admin-console-btn-led"></span>
+                                                <span class="admin-console-btn-face"><i class="bi bi-plus-lg" aria-hidden="true"></i> AGREGAR FLYER</span>
+                                            </button>
+                                            <button type="button" class="admin-console-btn admin-console-btn--ghost d-none" id="flyerCancelEdit" onclick="cancelFlyerEdit()">
+                                                <span class="admin-console-btn-face"><i class="bi bi-x-circle" aria-hidden="true"></i> CANCELAR</span>
+                                            </button>
                                         </div>
-                                        <div id="photoPreview"></div>
-                                    </div>
+                                    </form>
                                 </div>
-                            </div>
-                            <div class="d-flex flex-wrap gap-2">
-                                <button type="submit" class="btn btn-admin">Agregar Foto</button>
-                                <button type="button" class="btn btn-outline-secondary d-none" id="photoCancelEdit" onclick="cancelPhotoEdit()">
-                                    <i class="bi bi-x-circle"></i> Cancelar edición
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-                    
-                    <!-- Lista de Fotos -->
-                    <div class="form-section">
-                        <h4>Fotos Existentes</h4>
-                        <div id="photosList" class="media-list">
-                            <!-- Las fotos se cargarán aquí -->
+                                <div class="admin-console-module admin-console-module--list">
+                                    <div class="admin-console-module-head">
+                                        <span class="admin-console-module-tag">PLAYLIST · CH 01</span>
+                                        <h2 class="admin-console-module-title">En cartelera</h2>
+                                        <p class="admin-console-module-hint">Usá <strong>ANTES</strong> / <strong>DESPUÉS</strong> para cambiar el orden en la home. Pasá el mouse sobre un flyer para ver la info del show.</p>
+                                    </div>
+                                    <div id="flyersList" class="flyers-grid admin-flyers-published"></div>
+                                </div>
+                            </section>
+
+                            <!-- Fotos -->
+                            <section id="adminSectionPhotos" class="admin-panel-section" role="tabpanel" aria-labelledby="tabPhotos" hidden>
+                                <div class="admin-console-module">
+                                    <div class="admin-console-module-head">
+                                        <span class="admin-console-module-tag">INPUT · CH 02</span>
+                                        <h2 class="admin-console-module-title">Nueva foto</h2>
+                                        <p class="admin-console-module-hint">Se muestra en la <strong>Galería</strong>. Máximo 10 fotos.</p>
+                                    </div>
+                                    <form id="photoForm" class="admin-console-form">
+                                        <div class="admin-console-form-grid">
+                                            <div class="admin-console-form-col">
+                                                <div class="admin-login-field">
+                                                    <label for="photoTitle" class="admin-login-label"><span class="admin-login-label-led"></span>TÍTULO</label>
+                                                    <input type="text" class="admin-login-input" id="photoTitle" name="title" placeholder="Opcional">
+                                                </div>
+                                                <div class="admin-login-field">
+                                                    <label for="photoDescription" class="admin-login-label"><span class="admin-login-label-led"></span>DESCRIPCIÓN</label>
+                                                    <textarea class="admin-login-input admin-login-input--area" id="photoDescription" name="description" rows="4" placeholder="Opcional"></textarea>
+                                                </div>
+                                            </div>
+                                            <div class="admin-console-form-col">
+                                                <div class="admin-login-field">
+                                                    <span class="admin-login-label"><span class="admin-login-label-led"></span>IMAGEN</span>
+                                                    <div class="admin-console-dropzone" onclick="document.getElementById('photoImage').click()">
+                                                        <i class="bi bi-cloud-upload admin-console-dropzone-icon" aria-hidden="true"></i>
+                                                        <p class="admin-console-dropzone-title">Subir foto</p>
+                                                        <p class="admin-console-dropzone-hint">Clic para elegir JPG o PNG</p>
+                                                        <input type="file" id="photoImage" name="image" accept="image/*" hidden>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="admin-console-form-actions">
+                                            <button type="submit" class="admin-console-btn admin-console-btn--primary">
+                                                <span class="admin-console-btn-led"></span>
+                                                <span class="admin-console-btn-face"><i class="bi bi-plus-lg" aria-hidden="true"></i> AGREGAR FOTO</span>
+                                            </button>
+                                            <button type="button" class="admin-console-btn admin-console-btn--ghost d-none" id="photoCancelEdit" onclick="cancelPhotoEdit()">
+                                                <span class="admin-console-btn-face"><i class="bi bi-x-circle" aria-hidden="true"></i> CANCELAR</span>
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+                                <div class="admin-console-module admin-console-module--list">
+                                    <div class="admin-console-module-head">
+                                        <span class="admin-console-module-tag">ROLL · CH 02</span>
+                                        <h2 class="admin-console-module-title">Galería publicada</h2>
+                                        <p class="admin-console-module-hint">Usá <strong>ANTES</strong> / <strong>DESPUÉS</strong> para cambiar el orden en la home. Pasá el mouse sobre una foto para ver título y descripción.</p>
+                                    </div>
+                                    <div id="photosList" class="photos-grid admin-photos-published"></div>
+                                </div>
+                            </section>
+
+                            <!-- Videos -->
+                            <section id="adminSectionVideos" class="admin-panel-section" role="tabpanel" aria-labelledby="tabVideos" hidden>
+                                <div class="admin-console-module">
+                                    <div class="admin-console-module-head">
+                                        <span class="admin-console-module-tag">INPUT · CH 03</span>
+                                        <h2 class="admin-console-module-title">Nuevo video</h2>
+                                        <p class="admin-console-module-hint">Enlaces de <strong>YouTube</strong> para la sección Videos. Máximo 8.</p>
+                                    </div>
+                                    <form id="videoForm" class="admin-console-form">
+                                        <div class="admin-console-form-grid">
+                                            <div class="admin-console-form-col">
+                                                <div class="admin-login-field">
+                                                    <label for="videoTitle" class="admin-login-label"><span class="admin-login-label-led"></span>TÍTULO</label>
+                                                    <input type="text" class="admin-login-input" id="videoTitle" name="title" placeholder="Opcional">
+                                                </div>
+                                                <div class="admin-login-field">
+                                                    <label for="videoDescription" class="admin-login-label"><span class="admin-login-label-led"></span>DESCRIPCIÓN</label>
+                                                    <textarea class="admin-login-input admin-login-input--area" id="videoDescription" name="description" rows="4" placeholder="Opcional"></textarea>
+                                                </div>
+                                            </div>
+                                            <div class="admin-console-form-col">
+                                                <div class="admin-login-field">
+                                                    <label for="videoUrl" class="admin-login-label"><span class="admin-login-label-led"></span>URL YOUTUBE</label>
+                                                    <input type="text" class="admin-login-input" id="videoUrl" name="url" placeholder="https://youtube.com/watch?v=... o ID de 11 caracteres" required>
+                                                    <p class="admin-console-field-hint">Pegá el enlace completo o solo el ID del video.</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="admin-console-form-actions">
+                                            <button type="submit" class="admin-console-btn admin-console-btn--primary">
+                                                <span class="admin-console-btn-led"></span>
+                                                <span class="admin-console-btn-face"><i class="bi bi-plus-lg" aria-hidden="true"></i> AGREGAR VIDEO</span>
+                                            </button>
+                                            <button type="button" class="admin-console-btn admin-console-btn--ghost d-none" id="videoCancelEdit" onclick="cancelVideoEdit()">
+                                                <span class="admin-console-btn-face"><i class="bi bi-x-circle" aria-hidden="true"></i> CANCELAR</span>
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+                                <div class="admin-console-module admin-console-module--list">
+                                    <div class="admin-console-module-head">
+                                        <span class="admin-console-module-tag">MONITOR · CH 03</span>
+                                        <h2 class="admin-console-module-title">Videos en línea</h2>
+                                        <p class="admin-console-module-hint">Usá <strong>ANTES</strong> / <strong>DESPUÉS</strong> para cambiar el orden en la home.</p>
+                                    </div>
+                                    <div id="videosList" class="videos-grid admin-videos-published"></div>
+                                </div>
+                            </section>
                         </div>
-                    </div>
-                </div>
-                
-                <!-- Gestión de Videos -->
-                <div class="admin-card">
-                    <div class="form-section">
-                        <h3><i class="bi bi-youtube"></i> Gestión de Videos 
-                            <span id="videosCounter" class="badge bg-info ms-2">Videos: 0/8</span>
-                        </h3>
-                        
-                        <form id="videoForm">
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="mb-3">
-                                        <label for="videoTitle" class="form-label">Título del Video</label>
-                                        <input type="text" class="form-control" id="videoTitle" name="title">
-                                    </div>
-                                    <div class="mb-3">
-                                        <label for="videoDescription" class="form-label">Descripción</label>
-                                        <textarea class="form-control" id="videoDescription" name="description" rows="3"></textarea>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="mb-3">
-                                        <label for="videoUrl" class="form-label">URL de YouTube</label>
-                                        <input type="text" class="form-control" id="videoUrl" name="url" placeholder="https://www.youtube.com/watch?v=... o solo el ID del video" required>
-                                        <div class="form-text">Pega aquí el enlace completo de YouTube o solo el ID del video (11 caracteres)</div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="d-flex flex-wrap gap-2">
-                                <button type="submit" class="btn btn-admin">Agregar Video</button>
-                                <button type="button" class="btn btn-outline-secondary d-none" id="videoCancelEdit" onclick="cancelVideoEdit()">
-                                    <i class="bi bi-x-circle"></i> Cancelar edición
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-                    
-                    <!-- Lista de Videos -->
-                    <div class="form-section">
-                        <h4>Videos Existentes</h4>
-                        <div id="videosList" class="media-list">
-                            <!-- Los videos se cargarán aquí -->
-                        </div>
+
+                        <footer class="admin-panel-footer" aria-hidden="true">
+                            <span class="admin-login-model">DM-ADM · PANEL v1</span>
+                            <span class="admin-login-signal">ON AIR</span>
+                        </footer>
                     </div>
                 </div>
             </div>
@@ -415,8 +349,11 @@
     
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="../config.js"></script>
-    <script src="../js/api.js"></script>
-    <script src="admin.js"></script>
+    <script src="../config.js?v=20250615"></script>
+    <script src="../js/flyer-render.js?v=20250620"></script>
+    <script src="../js/photo-render.js?v=20250621"></script>
+    <script src="../js/video-render.js?v=20250620"></script>
+    <script src="../js/api.js?v=20250619"></script>
+    <script src="admin.js?v=20250619"></script>
 </body>
 </html>

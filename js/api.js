@@ -297,6 +297,24 @@ class SimpleAPI {
         return data.flyers[index];
     }
 
+    async moveFlyer(id, direction) {
+        const data = await this.getData();
+        const flyers = Array.isArray(data.flyers) ? data.flyers : [];
+        const index = flyers.findIndex(f => f.id === id);
+        if (index === -1) {
+            throw new Error('Flyer no encontrado');
+        }
+        const newIndex = index + direction;
+        if (newIndex < 0 || newIndex >= flyers.length) {
+            return flyers;
+        }
+        const [item] = flyers.splice(index, 1);
+        flyers.splice(newIndex, 0, item);
+        data.flyers = flyers;
+        await this.saveData(data);
+        return flyers;
+    }
+
     // Agregar foto
     async addPhoto(photoData) {
         const data = await this.getData();
@@ -338,6 +356,24 @@ class SimpleAPI {
         return data.photos[index];
     }
 
+    async movePhoto(id, direction) {
+        const data = await this.getData();
+        const photos = Array.isArray(data.photos) ? data.photos : [];
+        const index = photos.findIndex(p => p.id === id);
+        if (index === -1) {
+            throw new Error('Foto no encontrada');
+        }
+        const newIndex = index + direction;
+        if (newIndex < 0 || newIndex >= photos.length) {
+            return photos;
+        }
+        const [item] = photos.splice(index, 1);
+        photos.splice(newIndex, 0, item);
+        data.photos = photos;
+        await this.saveData(data);
+        return photos;
+    }
+
     // Agregar video
     async addVideo(videoData) {
         const data = await this.getData();
@@ -377,6 +413,24 @@ class SimpleAPI {
         };
         await this.saveData(data);
         return data.videos[index];
+    }
+
+    async moveVideo(id, direction) {
+        const data = await this.getData();
+        const videos = Array.isArray(data.videos) ? data.videos : [];
+        const index = videos.findIndex(v => v.id === id);
+        if (index === -1) {
+            throw new Error('Video no encontrado');
+        }
+        const newIndex = index + direction;
+        if (newIndex < 0 || newIndex >= videos.length) {
+            return videos;
+        }
+        const [item] = videos.splice(index, 1);
+        videos.splice(newIndex, 0, item);
+        data.videos = videos;
+        await this.saveData(data);
+        return videos;
     }
 }
 

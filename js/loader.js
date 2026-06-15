@@ -108,13 +108,18 @@ function displayFlyers(flyers) {
             return;
         }
         
-        // Escapar caracteres especiales para evitar problemas con HTML
+        if (window.FlyerRender) {
+            container.innerHTML = FlyerRender.buildFlyerGrid(flyers, { showActions: true });
+            console.log('✅ Flyers mostrados:', flyers.length);
+            return;
+        }
+
         const escapeHtml = (text) => {
             const div = document.createElement('div');
-            div.textContent = text;
+            div.textContent = text || '';
             return div.innerHTML;
         };
-        
+
         container.innerHTML = flyers.map(flyer => {
             const title = escapeHtml(flyer.title || 'Sin título');
             const date = flyer.date ? formatDate(flyer.date) : 'Fecha no disponible';
@@ -219,7 +224,13 @@ function displayPhotos(photos) {
             container.innerHTML = '<p class="text-center text-muted" style="grid-column: 1/-1; padding: 3rem;">No hay fotos disponibles</p>';
             return;
         }
-        
+
+        if (window.PhotoRender) {
+            container.innerHTML = PhotoRender.buildPhotoGrid(photos, { adminContext: false });
+            console.log('✅ Fotos mostradas:', photos.length);
+            return;
+        }
+
         // Escapar caracteres especiales
         const escapeHtml = (text) => {
             const div = document.createElement('div');
@@ -228,17 +239,24 @@ function displayPhotos(photos) {
         };
         
         container.innerHTML = photos.map(photo => {
-            const title = escapeHtml(photo.title || 'Sin título');
-            const description = photo.description ? escapeHtml(photo.description) : '';
+            const rawTitle = (photo.title || '').trim();
+            const rawDescription = (photo.description || '').trim();
+            const title = rawTitle ? escapeHtml(rawTitle) : '';
+            const description = rawDescription ? escapeHtml(rawDescription) : '';
+            const hasCaption = Boolean(rawTitle || rawDescription);
             const image = photo.image || 'img/bluseraflier.jpg';
-            
-            return `
-                <div class="photo-card">
-                    <img src="${image}" class="photo-image" alt="${title}" onerror="this.src='img/bluseraflier.jpg'">
+            const altText = rawTitle ? escapeHtml(rawTitle) : '';
+
+            const overlayHtml = hasCaption ? `
                     <div class="photo-overlay">
-                        <h4 class="photo-title">${title}</h4>
+                        ${title ? `<h4 class="photo-title">${title}</h4>` : ''}
                         ${description ? `<p class="photo-description">${description}</p>` : ''}
-                    </div>
+                    </div>` : '';
+
+            return `
+                <div class="photo-card${hasCaption ? '' : ' photo-card--no-caption'}">
+                    <img src="${image}" class="photo-image" alt="${altText}" onerror="this.src='img/bluseraflier.jpg'">
+                    ${overlayHtml}
                 </div>
             `;
         }).join('');
@@ -299,229 +317,14 @@ function displayVideos(videos) {
             container.innerHTML = '<p class="text-center text-muted" style="grid-column: 1/-1; padding: 3rem;">No hay videos disponibles</p>';
             return;
         }
-        
-        // Escapar caracteres especiales
-        const escapeHtml = (text) => {
-            const div = document.createElement('div');
-            div.textContent = text;
-            return div.innerHTML;
-        };
-        
-        container.innerHTML = videos.map(video => {
-        // Función mejorada para extraer ID del video de YouTube
-        function extractYouTubeId(url) {
-            if (!url) return null;
-            
-            // Limpiar URL
-            let cleanUrl = url.trim();
-            
-            // Remover parámetros adicionales
-            if (cleanUrl.includes('&')) {
-                cleanUrl = cleanUrl.split('&')[0];
-            }
-            
-            // Diferentes patrones de URLs de YouTube (IDs tienen 11 caracteres)
-            // Incluir soporte para Shorts/Reels
-            const patterns = [
-                /(?:youtube\.com\/watch\?v=|youtube\.com\/watch\?.*&v=)([a-zA-Z0-9_-]{11})/,
-                /youtube\.com\/shorts\/([a-zA-Z0-9_-]{11})/,  // Shorts/Reels
-                /youtu\.be\/([a-zA-Z0-9_-]{11})/,
-                /youtube\.com\/embed\/([a-zA-Z0-9_-]{11})/,
-                /youtube\.com\/v\/([a-zA-Z0-9_-]{11})/,
-                /youtube\.com\/.*[?&]v=([a-zA-Z0-9_-]{11})/,
-                /^([a-zA-Z0-9_-]{11})$/  // Si solo es el ID
-            ];
-            
-            for (const pattern of patterns) {
-                const match = cleanUrl.match(pattern);
-                if (match && match[1] && match[1].length === 11) {
-                    return match[1];
-                }
-            }
-            
-            // Extracción manual si los patrones fallan
-            if (cleanUrl.includes('v=')) {
-                const parts = cleanUrl.split('v=');
-                if (parts.length > 1) {
-                    const possibleId = parts[1].split(/[&?#]/)[0].trim();
-                    if (possibleId.length === 11 && /^[a-zA-Z0-9_-]+$/.test(possibleId)) {
-                        return possibleId;
-                    }
-                }
-            }
-            
-            if (cleanUrl.includes('youtu.be/')) {
-                const parts = cleanUrl.split('youtu.be/');
-                if (parts.length > 1) {
-                    const possibleId = parts[1].split(/[?&#]/)[0].trim();
-                    if (possibleId.length === 11 && /^[a-zA-Z0-9_-]+$/.test(possibleId)) {
-                        return possibleId;
-                    }
-                }
-            }
-            
-            // Extraer de URLs de Shorts/Reels
-            if (cleanUrl.includes('/shorts/')) {
-                const parts = cleanUrl.split('/shorts/');
-                if (parts.length > 1) {
-                    const possibleId = parts[1].split(/[?&#]/)[0].trim();
-                    if (possibleId.length === 11 && /^[a-zA-Z0-9_-]+$/.test(possibleId)) {
-                        console.log('✅ Short/Reel detectado, ID extraído:', possibleId);
-                        return possibleId;
-                    }
-                }
-            }
-            
-            return null;
+
+        if (window.VideoRender) {
+            container.innerHTML = VideoRender.buildVideoGrid(videos, { checkEmbed: true });
+            console.log('✅ Videos mostrados:', videos.length);
+            return;
         }
-        
-        // Obtener videoId (priorizar el guardado, luego extraer de la URL)
-        let videoId = video.videoId || extractYouTubeId(video.url);
-        
-        // Log para debugging
-        console.log('🔍 Procesando video:', {
-            title: video.title,
-            url: video.url,
-            videoId: video.videoId,
-            extractedId: extractYouTubeId(video.url),
-            finalId: videoId
-        });
-        
-        // Validar que el videoId sea válido (exactamente 11 caracteres)
-        if (!videoId || videoId.length !== 11 || !/^[a-zA-Z0-9_-]+$/.test(videoId)) {
-            console.warn('⚠️ Video ID inválido:', videoId, 'URL:', video.url);
-            const title = escapeHtml(video.title || 'Video sin título');
-            const description = video.description ? escapeHtml(video.description) : '';
-            const url = video.url || '';
-            return `
-                <div class="video-card">
-                    <div class="video-container">
-                        <div class="admin-video-placeholder">
-                            <i class="bi bi-exclamation-triangle" style="font-size: 3rem; color: #dc3545;"></i>
-                            <p style="margin-top: 1rem; color: var(--text-muted);">Video ID inválido</p>
-                        </div>
-                    </div>
-                    <div class="video-info">
-                        <h3>${title}</h3>
-                        ${description ? `<p>${description}</p>` : ''}
-                        <p class="text-danger"><small>Error: ID de video inválido (${videoId || 'no extraído'})</small></p>
-                        ${url ? `<a href="${url}" target="_blank" class="btn btn-secondary btn-sm">
-                            <i class="bi bi-youtube"></i> Ver en YouTube
-                        </a>` : ''}
-                    </div>
-                </div>
-            `;
-        }
-        
-        // Detectar si es un Short/Reel (videos cortos de YouTube)
-        // Los Shorts a veces necesitan parámetros diferentes
-        const isShort = video.url && (video.url.includes('/shorts/') || video.url.includes('youtube.com/shorts/'));
-        
-        // Construir URL de embed correcta con parámetros para mejor compatibilidad
-        // Para Shorts/Reels usamos parámetros ligeramente diferentes
-        let embedUrl;
-        if (isShort) {
-            embedUrl = `https://www.youtube.com/embed/${videoId}?rel=0&modestbranding=1&playsinline=1`;
-        } else {
-            embedUrl = `https://www.youtube.com/embed/${videoId}?rel=0&modestbranding=1&playsinline=1&enablejsapi=1`;
-        }
-        
-        console.log('🎬 Tipo de video:', isShort ? 'Short/Reel' : 'Video normal', 'ID:', videoId);
-        
-        // Validar que la URL de embed sea correcta antes de crear el iframe
-        if (!embedUrl.includes('/embed/') || embedUrl === 'https://www.youtube.com/embed/' || !videoId) {
-            console.error('❌ URL de embed inválida generada:', embedUrl, 'VideoId:', videoId);
-            const title = escapeHtml(video.title || 'Video sin título');
-            const description = video.description ? escapeHtml(video.description) : '';
-            const url = video.url || '';
-            return `
-                <div class="col-md-6 col-lg-4 mb-4">
-                    <div class="card h-100">
-                        <div class="card-body text-center">
-                            <h5 class="card-title">${title}</h5>
-                            ${description ? `<p class="card-text">${description}</p>` : ''}
-                            <p class="text-danger"><small>Error generando URL de embed</small></p>
-                            ${url ? `<a href="${url}" target="_blank" class="btn btn-primary btn-sm">Ver en YouTube</a>` : ''}
-                        </div>
-                    </div>
-                </div>
-            `;
-        }
-        
-        const title = escapeHtml(video.title || 'Video sin título');
-        const description = video.description ? escapeHtml(video.description) : '';
-        const url = video.url || '';
-        
-        return `
-            <div class="video-card" data-video-id="${videoId}">
-                <div class="video-container" id="video-wrapper-${videoId}">
-                    <iframe 
-                        id="ytplayer-${videoId}"
-                        src="${embedUrl}" 
-                        frameborder="0" 
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
-                        allowfullscreen
-                        loading="lazy"
-                        style="width: 100%; height: 100%;"
-                        onload="checkVideoLoad('${videoId}')"
-                        title="${escapeHtml(title)}">
-                    </iframe>
-                    <div class="video-error-overlay" id="error-${videoId}" style="display: none;">
-                        <div class="video-error-content">
-                            <i class="bi bi-exclamation-triangle" style="font-size: 3rem; color: #ffc107; margin-bottom: 1rem;"></i>
-                            <p style="color: var(--text-light); margin-bottom: 0.5rem;">Este video no permite reproducción embebida</p>
-                            <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1.5rem;">Haz clic en el botón para verlo en YouTube</p>
-                            <a href="${url}" target="_blank" class="btn btn-primary">
-                                <i class="bi bi-youtube"></i> Ver en YouTube
-                            </a>
-                        </div>
-                    </div>
-                </div>
-                <div class="video-info">
-                    <h3>${title}</h3>
-                    ${description ? `<p>${description}</p>` : ''}
-                    ${url ? `<a href="${url}" target="_blank" class="btn btn-secondary btn-sm">
-                        <i class="bi bi-youtube"></i> Ver en YouTube
-                    </a>` : ''}
-                </div>
-            </div>
-        `;
-        }).join('');
-        
-        // Función para verificar si el video cargó correctamente
-        window.checkVideoLoad = function(videoId) {
-            setTimeout(() => {
-                const iframe = document.getElementById(`ytplayer-${videoId}`);
-                const errorOverlay = document.getElementById(`error-${videoId}`);
-                const wrapper = document.getElementById(`video-wrapper-${videoId}`);
-                
-                if (iframe && wrapper) {
-                    try {
-                        // Intentar detectar si el video tiene restricciones de embedding
-                        // Esto se hace verificando si el iframe tiene contenido o está bloqueado
-                        const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document;
-                        
-                        // Si no podemos acceder al documento (cross-origin), asumimos que está bien
-                        // Si podemos acceder y no hay contenido, podría ser un problema
-                        if (iframeDoc) {
-                            const body = iframeDoc.body;
-                            if (body && body.textContent.includes('no disponible') || body.textContent.includes('not available')) {
-                                console.warn('⚠️ Video con restricciones de embedding detectado:', videoId);
-                                if (errorOverlay) {
-                                    errorOverlay.style.display = 'flex';
-                                    iframe.style.display = 'none';
-                                }
-                            }
-                        }
-                    } catch (e) {
-                        // Cross-origin error es normal, significa que el iframe está cargando
-                        console.log('✅ Iframe de video cargado (cross-origin normal):', videoId);
-                    }
-                }
-            }, 2000);
-        };
-        
-        console.log('✅ Videos mostrados:', videos.length);
+
+        container.innerHTML = '<p class="text-center text-muted">Error cargando videos</p>';
     } catch (error) {
         console.error('❌ Error mostrando videos:', error);
         const container = document.getElementById('videos-container');
