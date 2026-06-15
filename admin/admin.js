@@ -40,6 +40,7 @@ function checkAuth() {
 function showLoginForm() {
     document.getElementById('loginSection').style.display = 'block';
     document.getElementById('adminPanel').style.display = 'none';
+    document.querySelector('.admin-container')?.classList.add('admin-container--login');
     isAuthenticated = false;
 }
 
@@ -47,6 +48,7 @@ function showLoginForm() {
 async function showAdminPanel() {
     document.getElementById('loginSection').style.display = 'none';
     document.getElementById('adminPanel').style.display = 'block';
+    document.querySelector('.admin-container')?.classList.remove('admin-container--login');
     isAuthenticated = true;
     await loadAllContent();
 }

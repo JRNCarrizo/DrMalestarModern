@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <link rel="icon" type="image/x-icon" href="img/malestaexport.ico">
     <title>Dr.Malestar - Tributo a Pappo</title>
     
@@ -38,42 +38,82 @@
     <meta name="author" content="Dr.Malestar">
 </head>
 <body class="bodyP">
-    <!-- Barra de Navegación Moderna -->
-    <nav class="navbar navbar-expand-lg navbar-dark fixed-top stage-navbar">
-        <div class="container-fluid">
-            <a class="navbar-brand d-lg-none" href="#" id="logoLinkSmall">
-                <img src="img/logoNuevo-malestar.png" alt="Dr.Malestar Logo" class="logo-navbar">
-            </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav mx-auto">
-                    <li class="nav-item px-3">
-                        <a class="nav-link nav-button" href="#videos">
-                            <i class="bi bi-play-circle"></i> Videos
-                        </a>
-                    </li>
-                    <li class="nav-item px-3">
-                        <a class="nav-link nav-button" href="#cartelera">
-                            <i class="bi bi-calendar-event"></i> Próximos Shows
-                        </a>
-                    </li>
-                    <a class="navbar-brand d-none d-lg-block mx-4" href="#" id="logoLinkLarge">
-                        <img class="logo-main logo-navbar" src="img/logoNuevo-malestar.png" alt="Dr.Malestar Logo">
-                    </a>
-                    <li class="nav-item px-3">
-                        <a class="nav-link nav-button" href="#biografia">
-                            <i class="bi bi-people"></i> Sobre Nosotros
-                        </a>
-                    </li>
-                    <li class="nav-item px-3">
-                        <a class="nav-link nav-button" href="#contacto">
-                            <i class="bi bi-envelope"></i> Contacto
-                        </a>
-                    </li>
-                </ul>
+    <!-- Barra de Navegación — cabezal amplificador (prueba) -->
+    <nav class="navbar navbar-expand-lg navbar-dark fixed-top stage-navbar amp-navbar">
+        <div class="amp-navbar-chassis">
+            <div class="amp-navbar-power" aria-hidden="true">
+                <span class="amp-navbar-power-led"></span>
+                <span class="amp-navbar-power-label">POWER</span>
+            </div>
+            <div class="container-fluid amp-navbar-main">
+                <a class="navbar-brand d-lg-none amp-navbar-brand-mobile" href="#" id="logoLinkSmall">
+                    <img src="img/logoNuevo-malestar.png" alt="Dr.Malestar Logo" class="logo-navbar">
+                </a>
+                <button class="navbar-toggler amp-navbar-toggler ms-auto" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <div class="collapse navbar-collapse w-100" id="navbarNav">
+                    <div class="amp-navbar-strip">
+                        <div class="amp-knob-group amp-navbar-knobs d-none d-lg-flex" aria-hidden="true">
+                            <div class="amp-knob amp-knob--sm">
+                                <span class="amp-knob-cap"><span class="amp-knob-notch"></span></span>
+                                <span class="amp-knob-name">VOL</span>
+                            </div>
+                            <div class="amp-knob amp-knob--sm">
+                                <span class="amp-knob-cap amp-knob-cap--mid"><span class="amp-knob-notch"></span></span>
+                                <span class="amp-knob-name">GAIN</span>
+                            </div>
+                        </div>
+
+                        <ul class="navbar-nav mx-auto amp-navbar-nav">
+                            <li class="nav-item px-2 px-xl-3">
+                                <a class="nav-link nav-button nav-button--amp" href="#videos">
+                                    <i class="bi bi-play-circle"></i> Videos
+                                </a>
+                            </li>
+                            <li class="nav-item px-2 px-xl-3">
+                                <a class="nav-link nav-button nav-button--amp" href="#cartelera">
+                                    <i class="bi bi-calendar-event"></i> Shows
+                                </a>
+                            </li>
+                            <li class="nav-item d-none d-lg-flex px-2">
+                                <a class="navbar-brand amp-navbar-plate" href="#" id="logoLinkLarge">
+                                    <span class="amp-navbar-plate-tag">Dr.Malestar</span>
+                                    <img class="logo-main logo-navbar" src="img/logoNuevo-malestar.png" alt="Dr.Malestar Logo">
+                                    <span class="amp-navbar-plate-sub">TRIBUTE · PAPPO</span>
+                                </a>
+                            </li>
+                            <li class="nav-item px-2 px-xl-3">
+                                <a class="nav-link nav-button nav-button--amp" href="#biografia">
+                                    <i class="bi bi-people"></i> Nosotros
+                                </a>
+                            </li>
+                            <li class="nav-item px-2 px-xl-3">
+                                <a class="nav-link nav-button nav-button--amp" href="#contacto">
+                                    <i class="bi bi-envelope"></i> Contacto
+                                </a>
+                            </li>
+                        </ul>
+
+                        <div class="amp-knob-group amp-navbar-knobs d-none d-lg-flex" aria-hidden="true">
+                            <div class="amp-knob amp-knob--sm">
+                                <span class="amp-knob-cap amp-knob-cap--low"><span class="amp-knob-notch"></span></span>
+                                <span class="amp-knob-name">BASS</span>
+                            </div>
+                            <div class="amp-knob amp-knob--sm">
+                                <span class="amp-knob-cap amp-knob-cap--high"><span class="amp-knob-notch"></span></span>
+                                <span class="amp-knob-name">TREBLE</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="amp-grille amp-navbar-grille d-none d-lg-flex" aria-hidden="true">
+                <span class="amp-led"></span>
+                <span class="amp-led amp-led--on"></span>
+                <span class="amp-led"></span>
             </div>
         </div>
     </nav>
@@ -83,7 +123,7 @@
         <div class="stage-lights" id="stage-lights" aria-hidden="true">
             <div class="stage-flashes">
                 <div class="light-flash light-flash-white"></div>
-                <div class="light-flash light-flash-orange"></div>
+                <div class="light-flash light-flash-green"></div>
                 <div class="light-flash light-flash-red"></div>
             </div>
             <div class="spotlight spotlight-left"></div>
@@ -161,7 +201,7 @@
                 <div class="console-bank-panel">
                     <div class="console-bank-row">
                         <div class="console-bank-group" aria-hidden="true">
-                            <div class="console-bank-btn console-bank-btn--lit">
+                            <div class="console-bank-btn console-bank-btn--lit console-bank-btn--hot">
                                 <span class="console-bank-led"></span>
                                 <span class="console-bank-key">REC</span>
                             </div>
