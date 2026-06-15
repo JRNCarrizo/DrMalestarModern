@@ -1367,44 +1367,6 @@ body {
     .amp-knob-name {
         font-size: 0.42rem;
     }
-
-    .console-bank-row {
-        flex-direction: column;
-        align-items: center;
-        gap: 0.75rem;
-    }
-
-    .console-bank-display {
-        width: 100%;
-    }
-
-    .console-bank-controls {
-        display: flex;
-        flex-direction: row;
-        justify-content: center;
-        align-items: flex-end;
-        gap: 0.5rem;
-        width: 100%;
-        flex-wrap: nowrap;
-    }
-
-    .console-bank-group {
-        gap: 0.35rem;
-        flex: 0 0 auto;
-    }
-
-    .console-bank-btn {
-        min-width: 34px;
-        padding: 4px 4px 5px;
-    }
-
-    .console-bank-key {
-        min-width: 30px;
-        min-height: 24px;
-        font-size: 0.38rem;
-        padding: 3px 3px;
-        letter-spacing: 0.06em;
-    }
 }
 
 /* =========================================== */
@@ -1588,6 +1550,56 @@ body {
 .vu-seg--hot {
     background: #ef4444;
     box-shadow: 0 0 5px rgba(239, 68, 68, 0.5);
+}
+
+@media (max-width: 767.98px) {
+    .console-bank-row {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .console-bank-display {
+        width: 100%;
+        max-width: 100%;
+        grid-column: unset;
+        grid-row: unset;
+    }
+
+    .console-bank-controls {
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+        align-items: flex-end;
+        gap: 0.5rem;
+        width: 100%;
+        flex-wrap: nowrap;
+    }
+
+    .console-bank-controls .console-bank-group:first-child,
+    .console-bank-controls .console-bank-group:last-child {
+        grid-column: unset;
+        grid-row: unset;
+    }
+
+    .console-bank-group {
+        gap: 0.35rem;
+        flex: 0 0 auto;
+    }
+
+    .console-bank-btn {
+        min-width: 34px;
+        padding: 4px 4px 5px;
+    }
+
+    .console-bank-key {
+        min-width: 30px;
+        min-height: 24px;
+        font-size: 0.38rem;
+        padding: 3px 3px;
+        letter-spacing: 0.06em;
+    }
 }
 
 @media (max-width: 991.98px) {
