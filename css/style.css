@@ -205,6 +205,13 @@ body {
     animation: commandLedPulse 2s ease-in-out infinite;
 }
 
+.nav-button--section-active::before,
+.nav-button--led-hover::before {
+    background: var(--led-green);
+    box-shadow: 0 0 8px var(--glow-green);
+    animation: commandLedPulse 2s ease-in-out infinite;
+}
+
 .nav-button:hover {
     color: #fff;
     transform: translateY(-2px);
@@ -227,6 +234,36 @@ body {
         #ef4444 88%,
         #1a1a1f 100%
     );
+}
+
+.nav-button--section-active,
+.nav-button--led-hover {
+    color: #fff;
+}
+
+.nav-button--section-active::after,
+.nav-button--led-hover::after {
+    opacity: 0.85;
+    background: linear-gradient(
+        90deg,
+        #14532d 0%,
+        #22c55e 18%,
+        #1a1a1f 22%,
+        #15803d 40%,
+        #4ade80 44%,
+        #1a1a1f 62%,
+        #22c55e 66%,
+        #1a1a1f 84%,
+        #ef4444 88%,
+        #1a1a1f 100%
+    );
+}
+
+@media (max-width: 991.98px) {
+    .nav-button--section-active,
+    .nav-button--led-hover {
+        transform: none;
+    }
 }
 
 .nav-button:active {
@@ -629,11 +666,51 @@ body {
         align-self: center;
         justify-content: center;
         min-width: 0;
+        position: relative;
+        z-index: 4;
     }
 
     .amp-navbar-mobile-knobs .amp-navbar-knobs {
         gap: 0.45rem;
         padding: 0;
+    }
+
+    .amp-navbar-mobile-knobs .amp-knob--interactive {
+        touch-action: manipulation;
+        padding: 0.35rem 0.2rem;
+        margin: -0.35rem -0.2rem;
+    }
+
+    .amp-navbar-mobile-knobs .amp-knob-cap {
+        position: relative;
+        z-index: 1;
+    }
+
+    .panel-toggle {
+        touch-action: manipulation;
+    }
+
+    .console-bank-btn.panel-toggle {
+        min-width: 40px;
+        padding: 6px 5px 7px;
+    }
+
+    .broadcast-on-air.panel-toggle,
+    .broadcast-rec.panel-toggle {
+        min-height: 36px;
+        align-items: center;
+    }
+
+    .signal-pill.panel-toggle {
+        min-height: 28px;
+        display: inline-flex;
+        align-items: center;
+    }
+
+    .section-panel-grille .amp-led.panel-toggle,
+    .rider-amp-footer .amp-led.panel-toggle {
+        padding: 10px;
+        margin: -6px;
     }
 
     .amp-navbar-toggler {
@@ -1561,6 +1638,7 @@ body {
     cursor: pointer;
     -webkit-tap-highlight-color: transparent;
     user-select: none;
+    touch-action: manipulation;
 }
 
 .panel-toggle:focus-visible {

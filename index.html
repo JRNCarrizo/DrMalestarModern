@@ -22,7 +22,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
     
     <!-- Custom CSS -->
-    <link href="css/style.css?v=20250742" rel="stylesheet">
+    <link href="css/style.css?v=20250744" rel="stylesheet">
     
     <!-- Meta Tags para SEO -->
     <meta property="og:title" content="Dr.Malestar - Tributo a Pappo" />
@@ -582,6 +582,28 @@
     <script>
         // Configurar navegación y botón de admin
         document.addEventListener('DOMContentLoaded', function() {
+            function bindTapAction(el, handler) {
+                var touchHandled = false;
+                function run(e) {
+                    if (e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                    }
+                    handler(e);
+                }
+                el.addEventListener('touchend', function(e) {
+                    touchHandled = true;
+                    run(e);
+                    window.setTimeout(function() {
+                        touchHandled = false;
+                    }, 400);
+                });
+                el.addEventListener('click', function(e) {
+                    if (touchHandled) return;
+                    run(e);
+                });
+            }
+
             // Smooth scroll para enlaces internos
             document.querySelectorAll('a[href^="#"]').forEach(anchor => {
                 anchor.addEventListener('click', function (e) {
@@ -612,6 +634,11 @@
                     document.querySelectorAll('.amp-navbar-grille [data-nav-led]').forEach(function(led) {
                         led.classList.toggle('amp-led--on', active !== null && led.dataset.navLed === active);
                     });
+                    navButtons.forEach(function(btn) {
+                        const idx = btn.dataset.navLed;
+                        btn.classList.toggle('nav-button--section-active', scrollLed !== null && idx === scrollLed);
+                        btn.classList.toggle('nav-button--led-hover', hoverLed !== null && idx === hoverLed);
+                    });
                 }
 
                 function setScrollLed(led) {
@@ -632,6 +659,9 @@
                     btn.addEventListener('mouseleave', function() { setHover(idx, false); });
                     btn.addEventListener('focus', function() { setHover(idx, true); });
                     btn.addEventListener('blur', function() { setHover(idx, false); });
+                    btn.addEventListener('touchstart', function() { setHover(idx, true); }, { passive: true });
+                    btn.addEventListener('touchend', function() { setHover(idx, false); });
+                    btn.addEventListener('touchcancel', function() { setHover(idx, false); });
                 });
 
                 const spyEntries = [];
@@ -725,7 +755,7 @@
                     function toggle() {
                         setOn(!isOn());
                     }
-                    el.addEventListener('click', toggle);
+                    bindTapAction(el, toggle);
                     el.addEventListener('keydown', function(e) {
                         if (e.key === 'Enter' || e.key === ' ') {
                             e.preventDefault();
@@ -785,7 +815,7 @@
                 });
             })();
 
-            // Perillas interactivas — navbar y Próximas Fechas
+            // Perillas interactivas — navbar (móvil + desktop) y Próximas Fechas
             (function initInteractiveKnobs() {
                 var stepDeg = 38;
 
@@ -796,7 +826,7 @@
                     return -35;
                 }
 
-                document.querySelectorAll('.amp-head-controls .amp-knob, .amp-navbar-knobs .amp-knob').forEach(function(knob) {
+                function bindKnob(knob) {
                     var cap = knob.querySelector('.amp-knob-cap');
                     var notch = knob.querySelector('.amp-knob-notch');
                     if (!cap || !notch) return;
@@ -821,7 +851,7 @@
 
                     applyRotation();
 
-                    knob.addEventListener('click', function() {
+                    bindTapAction(knob, function() {
                         rotateKnob(stepDeg);
                     });
 
@@ -831,7 +861,11 @@
                             rotateKnob(stepDeg);
                         }
                     });
-                });
+                }
+
+                document.querySelectorAll(
+                    '.amp-head-controls .amp-knob, .amp-navbar-mobile-knobs .amp-knob, .amp-navbar-strip .amp-navbar-knobs .amp-knob'
+                ).forEach(bindKnob);
             })();
 
             // Cerrar navbar en móviles
@@ -900,6 +934,9 @@
                     link.addEventListener('mouseleave', function() { setHeroGlow(false); });
                     link.addEventListener('focus', function() { setHeroGlow(true); });
                     link.addEventListener('blur', function() { setHeroGlow(false); });
+                    link.addEventListener('touchstart', function() { setHeroGlow(true); }, { passive: true });
+                    link.addEventListener('touchend', function() { setHeroGlow(false); });
+                    link.addEventListener('touchcancel', function() { setHeroGlow(false); });
                 });
             })();
 
