@@ -22,7 +22,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
     
     <!-- Custom CSS -->
-    <link href="css/style.css?v=20250726" rel="stylesheet">
+    <link href="css/style.css?v=20250728" rel="stylesheet">
     
     <!-- Meta Tags para SEO -->
     <meta property="og:title" content="Dr.Malestar - Tributo a Pappo" />
@@ -87,11 +87,6 @@
                                     <span class="amp-navbar-plate-tag">Dr.Malestar</span>
                                     <img class="logo-main logo-navbar" src="img/logoNuevo-malestar.png" alt="Dr.Malestar Logo">
                                     <span class="amp-navbar-plate-sub">TRIBUTE · PAPPO</span>
-                                </a>
-                            </li>
-                            <li class="nav-item amp-navbar-logo-item d-lg-none px-2">
-                                <a class="navbar-brand amp-navbar-plate amp-navbar-plate--mobile-nav" href="#" id="logoLinkMobile">
-                                    <img class="logo-main logo-navbar" src="img/logoNuevo-malestar.png" alt="Dr.Malestar Logo">
                                 </a>
                             </li>
                             <li class="nav-item px-2 px-xl-3">
@@ -641,7 +636,6 @@
             const heroSection = document.getElementById('hero');
             const logoLinkSmall = document.getElementById('logoLinkSmall');
             const logoLinkLarge = document.getElementById('logoLinkLarge');
-            const logoLinkMobile = document.getElementById('logoLinkMobile');
 
             function scrollToHero(event) {
                 event.preventDefault();
@@ -665,15 +659,12 @@
             if (logoLinkLarge) {
                 logoLinkLarge.addEventListener('click', scrollToHero);
             }
-            if (logoLinkMobile) {
-                logoLinkMobile.addEventListener('click', scrollToHero);
-            }
 
             // Logo y título del hero — se encienden al hover/focus del logo del navbar
             (function initNavbarHeroLogoGlow() {
                 const heroLogo = document.querySelector('.hero-stage-glow');
                 const heroTitle = document.querySelector('.hero-title');
-                const logoLinks = [logoLinkSmall, logoLinkLarge, logoLinkMobile].filter(Boolean);
+                const logoLinks = [logoLinkSmall, logoLinkLarge].filter(Boolean);
                 if (!logoLinks.length) return;
 
                 let hoverCount = 0;

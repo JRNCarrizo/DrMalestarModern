@@ -554,14 +554,16 @@ body {
         border-top: 2px solid #2a2a30;
         margin-top: 0.25rem;
         padding-bottom: 0.75rem;
+        padding-left: max(0.85rem, env(safe-area-inset-left));
+        padding-right: max(0.85rem, env(safe-area-inset-right));
         border-radius: 0 0 10px 10px;
         box-shadow: inset 0 4px 12px rgba(0, 0, 0, 0.4);
     }
 
     .navbar-collapse .navbar-nav {
         flex-direction: column;
-        align-items: center;
-        justify-content: center;
+        align-items: stretch;
+        justify-content: flex-start;
         gap: 0.65rem;
         padding: 1rem 0 0.5rem;
         width: 100%;
@@ -569,35 +571,38 @@ body {
         margin-right: 0;
     }
 
-    .navbar-nav .nav-item {
+    .navbar-collapse .navbar-nav .nav-item {
         width: 100%;
-        justify-content: center;
+        justify-content: flex-start;
         padding-left: 0 !important;
         padding-right: 0 !important;
     }
 
-    .nav-button {
+    .navbar-collapse .nav-button {
         flex-direction: row;
-        justify-content: center;
+        justify-content: flex-start;
+        align-items: center;
         gap: 12px;
-        width: min(100%, 300px);
+        width: 100%;
         min-width: 0;
-        padding: 6px 8px 10px;
-        text-align: center;
-        margin-left: auto;
-        margin-right: auto;
+        padding: 6px 0 10px;
+        text-align: left;
+        margin-left: 0;
+        margin-right: 0;
     }
 
-    .nav-button::before {
+    .navbar-collapse .nav-button::before {
         order: 0;
     }
 
-    .nav-button i {
+    .navbar-collapse .nav-button i {
         order: 1;
         flex-shrink: 0;
+        width: 1.25rem;
+        text-align: center;
     }
 
-    .nav-button::after {
+    .navbar-collapse .nav-button::after {
         left: 0;
         right: 0;
         bottom: 4px;
@@ -605,23 +610,8 @@ body {
 
     .amp-navbar-strip {
         flex-direction: column;
-        align-items: center;
-    }
-
-    .amp-navbar-logo-item {
+        align-items: stretch;
         width: 100%;
-        justify-content: center;
-        padding-top: 0.25rem;
-        padding-bottom: 0.25rem;
-    }
-
-    .amp-navbar-plate--mobile-nav {
-        padding: 0.45rem 0.85rem 0.4rem;
-    }
-
-    .amp-navbar-plate--mobile-nav .logo-navbar {
-        height: 44px;
-        max-width: 180px;
     }
 }
 
@@ -5342,11 +5332,11 @@ a.contact-card:hover {
         padding: 3rem 0;
     }
     
-    .nav-button {
+    .navbar-collapse .nav-button {
         font-size: 0.5rem;
         min-width: 0;
         margin: 0;
-        width: min(100%, 280px);
+        width: 100%;
     }
 
     .console-command-btn {
