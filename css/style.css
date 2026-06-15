@@ -767,7 +767,7 @@ body {
 
 /* Flash de contorno blanco — solo logo (luces de show) */
 .hero-stage-glow {
-    animation: heroLogoContourFlash 7.5s ease-in-out infinite;
+    animation: heroLogoContourFlash 7.5s ease-out infinite;
 }
 
 @keyframes heroLogoContourFlash {
@@ -777,7 +777,7 @@ body {
             drop-shadow(0 16px 32px rgba(0, 0, 0, 0.4))
             drop-shadow(0 0 20px rgba(255, 255, 255, 0.1));
     }
-    83%, 86% {
+    83%, 84% {
         filter:
             drop-shadow(0 6px 12px rgba(0, 0, 0, 0.55))
             drop-shadow(0 0 4px rgba(255, 255, 255, 1))
@@ -785,11 +785,25 @@ body {
             drop-shadow(0 0 32px rgba(255, 255, 255, 0.7))
             drop-shadow(0 0 48px rgba(255, 255, 255, 0.35));
     }
-    87%, 91% {
+    86% {
         filter:
             drop-shadow(0 6px 12px rgba(0, 0, 0, 0.55))
-            drop-shadow(0 0 2px rgba(255, 255, 255, 0.75))
-            drop-shadow(0 0 12px rgba(255, 255, 255, 0.45));
+            drop-shadow(0 16px 32px rgba(0, 0, 0, 0.4))
+            drop-shadow(0 0 10px rgba(255, 255, 255, 0.5))
+            drop-shadow(0 0 22px rgba(255, 255, 255, 0.22));
+    }
+    88.5% {
+        filter:
+            drop-shadow(0 6px 12px rgba(0, 0, 0, 0.55))
+            drop-shadow(0 16px 32px rgba(0, 0, 0, 0.4))
+            drop-shadow(0 0 6px rgba(255, 255, 255, 0.22))
+            drop-shadow(0 0 14px rgba(255, 255, 255, 0.08));
+    }
+    91% {
+        filter:
+            drop-shadow(0 6px 12px rgba(0, 0, 0, 0.55))
+            drop-shadow(0 16px 32px rgba(0, 0, 0, 0.4))
+            drop-shadow(0 0 20px rgba(255, 255, 255, 0.1));
     }
 }
 
