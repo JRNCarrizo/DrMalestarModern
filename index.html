@@ -22,7 +22,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
     
     <!-- Custom CSS -->
-    <link href="css/style.css?v=20250624" rel="stylesheet">
+    <link href="css/style.css?v=20250701" rel="stylesheet">
     
     <!-- Meta Tags para SEO -->
     <meta property="og:title" content="Dr.Malestar - Tributo a Pappo" />
@@ -130,7 +130,7 @@
             <div class="spotlight spotlight-right"></div>
         </div>
         <div class="hero-content">
-            <img src="img/logoNuevo-malestar.png" alt="Dr.Malestar" class="logo-hero">
+            <img src="img/logoNuevo-malestar.png" alt="Dr.Malestar" class="logo-hero hero-stage-glow">
             <div class="hero-text-block">
                 <h1 class="hero-title">Dr.Malestar</h1>
                 <p class="hero-subtitle">Tributo a Norberto Aníbal Napolitano - PAPPO</p>
@@ -364,42 +364,28 @@
     <section id="contacto" class="section-padding">
         <div class="container">
             <div class="console-section-header" aria-labelledby="contacto-title">
-                <span class="console-section-tag">Contact Input</span>
+                <span class="console-section-tag">Contact Channel</span>
                 <h2 id="contacto-title" class="console-section-title">Contacto</h2>
                 <span class="console-section-line" aria-hidden="true"></span>
             </div>
-            <div class="contact-content">
-                <div class="contact-info">
-                    <div class="contact-item">
-                        <i class="bi bi-envelope"></i>
-                        <span>Natalehectorbass@gmail.com</span>
-                    </div>
-                    <div class="contact-item">
-                        <i class="bi bi-telephone"></i>
-                        <span>11 2245-3594</span>
-                    </div>
-                    <div class="contact-item">
-                        <i class="bi bi-geo-alt"></i>
-                        <span>Buenos Aires, Argentina</span>
-                    </div>
-                </div>
-                <div class="contact-form">
-                    <form id="contactForm">
-                        <div class="row">
-                            <div class="col-md-6">
-                                <input type="text" class="form-control" placeholder="Nombre" required>
-                            </div>
-                            <div class="col-md-6">
-                                <input type="email" class="form-control" placeholder="Email" required>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-12">
-                                <textarea class="form-control" rows="5" placeholder="Mensaje" required></textarea>
-                            </div>
-                        </div>
-                        <button type="submit" class="btn btn-primary">Enviar Mensaje</button>
-                    </form>
+            <div class="contact-grid">
+                <a href="mailto:Natalehectorbass@gmail.com" class="contact-card">
+                    <span class="contact-card-tag">MAIL</span>
+                    <i class="bi bi-envelope contact-card-icon" aria-hidden="true"></i>
+                    <span class="contact-card-label">Email</span>
+                    <span class="contact-card-value">Natalehectorbass@gmail.com</span>
+                </a>
+                <a href="https://wa.me/5491122453594" class="contact-card contact-card--whatsapp" target="_blank" rel="noopener noreferrer" title="Escribinos por WhatsApp">
+                    <span class="contact-card-tag">WA</span>
+                    <i class="bi bi-whatsapp contact-card-icon contact-card-icon--whatsapp" aria-hidden="true"></i>
+                    <span class="contact-card-label">WhatsApp</span>
+                    <span class="contact-card-value">11 2245-3594</span>
+                </a>
+                <div class="contact-card contact-card--static">
+                    <span class="contact-card-tag">LOC</span>
+                    <i class="bi bi-geo-alt contact-card-icon" aria-hidden="true"></i>
+                    <span class="contact-card-label">Ubicación</span>
+                    <span class="contact-card-value">Buenos Aires, Argentina</span>
                 </div>
             </div>
         </div>
@@ -414,23 +400,39 @@
                 <span class="console-section-line" aria-hidden="true"></span>
             </div>
             <div class="row justify-content-center">
-                <div class="col-lg-8 text-center">
-                    <div class="rider-card">
-                        <div class="rider-icon">
-                            <i class="bi bi-file-earmark-music"></i>
-                        </div>
-                        <h3>Especificaciones Técnicas</h3>
-                        <p class="rider-description">
-                            Descarga nuestro rider técnico completo con todas las especificaciones de sonido 
-                            y equipamiento necesario para nuestros shows.
-                        </p>
-                        <div class="rider-actions">
-                            <a href="img/RiderTécnicoDrMalestar.png" target="_blank" class="btn btn-secondary">
-                                <i class="bi bi-eye"></i> Ver Rider
-                            </a>
-                            <a href="img/RiderTécnicoDrMalestar.png" download class="btn btn-primary">
-                                <i class="bi bi-download"></i> Descargar PDF
-                            </a>
+                <div class="col-lg-9 text-center">
+                    <div class="rider-amp">
+                        <div class="rider-amp-cabinet">
+                            <div class="rider-amp-header">
+                                <span class="rider-amp-brand">Dr.Malestar</span>
+                                <span class="rider-amp-model">TECH RIDER · SPECS</span>
+                            </div>
+                            <div class="rider-amp-grille">
+                                <div class="rider-amp-grille-mesh" aria-hidden="true"></div>
+                                <div class="rider-amp-content">
+                                    <div class="rider-icon">
+                                        <i class="bi bi-file-earmark-music"></i>
+                                    </div>
+                                    <h3>Especificaciones Técnicas</h3>
+                                    <p class="rider-description">
+                                        Descarga nuestro rider técnico completo con todas las especificaciones de sonido
+                                        y equipamiento necesario para nuestros shows.
+                                    </p>
+                                    <div class="rider-actions">
+                                        <a href="img/RiderTécnicoDrMalestar.png" target="_blank" rel="noopener" class="btn-console btn-console--ghost">
+                                            <i class="bi bi-eye"></i> Ver Rider
+                                        </a>
+                                        <a href="img/RiderTécnicoDrMalestar.png" download class="btn-console btn-console--primary">
+                                            <i class="bi bi-download"></i> Descargar
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="rider-amp-footer" aria-hidden="true">
+                                <span class="amp-led"></span>
+                                <span class="amp-led amp-led--on"></span>
+                                <span class="amp-led"></span>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -440,7 +442,24 @@
 
     <!-- Footer -->
     <footer class="footer">
+        <div class="footer-hazard-strip" aria-hidden="true"></div>
         <div class="container">
+            <div class="footer-warnings" aria-hidden="true">
+                <div class="elec-sign elec-sign--triangle">
+                    <span class="elec-sign-bolt"><i class="bi bi-lightning-charge-fill"></i></span>
+                    <span class="elec-sign-line">DANGER</span>
+                </div>
+                <div class="elec-sign elec-sign--plate">
+                    <span class="elec-sign-plate-top">HIGH VOLTAGE</span>
+                    <span class="elec-sign-plate-icon"><i class="bi bi-lightning-charge-fill"></i></span>
+                    <span class="elec-sign-plate-sub">KEEP OUT</span>
+                </div>
+                <div class="elec-sign elec-sign--plate elec-sign--danger">
+                    <span class="elec-sign-plate-top">CAUTION</span>
+                    <span class="elec-sign-plate-icon"><i class="bi bi-exclamation-triangle-fill"></i></span>
+                    <span class="elec-sign-plate-sub">LIVE CIRCUIT</span>
+                </div>
+            </div>
             <div class="footer-content">
                 <div class="footer-logo">
                     <img src="img/logoNuevo-malestar.png" alt="Dr.Malestar" class="logo-footer">
@@ -450,6 +469,11 @@
                     <a href="https://www.instagram.com/dr.malestar?igsh=Mmw2ZXluZzl2dzFq" target="_blank" class="social-link" title="Instagram - @dr.malestar"><i class="bi bi-instagram"></i></a>
                     <a href="https://youtube.com/@dr.malestar478?si=TfpVCdFJqLfBa18q" target="_blank" class="social-link" title="YouTube - Dr.Malestar"><i class="bi bi-youtube"></i></a>
                 </div>
+                <div class="footer-electric-tags" aria-hidden="true">
+                    <span class="elec-tag">230V AC</span>
+                    <span class="elec-tag elec-tag--live">LIVE</span>
+                    <span class="elec-tag">EARTH GROUNDED</span>
+                </div>
                 <div class="footer-text">
                     <p>&copy; 2025 Dr.Malestar. Todos los derechos reservados.</p>
                     <p class="footer-credit">
@@ -458,6 +482,7 @@
                 </div>
             </div>
         </div>
+        <div class="footer-hazard-strip footer-hazard-strip--bottom" aria-hidden="true"></div>
     </footer>
 
     <!-- Botón Admin — estilo consola -->
