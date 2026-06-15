@@ -39,7 +39,7 @@
 </head>
 <body class="bodyP">
     <!-- Barra de Navegación Moderna -->
-    <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
+    <nav class="navbar navbar-expand-lg navbar-dark fixed-top stage-navbar">
         <div class="container-fluid">
             <a class="navbar-brand d-lg-none" href="#" id="logoLinkSmall">
                 <img src="img/logoNuevo-malestar.png" alt="Dr.Malestar Logo" class="logo-navbar">
@@ -80,7 +80,12 @@
 
     <!-- Hero Section -->
     <section id="hero" class="hero-section">
-        <div class="hero-spotlights" aria-hidden="true">
+        <div class="stage-lights" id="stage-lights" aria-hidden="true">
+            <div class="stage-flashes">
+                <div class="light-flash light-flash-white"></div>
+                <div class="light-flash light-flash-orange"></div>
+                <div class="light-flash light-flash-red"></div>
+            </div>
             <div class="spotlight spotlight-left"></div>
             <div class="spotlight spotlight-right"></div>
         </div>
@@ -102,7 +107,42 @@
     <!-- Cartelera de Shows -->
     <section id="cartelera" class="section-padding">
         <div class="container">
-            <h2 class="section-title">Próximas Fechas</h2>
+            <div class="amp-head-header" aria-labelledby="cartelera-title">
+                <div class="amp-head-panel">
+                    <div class="amp-head-controls">
+                        <div class="amp-knob-group" aria-hidden="true">
+                            <div class="amp-knob">
+                                <span class="amp-knob-cap"><span class="amp-knob-notch"></span></span>
+                                <span class="amp-knob-name">VOL</span>
+                            </div>
+                            <div class="amp-knob">
+                                <span class="amp-knob-cap amp-knob-cap--mid"><span class="amp-knob-notch"></span></span>
+                                <span class="amp-knob-name">GAIN</span>
+                            </div>
+                        </div>
+                        <div class="amp-nameplate">
+                            <span class="amp-brand">Dr.Malestar</span>
+                            <h2 id="cartelera-title" class="amp-section-title">Próximas Fechas</h2>
+                            <span class="amp-model">SHOWS · LIVE</span>
+                        </div>
+                        <div class="amp-knob-group" aria-hidden="true">
+                            <div class="amp-knob">
+                                <span class="amp-knob-cap amp-knob-cap--low"><span class="amp-knob-notch"></span></span>
+                                <span class="amp-knob-name">BASS</span>
+                            </div>
+                            <div class="amp-knob">
+                                <span class="amp-knob-cap amp-knob-cap--high"><span class="amp-knob-notch"></span></span>
+                                <span class="amp-knob-name">TREBLE</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="amp-grille" aria-hidden="true">
+                        <span class="amp-led"></span>
+                        <span class="amp-led amp-led--on"></span>
+                        <span class="amp-led"></span>
+                    </div>
+                </div>
+            </div>
             <div id="flyers-container" class="flyers-grid">
                 <!-- Los flyers se cargarán aquí dinámicamente -->
                 <div class="text-center w-100 py-5" style="grid-column: 1/-1;">
@@ -117,7 +157,53 @@
     <!-- Galería de Fotos -->
     <section id="galeria" class="section-padding bg-dark">
         <div class="container">
-            <h2 class="section-title">Galería</h2>
+            <div class="console-bank-header" aria-labelledby="galeria-title">
+                <div class="console-bank-panel">
+                    <div class="console-bank-row">
+                        <div class="console-bank-group" aria-hidden="true">
+                            <div class="console-bank-btn console-bank-btn--lit">
+                                <span class="console-bank-led"></span>
+                                <span class="console-bank-key">REC</span>
+                            </div>
+                            <div class="console-bank-btn">
+                                <span class="console-bank-led"></span>
+                                <span class="console-bank-key">VIEW</span>
+                            </div>
+                            <div class="console-bank-btn">
+                                <span class="console-bank-led"></span>
+                                <span class="console-bank-key">CH1</span>
+                            </div>
+                        </div>
+                        <div class="console-bank-display">
+                            <span class="console-bank-tag">PHOTO BANK</span>
+                            <h2 id="galeria-title" class="console-bank-title">Galería</h2>
+                            <div class="console-bank-vu" aria-hidden="true">
+                                <span class="vu-seg"></span>
+                                <span class="vu-seg"></span>
+                                <span class="vu-seg vu-seg--on"></span>
+                                <span class="vu-seg vu-seg--on"></span>
+                                <span class="vu-seg vu-seg--on"></span>
+                                <span class="vu-seg vu-seg--hot"></span>
+                                <span class="vu-seg"></span>
+                            </div>
+                        </div>
+                        <div class="console-bank-group" aria-hidden="true">
+                            <div class="console-bank-btn">
+                                <span class="console-bank-led"></span>
+                                <span class="console-bank-key">CH2</span>
+                            </div>
+                            <div class="console-bank-btn console-bank-btn--lit">
+                                <span class="console-bank-led"></span>
+                                <span class="console-bank-key">LIVE</span>
+                            </div>
+                            <div class="console-bank-btn">
+                                <span class="console-bank-led"></span>
+                                <span class="console-bank-key">SOLO</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
             <div id="photos-container" class="photos-grid">
                 <!-- Las fotos se cargarán aquí dinámicamente -->
                 <div class="text-center w-100 py-5" style="grid-column: 1/-1;">
@@ -132,7 +218,40 @@
     <!-- Videos -->
     <section id="videos" class="section-padding">
         <div class="container">
-            <h2 class="section-title">Videos</h2>
+            <div class="broadcast-monitor-header" aria-labelledby="videos-title">
+                <div class="broadcast-monitor-panel">
+                    <div class="broadcast-monitor-top">
+                        <div class="broadcast-status" aria-hidden="true">
+                            <span class="broadcast-on-air">
+                                <span class="on-air-led"></span>
+                                ON AIR
+                            </span>
+                            <span class="broadcast-rec">
+                                <span class="rec-led"></span>
+                                REC
+                            </span>
+                        </div>
+                        <span class="broadcast-timecode" aria-hidden="true">00:12:34:08</span>
+                        <div class="broadcast-signals" aria-hidden="true">
+                            <span class="signal-pill signal-pill--on">HD</span>
+                            <span class="signal-pill signal-pill--on">SYNC</span>
+                            <span class="signal-pill">PLAY</span>
+                        </div>
+                    </div>
+                    <div class="broadcast-screen">
+                        <div class="broadcast-screen-inner">
+                            <span class="broadcast-channel">CH 04 · VIDEO IN</span>
+                            <h2 id="videos-title" class="broadcast-title">Videos</h2>
+                            <div class="broadcast-scanlines" aria-hidden="true"></div>
+                        </div>
+                    </div>
+                    <div class="broadcast-monitor-base" aria-hidden="true">
+                        <span class="base-led"></span>
+                        <span class="base-label">Dr.Malestar Broadcast</span>
+                        <span class="base-led base-led--on"></span>
+                    </div>
+                </div>
+            </div>
             <div id="videos-container" class="videos-grid">
                 <!-- Los videos se cargarán aquí dinámicamente -->
                 <div class="text-center w-100 py-5" style="grid-column: 1/-1;">
@@ -147,7 +266,11 @@
     <!-- Biografía -->
     <section id="biografia" class="section-padding bg-dark">
         <div class="container">
-            <h2 class="section-title">Sobre Nosotros</h2>
+            <div class="console-section-header" aria-labelledby="biografia-title">
+                <span class="console-section-tag">Artist Profile</span>
+                <h2 id="biografia-title" class="console-section-title">Sobre Nosotros</h2>
+                <span class="console-section-line" aria-hidden="true"></span>
+            </div>
             <div class="bio-content">
                 <div class="bio-text">
                     <p class="bio-description">
@@ -200,7 +323,11 @@
     <!-- Contacto -->
     <section id="contacto" class="section-padding">
         <div class="container">
-            <h2 class="section-title">Contacto</h2>
+            <div class="console-section-header" aria-labelledby="contacto-title">
+                <span class="console-section-tag">Contact Input</span>
+                <h2 id="contacto-title" class="console-section-title">Contacto</h2>
+                <span class="console-section-line" aria-hidden="true"></span>
+            </div>
             <div class="contact-content">
                 <div class="contact-info">
                     <div class="contact-item">
@@ -241,7 +368,11 @@
     <!-- Rider Técnico -->
     <section id="rider" class="section-padding bg-dark">
         <div class="container">
-            <h2 class="section-title">Rider Técnico</h2>
+            <div class="console-section-header" aria-labelledby="rider-title">
+                <span class="console-section-tag">Tech Rider</span>
+                <h2 id="rider-title" class="console-section-title">Rider Técnico</h2>
+                <span class="console-section-line" aria-hidden="true"></span>
+            </div>
             <div class="row justify-content-center">
                 <div class="col-lg-8 text-center">
                     <div class="rider-card">
@@ -289,15 +420,46 @@
         </div>
     </footer>
 
-    <!-- Botón de Admin en el medio de la pantalla -->
-    <button id="admin-toggle" class="admin-toggle">
-        <i class="bi bi-gear"></i> Admin
+    <!-- Botón Admin — estilo consola -->
+    <button type="button" id="admin-toggle" class="console-command-btn" title="Ir al panel de administración" aria-label="Admin login">
+        <span class="console-command-led" aria-hidden="true"></span>
+        <span class="console-command-face">
+            <span class="console-jack-input" aria-hidden="true">
+                <span class="jack-nut"></span>
+                <span class="jack-socket">
+                    <span class="jack-hole"></span>
+                    <span class="jack-tip"></span>
+                </span>
+            </span>
+            <span class="console-command-title">ADMIN</span>
+            <span class="console-command-sub">LOGIN</span>
+        </span>
     </button>
 
-    <!-- Audio de fondo -->
+    <!-- Audio de fondo — consola -->
     <div id="audio-controls" class="audio-controls">
-        <button type="button" id="audio-toggle" class="audio-toggle playing" title="Silenciar/Activar audio" aria-pressed="true">
-            <i class="bi bi-volume-up-fill" id="audio-icon" aria-hidden="true"></i>
+        <button type="button" id="audio-toggle" class="console-fader playing" title="Silenciar/Activar audio" aria-pressed="true" aria-label="Control de audio">
+            <span class="console-label">RIFF</span>
+            <div class="console-meter" aria-hidden="true">
+                <span class="meter-led"></span>
+                <span class="meter-led"></span>
+                <span class="meter-led"></span>
+                <span class="meter-led"></span>
+                <span class="meter-led"></span>
+                <span class="meter-led"></span>
+                <span class="meter-led meter-hot"></span>
+            </div>
+            <div class="fader-slot" aria-hidden="true">
+                <div class="fader-scale">
+                    <span>0</span>
+                    <span>-12</span>
+                    <span>-∞</span>
+                </div>
+                <div class="fader-track">
+                    <div class="fader-knob"></div>
+                </div>
+            </div>
+            <span class="console-db" id="audio-db">-12 dB</span>
         </button>
     </div>
 
@@ -370,6 +532,15 @@
                 console.error('❌ Botón admin no encontrado');
             }
 
+            // Ocultar luces al salir del hero
+            const stageLights = document.getElementById('stage-lights');
+            const heroEl = document.getElementById('hero');
+            if (stageLights && heroEl && 'IntersectionObserver' in window) {
+                new IntersectionObserver(function(entries) {
+                    stageLights.classList.toggle('stage-lights-hidden', !entries[0].isIntersecting);
+                }, { threshold: 0.05 }).observe(heroEl);
+            }
+
             // Audio de fondo — Web Audio API, loop continuo, mute por volumen
             (function initBackgroundAudio() {
                 const AUDIO_SRC = 'audio/bucle-cadillac-loop.wav';
@@ -377,8 +548,8 @@
                 const STORAGE_KEY = 'drmalestar_audio_enabled';
 
                 const audioToggle = document.getElementById('audio-toggle');
-                const audioIcon = document.getElementById('audio-icon');
-                if (!audioToggle || !audioIcon) return;
+                const audioDb = document.getElementById('audio-db');
+                if (!audioToggle) return;
 
                 let audioContext = null;
                 let audioBuffer = null;
@@ -392,11 +563,11 @@
                     if (enabled) {
                         audioToggle.classList.add('playing');
                         audioToggle.classList.remove('muted');
-                        audioIcon.className = 'bi bi-volume-up-fill';
+                        if (audioDb) audioDb.textContent = '-12 dB';
                     } else {
                         audioToggle.classList.remove('playing');
                         audioToggle.classList.add('muted');
-                        audioIcon.className = 'bi bi-volume-mute-fill';
+                        if (audioDb) audioDb.textContent = '-∞ dB';
                     }
                 }
 
