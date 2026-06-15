@@ -28,6 +28,7 @@
     --gradient-signal: linear-gradient(135deg, var(--led-green-dark), var(--led-green-bright));
     --gradient-dark: linear-gradient(135deg, var(--dark-bg), var(--darker-bg));
     --navbar-height: 118px;
+    --admin-btn-gap: 44px;
 }
 
 /* =========================================== */
@@ -436,7 +437,8 @@ body {
 
 @media (max-width: 991.98px) {
     :root {
-        --navbar-height: 68px;
+        --navbar-height: 78px;
+        --admin-btn-gap: 52px;
     }
 
     .amp-navbar-main {
@@ -544,8 +546,8 @@ body {
 }
 
 @media (min-width: 992px) and (max-width: 1400px) {
-    .console-command-btn {
-        top: calc(var(--navbar-height) + 52px + env(safe-area-inset-top, 0px));
+    :root {
+        --admin-btn-gap: 52px;
     }
 }
 
@@ -2774,7 +2776,7 @@ a.contact-card:hover {
 /* =========================================== */
 .console-command-btn {
     position: fixed;
-    top: calc(var(--navbar-height) + 44px + env(safe-area-inset-top, 0px));
+    top: calc(var(--navbar-height) + var(--admin-btn-gap) + env(safe-area-inset-top, 0px));
     right: max(10px, env(safe-area-inset-right, 0px));
     transform: none;
     z-index: 1040;
@@ -4845,7 +4847,6 @@ a.contact-card:hover {
     .console-command-btn {
         width: 58px;
         padding: 6px 6px 8px;
-        top: calc(var(--navbar-height) + 28px + env(safe-area-inset-top, 0px));
     }
 
     .console-command-face {
@@ -4871,6 +4872,10 @@ a.contact-card:hover {
 }
 
 @media (max-width: 768px) {
+    :root {
+        --admin-btn-gap: 58px;
+    }
+
     .hero-title {
         font-size: 2.5rem;
     }
@@ -4927,7 +4932,8 @@ a.contact-card:hover {
 
 @media (max-width: 480px) {
     :root {
-        --navbar-height: 56px;
+        --navbar-height: 72px;
+        --admin-btn-gap: 66px;
     }
 
     .hero-title {
@@ -5008,7 +5014,6 @@ a.contact-card:hover {
 
     .console-command-btn {
         width: 52px;
-        top: calc(var(--navbar-height) + 32px + env(safe-area-inset-top, 0px));
         right: max(8px, env(safe-area-inset-right, 0px));
     }
 
