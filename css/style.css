@@ -29,7 +29,8 @@
     --gradient-dark: linear-gradient(135deg, var(--dark-bg), var(--darker-bg));
     --navbar-height: 118px;
     --admin-btn-gap: 44px;
-    --admin-btn-inset-right: 28px;
+    --console-float-inset: 12px;
+    --admin-btn-inset-right: var(--console-float-inset);
     --gallery-media-max-h: min(520px, calc(100vh - var(--navbar-height) - 17rem));
     --flyer-image-max-h: min(650px, calc(100vh - var(--navbar-height) - 12rem));
     --photo-card-max-h: var(--gallery-media-max-h);
@@ -684,7 +685,6 @@ body {
 @media (min-width: 992px) and (max-width: 1400px) {
     :root {
         --admin-btn-gap: 52px;
-        --admin-btn-inset-right: 36px;
     }
 
     .amp-navbar-nav .nav-item {
@@ -1369,34 +1369,41 @@ body {
     }
 
     .console-bank-row {
-        flex-direction: row;
-        flex-wrap: wrap;
-        justify-content: center;
-        align-items: flex-end;
-        gap: 0.5rem 0.65rem;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.75rem;
     }
 
     .console-bank-display {
-        order: -1;
         width: 100%;
-        flex: 1 1 100%;
+    }
+
+    .console-bank-controls {
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+        align-items: flex-end;
+        gap: 0.5rem;
+        width: 100%;
+        flex-wrap: nowrap;
     }
 
     .console-bank-group {
-        gap: 0.45rem;
+        gap: 0.35rem;
         flex: 0 0 auto;
     }
 
     .console-bank-btn {
-        min-width: 38px;
-        padding: 4px 5px 5px;
+        min-width: 34px;
+        padding: 4px 4px 5px;
     }
 
     .console-bank-key {
-        min-width: 32px;
-        min-height: 26px;
-        font-size: 0.4rem;
-        padding: 3px 4px;
+        min-width: 30px;
+        min-height: 24px;
+        font-size: 0.38rem;
+        padding: 3px 3px;
+        letter-spacing: 0.06em;
     }
 }
 
@@ -1422,10 +1429,29 @@ body {
 }
 
 .console-bank-row {
-    display: flex;
+    display: grid;
+    grid-template-columns: auto 1fr auto;
     align-items: center;
-    justify-content: space-between;
     gap: 1rem;
+}
+
+.console-bank-controls {
+    display: contents;
+}
+
+.console-bank-controls .console-bank-group:first-child {
+    grid-column: 1;
+    grid-row: 1;
+}
+
+.console-bank-display {
+    grid-column: 2;
+    grid-row: 1;
+}
+
+.console-bank-controls .console-bank-group:last-child {
+    grid-column: 3;
+    grid-row: 1;
 }
 
 .console-bank-group {
@@ -3338,7 +3364,7 @@ a.contact-card:hover {
 .audio-controls {
     position: fixed;
     bottom: max(14px, env(safe-area-inset-bottom, 0px));
-    left: max(12px, env(safe-area-inset-left, 0px));
+    left: max(var(--console-float-inset), env(safe-area-inset-left, 0px));
     z-index: 1040;
 }
 
@@ -5399,12 +5425,11 @@ a.contact-card:hover {
 
     .console-command-btn {
         width: 52px;
-        --admin-btn-inset-right: 24px;
     }
 
     .audio-controls {
         bottom: max(10px, env(safe-area-inset-bottom, 0px));
-        left: max(8px, env(safe-area-inset-left, 0px));
+        --console-float-inset: 8px;
     }
 
     .console-fader {
