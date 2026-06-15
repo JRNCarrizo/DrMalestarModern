@@ -81,7 +81,7 @@
     <!-- Hero Section -->
     <section id="hero" class="hero-section">
         <div class="hero-content">
-            <img src="img/logosinfondonuevo2.png" alt="Dr.Malestar" class="logo-hero">
+            <img src="img/logoNuevo-malestar.png" alt="Dr.Malestar" class="logo-hero">
             <div class="hero-text-block">
                 <h1 class="hero-title">Dr.Malestar</h1>
                 <p class="hero-subtitle">Tributo a Norberto Aníbal Napolitano - PAPPO</p>
@@ -290,17 +290,12 @@
         <i class="bi bi-gear"></i> Admin
     </button>
 
-    <!-- Controles de Audio -->
+    <!-- Audio de fondo -->
     <div id="audio-controls" class="audio-controls">
-        <button id="audio-toggle" class="audio-toggle" title="Reproducir/Pausar audio">
-            <i class="bi bi-volume-up-fill" id="audio-icon"></i>
+        <button type="button" id="audio-toggle" class="audio-toggle playing" title="Silenciar/Activar audio" aria-pressed="true">
+            <i class="bi bi-volume-up-fill" id="audio-icon" aria-hidden="true"></i>
         </button>
-        <audio id="background-audio" loop preload="auto" autoplay volume="0.3">
-            <source src="audio/bucle cadillac.mp3" type="audio/mpeg">
-        </audio>
     </div>
-
-
 
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
@@ -370,319 +365,129 @@
             } else {
                 console.error('❌ Botón admin no encontrado');
             }
-            
-            // Controles de audio con Web Audio API para loop sin cortes
-            const audioToggle = document.getElementById('audio-toggle');
-            const audioIcon = document.getElementById('audio-icon');
-            
-            let audioContext = null;
-            let audioBuffer = null;
-            let sourceNode = null;
-            let gainNode = null;
-            let isPlaying = false;
-            let audioLoaded = false;
-            
-            // Intentar usar Web Audio API para loop perfecto
-            try {
-                audioContext = new (window.AudioContext || window.webkitAudioContext)();
-            } catch (e) {
-                console.warn('Web Audio API no disponible, usando método estándar');
-                audioContext = null;
-            }
-            
-            // Función para activar el contexto de audio (requerido por algunos navegadores)
-            function resumeAudioContext() {
-                if (audioContext && audioContext.state === 'suspended') {
-                    audioContext.resume().then(() => {
-                        console.log('🔊 AudioContext activado');
-                    }).catch(err => {
-                        console.warn('⚠️ No se pudo activar AudioContext:', err);
-                    });
-                }
-            }
-            
-            // Función para cargar el audio (sin activar el contexto)
-            async function loadAudio() {
-                if (!audioContext || audioLoaded) return;
-                
-                try {
-                    // NO activar el contexto aquí - esperar interacción del usuario
-                    const response = await fetch('audio/bucle cadillac.mp3');
-                    if (!response.ok) {
-                        throw new Error(`HTTP error! status: ${response.status}`);
+
+            // Audio de fondo — Web Audio API, loop continuo, mute por volumen
+            (function initBackgroundAudio() {
+                const AUDIO_SRC = 'audio/bucle-cadillac-loop.wav';
+                const AUDIO_VOLUME = 0.3;
+                const STORAGE_KEY = 'drmalestar_audio_enabled';
+
+                const audioToggle = document.getElementById('audio-toggle');
+                const audioIcon = document.getElementById('audio-icon');
+                if (!audioToggle || !audioIcon) return;
+
+                let audioContext = null;
+                let audioBuffer = null;
+                let sourceNode = null;
+                let gainNode = null;
+                let started = false;
+                let enabled = localStorage.getItem(STORAGE_KEY) !== 'false';
+
+                function updateUI() {
+                    audioToggle.setAttribute('aria-pressed', enabled ? 'true' : 'false');
+                    if (enabled) {
+                        audioToggle.classList.add('playing');
+                        audioToggle.classList.remove('muted');
+                        audioIcon.className = 'bi bi-volume-up-fill';
+                    } else {
+                        audioToggle.classList.remove('playing');
+                        audioToggle.classList.add('muted');
+                        audioIcon.className = 'bi bi-volume-mute-fill';
                     }
-                    const arrayBuffer = await response.arrayBuffer();
-                    audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
-                    audioLoaded = true;
-                    console.log('📊 Audio cargado:', audioBuffer.duration, 'segundos');
-                } catch (error) {
-                    console.error('❌ Error cargando audio:', error);
-                    console.log('🔄 Usando método estándar como fallback');
-                    // Fallback al método estándar
-                    useStandardAudio();
                 }
-            }
-            
-            // Función para reproducir con Web Audio API (loop perfecto)
-            function playWebAudio() {
-                if (!audioContext || !audioBuffer || sourceNode) return;
-                
-                try {
-                    // Asegurar que el contexto esté activo
-                    resumeAudioContext();
-                    
-                    // Crear nodo de ganancia para controlar el volumen
+
+                function applyVolume() {
+                    if (!gainNode || !audioContext) return;
+
+                    gainNode.gain.cancelScheduledValues(audioContext.currentTime);
+
+                    if (enabled) {
+                        gainNode.gain.setValueAtTime(AUDIO_VOLUME, audioContext.currentTime);
+                        if (audioContext.state === 'suspended') {
+                            audioContext.resume();
+                        }
+                    } else {
+                        gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+                        if (audioContext.state === 'running') {
+                            audioContext.suspend();
+                        }
+                    }
+                }
+
+                async function ensureContext() {
+                    if (!audioContext) {
+                        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                    }
+                    if (audioContext.state === 'suspended') {
+                        await audioContext.resume();
+                    }
+                }
+
+                async function loadBuffer() {
+                    if (audioBuffer) return;
+                    const response = await fetch(AUDIO_SRC);
+                    if (!response.ok) throw new Error('No se pudo cargar el audio');
+                    audioBuffer = await audioContext.decodeAudioData(await response.arrayBuffer());
+                }
+
+                async function startLoop() {
+                    if (started) return true;
+                    await ensureContext();
+                    await loadBuffer();
+
                     gainNode = audioContext.createGain();
-                    gainNode.gain.value = 0.3;
                     gainNode.connect(audioContext.destination);
-                    
-                    // Crear source node
+                    applyVolume();
+
                     sourceNode = audioContext.createBufferSource();
                     sourceNode.buffer = audioBuffer;
-                    sourceNode.loop = true; // Loop nativo sin cortes
+                    sourceNode.loop = true;
                     sourceNode.connect(gainNode);
-                    
-                    // Reproducir
                     sourceNode.start(0);
-                    isPlaying = true;
-                    updateUI(true);
-                    localStorage.setItem('drmalestar_audio_enabled', 'true');
-                    console.log('🔊 Audio iniciado con Web Audio API (loop perfecto)');
-                } catch (error) {
-                    console.error('❌ Error reproduciendo audio:', error);
-                    // Si falla Web Audio API, usar método estándar
-                    if (!audioElement) useStandardAudio();
-                    if (window.startAudioStandard) window.startAudioStandard();
+
+                    started = true;
+                    return true;
                 }
-            }
-            
-            // Función para detener Web Audio
-            function stopWebAudio() {
-                if (sourceNode) {
+
+                async function tryAutoplay() {
+                    if (!enabled) {
+                        updateUI();
+                        return;
+                    }
                     try {
-                        sourceNode.stop();
-                    } catch (e) {}
-                    sourceNode = null;
-                }
-                isPlaying = false;
-            }
-            
-            // Función para silenciar/activar Web Audio
-            function toggleMuteWebAudio() {
-                if (gainNode) {
-                    if (gainNode.gain.value === 0) {
-                        gainNode.gain.value = 0.3;
-                        localStorage.setItem('drmalestar_audio_enabled', 'true');
-                        console.log('🔊 Audio activado');
-                    } else {
-                        gainNode.gain.value = 0;
-                        localStorage.setItem('drmalestar_audio_enabled', 'false');
-                        console.log('🔇 Audio silenciado');
-                    }
-                    updateUI(isPlaying && gainNode.gain.value > 0);
-                }
-            }
-            
-            // Fallback: método estándar con elemento <audio>
-            let audioElement = null;
-            let useStandardMethod = false;
-            
-            function useStandardAudio() {
-                audioElement = document.getElementById('background-audio');
-                if (!audioElement) return;
-                
-                audioElement.volume = 0.3;
-                audioElement.loop = true;
-                useStandardMethod = true;
-                
-                // Función para iniciar reproducción
-                function startAudioStandard() {
-                    if (!isPlaying && audioElement) {
-                        // Asegurar que no esté muteado antes de reproducir
-                        audioElement.muted = false;
-                        isPlaying = true;
-                        audioElement.play().then(() => {
-                            updateUI(true);
-                            localStorage.setItem('drmalestar_audio_enabled', 'true');
-                            console.log('🔊 Audio iniciado (método estándar)');
-                        }).catch(error => {
-                            console.error('❌ Error reproduciendo audio:', error);
-                            isPlaying = false;
-                            // Mantener el botón en estado activo para que el usuario intente manualmente
-                            updateUI(!audioElement.muted);
-                            // Intentar de nuevo después de un delay (por si el navegador permite luego de una interacción)
-                            setTimeout(() => {
-                                if (audioElement && !isPlaying) {
-                                    audioElement.play().catch(() => {
-                                        console.log('⚠️ Auto-play bloqueado, se requiere interacción del usuario');
-                                    });
-                                }
-                            }, 1000);
-                        });
+                        await startLoop();
+                        updateUI();
+                    } catch (error) {
+                        console.log('Audio: esperando interacción del usuario');
+                        updateUI();
                     }
                 }
-                
-                // Función para silenciar/activar
-                function toggleMuteStandard() {
-                    if (audioElement.muted) {
-                        audioElement.muted = false;
-                        updateUI(isPlaying);
-                        localStorage.setItem('drmalestar_audio_enabled', 'true');
-                    } else {
-                        audioElement.muted = true;
-                        updateUI(false);
-                        localStorage.setItem('drmalestar_audio_enabled', 'false');
-                    }
-                }
-                
-                // Exponer funciones
-                window.startAudioStandard = startAudioStandard;
-                window.toggleMuteStandard = toggleMuteStandard;
-            }
-            
-            // Función para actualizar UI
-            function updateUI(playing) {
-                if (playing) {
-                    audioToggle.classList.add('playing');
-                    audioToggle.classList.remove('muted');
-                    audioIcon.className = 'bi bi-volume-up-fill';
-                } else {
-                    audioToggle.classList.remove('playing');
-                    audioToggle.classList.add('muted');
-                    audioIcon.className = 'bi bi-volume-mute-fill';
-                }
-            }
-            
-            // Función principal para iniciar audio
-            async function startAudio() {
-                if (isPlaying) return;
-                
-                // Si estamos usando el método estándar, usar esa función
-                if (useStandardMethod && window.startAudioStandard) {
-                    window.startAudioStandard();
-                    return;
-                }
-                
-                // Si tenemos Web Audio API y el buffer cargado, intentar usar Web Audio
-                // Pero primero asegurar que el contexto esté activo
-                if (audioContext && audioBuffer) {
-                    resumeAudioContext();
-                    // Esperar un momento para que el contexto se active
-                    setTimeout(() => {
-                        playWebAudio();
-                    }, 10);
-                } else if (audioContext && !audioLoaded) {
-                    // Cargar primero
-                    resumeAudioContext();
-                    await loadAudio();
-                    if (audioLoaded) {
-                        setTimeout(() => {
-                            playWebAudio();
-                        }, 10);
-                    } else {
-                        // Fallback al método estándar
-                        if (!useStandardMethod) useStandardAudio();
-                        if (window.startAudioStandard) window.startAudioStandard();
-                    }
-                } else {
-                    // Usar método estándar
-                    if (!useStandardMethod) useStandardAudio();
-                    if (window.startAudioStandard) window.startAudioStandard();
-                }
-            }
-            
-            // Función para toggle mute
-            function toggleMute() {
-                if (audioContext && gainNode && !useStandardMethod) {
-                    toggleMuteWebAudio();
-                } else if (audioElement) {
-                    if (window.toggleMuteStandard) window.toggleMuteStandard();
-                }
-            }
-            
-            if (audioToggle) {
-                // Manejar click en el botón de audio (solo para silenciar/activar)
-                audioToggle.addEventListener('click', function() {
-                    // Activar contexto de audio con la interacción del usuario
-                    resumeAudioContext();
-                    
-                    // Si no está reproduciéndose, iniciarlo
-                    if (!isPlaying) {
-                        startAudio();
-                    } else {
-                        // Si ya está reproduciéndose, solo cambiar mute/unmute
-                        toggleMute();
+
+                audioToggle.addEventListener('click', async function (event) {
+                    event.preventDefault();
+                    event.stopPropagation();
+
+                    try {
+                        if (!started) {
+                            enabled = true;
+                            localStorage.setItem(STORAGE_KEY, 'true');
+                            await startLoop();
+                            updateUI();
+                            return;
+                        }
+
+                        enabled = !enabled;
+                        localStorage.setItem(STORAGE_KEY, enabled ? 'true' : 'false');
+                        applyVolume();
+                        updateUI();
+                    } catch (error) {
+                        console.error('Error de audio:', error);
                     }
                 });
-                
-                // Inicializar con método estándar primero para permitir auto-play
-                useStandardAudio();
-                
-                // En segundo plano, intentar cargar Web Audio API (para mejor calidad de loop)
-                if (audioContext) {
-                    loadAudio().catch(() => {
-                        console.log('🔄 Web Audio API no disponible, usando método estándar');
-                    });
-                }
-                
-                // Verificar preferencia guardada (pero por defecto reproducir automáticamente)
-                let audioPreference = localStorage.getItem('drmalestar_audio_enabled');
-                if (audioPreference === null || audioPreference === undefined) {
-                    audioPreference = 'true';
-                    localStorage.setItem('drmalestar_audio_enabled', 'true');
-                    console.log('✅ Preferencia de audio no encontrada. Estableciendo reproducción por defecto.');
-                }
-                console.log('🎚️ Preferencia de audio:', audioPreference);
 
-                // Intentar reproducir automáticamente con método estándar
-                // Solo no reproducir si explícitamente el usuario lo silenció antes
-                if (audioPreference !== 'false') {
-                    // Mostrar UI como activo por defecto
-                    updateUI(true);
-                    setTimeout(() => {
-                        if (window.startAudioStandard) {
-                            window.startAudioStandard();
-                        } else if (audioElement) {
-                            // Si la función no está lista, intentar directamente
-                            audioElement.muted = false;
-                            audioElement.play().then(() => {
-                                isPlaying = true;
-                                updateUI(true);
-                                console.log('🔊 Audio iniciado automáticamente');
-                            }).catch(error => {
-                                console.log('⚠️ Auto-play bloqueado, usuario debe hacer clic:', error);
-                                // Mantener el botón visible como activo aunque el navegador bloquee el audio
-                                updateUI(true);
-                            });
-                        }
-                    }, 300);
-                } else {
-                    // Si el usuario lo silenció antes, mantenerlo silenciado pero cargado
-                    if (audioElement) {
-                        audioElement.muted = true;
-                    }
-                    updateUI(false);
-                }
-                
-                // Si el usuario interactúa, podemos cambiar a Web Audio API para mejor loop
-                document.addEventListener('click', function() {
-                    resumeAudioContext();
-                    // Si ya está sonando con método estándar y tenemos Web Audio listo, cambiar
-                    if (isPlaying && audioContext && audioBuffer && useStandardMethod) {
-                        // Detener método estándar y cambiar a Web Audio
-                        if (audioElement) {
-                            audioElement.pause();
-                            audioElement.currentTime = 0;
-                        }
-                        useStandardMethod = false;
-                        playWebAudio();
-                    }
-                }, { once: true });
-                
-                document.addEventListener('touchstart', function() {
-                    resumeAudioContext();
-                }, { once: true });
-            }
+                updateUI();
+                tryAutoplay();
+            })();
         });
     </script>
 </body>
