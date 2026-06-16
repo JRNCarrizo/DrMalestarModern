@@ -390,6 +390,7 @@ function displayVideos(videos) {
 
         if (window.VideoRender) {
             container.innerHTML = VideoRender.buildVideoGrid(videos, { checkEmbed: true });
+            VideoRender.initYouTubePlayers(container);
             console.log('✅ Videos mostrados:', videos.length);
             return;
         }

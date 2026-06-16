@@ -71,12 +71,39 @@ window.VideoRender = (function () {
         return video.videoId || extractYouTubeId(video.url);
     }
 
+    function buildVideoDeckHtml() {
+        return `
+            <div class="video-card-deck" aria-hidden="true">
+                <div class="video-deck-controls">
+                    <span class="video-deck-btn video-deck-btn--audio">
+                        <span class="video-deck-led"></span>
+                        <span class="video-deck-key">AUDIO</span>
+                    </span>
+                    <span class="video-deck-btn video-deck-btn--on-air">
+                        <span class="video-deck-led"></span>
+                        <span class="video-deck-key">ON AIR</span>
+                    </span>
+                </div>
+                <div class="video-deck-vu" aria-hidden="true">
+                    <span class="vu-seg"></span>
+                    <span class="vu-seg"></span>
+                    <span class="vu-seg"></span>
+                    <span class="vu-seg"></span>
+                    <span class="vu-seg"></span>
+                    <span class="vu-seg"></span>
+                    <span class="vu-seg"></span>
+                </div>
+            </div>
+        `;
+    }
+
     function buildEmbedUrl(video, videoId) {
+        const origin = encodeURIComponent(window.location.origin);
         const isShort = video.url && (video.url.includes('/shorts/') || video.url.includes('youtube.com/shorts/'));
         if (isShort) {
-            return `https://www.youtube.com/embed/${videoId}?rel=0&modestbranding=1&playsinline=1`;
+            return `https://www.youtube.com/embed/${videoId}?rel=0&modestbranding=1&playsinline=1&enablejsapi=1&origin=${origin}`;
         }
-        return `https://www.youtube.com/embed/${videoId}?rel=0&modestbranding=1&playsinline=1&enablejsapi=1`;
+        return `https://www.youtube.com/embed/${videoId}?rel=0&modestbranding=1&playsinline=1&enablejsapi=1&origin=${origin}`;
     }
 
     function buildInvalidVideoCard(video) {
@@ -122,11 +149,11 @@ window.VideoRender = (function () {
         const title = escapeHtml(video.title || 'Video sin título');
         const description = video.description ? escapeHtml(video.description) : '';
         const url = video.url || '';
-        const onloadAttr = checkEmbed ? ` onload="VideoRender.checkVideoLoad('${videoId}')"` : '';
+        const isShort = Boolean(video.url && (video.url.includes('/shorts/') || video.url.includes('youtube.com/shorts/')));
+        const onloadAttr = checkEmbed && isShort ? ` onload="VideoRender.checkVideoLoad('${videoId}')"` : '';
+        const deckHtml = buildVideoDeckHtml();
 
-        return `
-            <div class="video-card" data-video-id="${videoId}">
-                <div class="video-container" id="video-wrapper-${videoId}">
+        const playerHtml = isShort ? `
                     <iframe
                         id="ytplayer-${videoId}"
                         src="${embedUrl}"
@@ -136,7 +163,14 @@ window.VideoRender = (function () {
                         loading="lazy"
                         style="width: 100%; height: 100%;"${onloadAttr}
                         title="${title}">
-                    </iframe>
+                    </iframe>` : `
+                    <div class="video-player-mount" id="ytplayer-${videoId}"></div>`;
+
+        return `
+            <div class="video-card" data-video-id="${videoId}">
+                ${deckHtml}
+                <div class="video-container" id="video-wrapper-${videoId}">
+                    ${playerHtml}
                     <div class="video-error-overlay" id="error-${videoId}" style="display: none;">
                         <div class="video-error-content">
                             <i class="bi bi-exclamation-triangle" style="font-size: 3rem; color: #ffc107; margin-bottom: 1rem;"></i>
@@ -231,6 +265,178 @@ window.VideoRender = (function () {
         }, 2000);
     }
 
+    let youtubeApiPromise = null;
+    const playersByCard = new WeakMap();
+
+    function pauseIframe(iframe) {
+        if (!iframe || !iframe.contentWindow) return;
+        iframe.contentWindow.postMessage(JSON.stringify({
+            event: 'command',
+            func: 'pauseVideo',
+            args: ''
+        }), '*');
+    }
+
+    function pauseVideoCard(card) {
+        if (!card) return;
+
+        const entry = playersByCard.get(card);
+        if (entry) {
+            if (entry.type === 'api' && entry.player && typeof entry.player.pauseVideo === 'function') {
+                try {
+                    entry.player.pauseVideo();
+                } catch (_) {
+                    /* player no listo */
+                }
+            } else if (entry.type === 'iframe' && entry.iframe) {
+                pauseIframe(entry.iframe);
+            }
+            return;
+        }
+
+        const iframe = card.querySelector('iframe');
+        if (iframe) pauseIframe(iframe);
+    }
+
+    function pauseAllExcept(activeCard) {
+        document.querySelectorAll('.video-card[data-video-id]').forEach(function(card) {
+            if (card === activeCard) return;
+            pauseVideoCard(card);
+            card.classList.remove('video-card--live');
+        });
+    }
+
+    function onVideoPlay(card) {
+        if (!card) return;
+        pauseAllExcept(card);
+        card.classList.add('video-card--live');
+    }
+
+    function registerIframePlayer(card, iframe) {
+        if (!card || !iframe) return;
+        playersByCard.set(card, { type: 'iframe', iframe: iframe });
+    }
+
+    function ensureYouTubeApi() {
+        if (window.YT && window.YT.Player) {
+            return Promise.resolve();
+        }
+        if (youtubeApiPromise) return youtubeApiPromise;
+
+        youtubeApiPromise = new Promise(function(resolve) {
+            const previousReady = window.onYouTubeIframeAPIReady;
+            window.onYouTubeIframeAPIReady = function() {
+                if (typeof previousReady === 'function') previousReady();
+                resolve();
+            };
+
+            if (!document.querySelector('script[src*="youtube.com/iframe_api"]')) {
+                const tag = document.createElement('script');
+                tag.src = 'https://www.youtube.com/iframe_api';
+                tag.async = true;
+                document.head.appendChild(tag);
+            }
+        });
+
+        return youtubeApiPromise;
+    }
+
+    function setVideoLive(card, live) {
+        if (!card) return;
+        if (live) {
+            document.querySelectorAll('.video-card--live').forEach(function(other) {
+                if (other !== card) other.classList.remove('video-card--live');
+            });
+        }
+        card.classList.toggle('video-card--live', live);
+    }
+
+    function bindYouTubePostMessage() {
+        if (window.__ytVideoMessageBound) return;
+        window.__ytVideoMessageBound = true;
+
+        window.addEventListener('message', function(event) {
+            if (event.origin !== 'https://www.youtube.com' && event.origin !== 'https://www.youtube-nocookie.com') {
+                return;
+            }
+
+            let data;
+            try {
+                data = JSON.parse(event.data);
+            } catch (_) {
+                return;
+            }
+
+            if (data.event !== 'onStateChange' || data.info === undefined) return;
+
+            const iframe = document.getElementById(data.id);
+            if (!iframe) return;
+
+            const card = iframe.closest('.video-card');
+            if (!card) return;
+
+            if (data.info === 1) {
+                onVideoPlay(card);
+            } else if (data.info === 2 || data.info === 0) {
+                setVideoLive(card, false);
+            }
+        });
+    }
+
+    function registerPlayersInScope(scope) {
+        scope.querySelectorAll('.video-card[data-video-id] iframe[id^="ytplayer-"]').forEach(function(iframe) {
+            const card = iframe.closest('.video-card');
+            registerIframePlayer(card, iframe);
+        });
+    }
+
+    function initYouTubePlayers(root) {
+        const scope = root || document;
+        bindYouTubePostMessage();
+        registerPlayersInScope(scope);
+
+        const mounts = scope.querySelectorAll('.video-card[data-video-id] .video-player-mount');
+        if (!mounts.length) return;
+
+        ensureYouTubeApi().then(function() {
+            mounts.forEach(function(mount) {
+                if (mount.dataset.ytReady === '1') return;
+
+                const card = mount.closest('.video-card');
+                const videoId = card && card.getAttribute('data-video-id');
+                if (!videoId) return;
+
+                mount.dataset.ytReady = '1';
+                const player = new YT.Player(mount.id, {
+                    videoId: videoId,
+                    width: '100%',
+                    height: '100%',
+                    playerVars: {
+                        rel: 0,
+                        modestbranding: 1,
+                        playsinline: 1,
+                        origin: window.location.origin
+                    },
+                    events: {
+                        onReady: function() {
+                            playersByCard.set(card, { type: 'api', player: player });
+                        },
+                        onStateChange: function(event) {
+                            if (event.data === YT.PlayerState.PLAYING) {
+                                onVideoPlay(card);
+                            } else if (event.data === YT.PlayerState.PAUSED || event.data === YT.PlayerState.ENDED) {
+                                setVideoLive(card, false);
+                            }
+                        }
+                    }
+                });
+                playersByCard.set(card, { type: 'api', player: player });
+            });
+        }).catch(function(error) {
+            console.warn('No se pudo inicializar YouTube Player API:', error);
+        });
+    }
+
     return {
         escapeHtml,
         extractYouTubeId,
@@ -238,6 +444,7 @@ window.VideoRender = (function () {
         buildVideoCard,
         buildAdminVideoItem,
         buildVideoGrid,
-        checkVideoLoad
+        checkVideoLoad,
+        initYouTubePlayers
     };
 })();
