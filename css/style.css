@@ -648,7 +648,7 @@ body {
     }
 
     html {
-        scroll-padding-top: calc(var(--navbar-height) + 10px);
+        scroll-padding-top: calc(var(--navbar-height) + 14px);
     }
 
     #cartelera,
@@ -659,7 +659,7 @@ body {
     #redes,
     #galeria,
     #descargas {
-        scroll-margin-top: calc(var(--navbar-height) + 10px);
+        scroll-margin-top: calc(var(--navbar-height) + 14px);
     }
 
     #cartelera-title,
@@ -668,11 +668,11 @@ body {
     .console-bank-title,
     .broadcast-title,
     .console-section-title {
-        scroll-margin-top: calc(var(--navbar-height) + 14px);
+        scroll-margin-top: calc(var(--navbar-height) + 18px);
     }
 
     .broadcast-monitor-header {
-        scroll-margin-top: calc(var(--navbar-height) + 12px);
+        scroll-margin-top: calc(var(--navbar-height) + 16px);
     }
 
     .amp-navbar-main {

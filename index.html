@@ -22,7 +22,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
     
     <!-- Custom CSS -->
-    <link href="css/style.css?v=20250762" rel="stylesheet">
+    <link href="css/style.css?v=20250766" rel="stylesheet">
     
     <!-- Meta Tags para SEO -->
     <meta property="og:title" content="Dr.Malestar - Tributo a Pappo" />
@@ -717,7 +717,7 @@
             }
 
             function getNavbarScrollOffset(extra) {
-                const pad = isMobileNav() ? 10 : 28;
+                const pad = isMobileNav() ? 34 : 28;
                 return getCollapsedNavbarHeight() + pad + (extra || 0);
             }
 
@@ -729,10 +729,10 @@
                 }
 
                 if (isMobileNav()) {
-                    const mobileHeader = section.querySelector(
-                        '.amp-head-header, .console-bank-header, .download-amp-head, .console-section-header'
+                    const mobileFocus = section.querySelector(
+                        '.amp-nameplate, .console-bank-display, .console-section-header, [id$="-title"]'
                     );
-                    if (mobileHeader) return mobileHeader;
+                    if (mobileFocus) return mobileFocus;
                 }
 
                 const titledPanel = section.querySelector(
@@ -753,8 +753,10 @@
             function getSectionScrollExtra(focus, section) {
                 if (!focus || !section) return 0;
                 const mobile = isMobileNav();
-                if (section.id === 'videos') return mobile ? 4 : 8;
-                if (focus.matches('.amp-nameplate, .console-bank-display')) return mobile ? 0 : 10;
+                if (section.id === 'videos') return mobile ? 2 : 8;
+                if (focus.matches('.amp-nameplate, .console-bank-display, .console-section-header, [id$="-title"]')) {
+                    return mobile ? 10 : 10;
+                }
                 return 0;
             }
 
@@ -920,7 +922,7 @@
                         const nav = document.querySelector('.amp-navbar');
                         const main = nav ? nav.querySelector('.amp-navbar-main') : null;
                         const base = main ? main.getBoundingClientRect().height : 72;
-                        return base + 10;
+                        return base + 34;
                     }
                     const nav = document.querySelector('.amp-navbar');
                     return (nav ? nav.getBoundingClientRect().height : 88) + 28;
