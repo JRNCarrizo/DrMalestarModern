@@ -2302,6 +2302,62 @@ body {
     display: none;
 }
 
+.flyer-card-deck {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.42rem 0.7rem;
+    border-bottom: 2px solid #2a2a30;
+    background:
+        repeating-linear-gradient(
+            90deg,
+            rgba(0, 0, 0, 0.12) 0 2px,
+            transparent 2px 5px
+        ),
+        linear-gradient(180deg, #242428 0%, #18181e 100%);
+}
+
+.flyer-deck-led {
+    width: 6px;
+    height: 6px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    background: #2a1510;
+    border: 1px solid #3a2020;
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.85);
+}
+
+.flyer-deck-led--on {
+    background: var(--led-red);
+    border-color: #7f1d1d;
+    box-shadow: 0 0 8px var(--glow-red);
+    animation: commandLedPulse 2.5s ease-in-out infinite;
+}
+
+.flyer-deck-tag {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.48rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: #f0f0f2;
+    line-height: 1;
+}
+
+.flyer-card--draft .flyer-deck-tag {
+    color: rgba(255, 255, 255, 0.72);
+}
+
+.flyer-deck-channel {
+    margin-left: auto;
+    font-family: monospace;
+    font-size: 0.45rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: rgba(74, 222, 128, 0.75);
+}
+
 .flyer-image-wrapper {
     position: relative;
     width: 100%;
@@ -2334,21 +2390,7 @@ body {
 }
 
 .flyer-overlay-top {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    padding: 1rem;
-    display: flex;
-    align-items: flex-start;
-    justify-content: flex-end;
-    opacity: 1;
-    transition: opacity 0.4s ease;
-    z-index: 2;
-}
-
-.flyer-card:hover .flyer-overlay-top {
-    opacity: 0.8;
+    display: none;
 }
 
 .flyer-info-overlay {
@@ -2372,6 +2414,10 @@ body {
     overscroll-behavior: auto;
     pointer-events: none;
     -webkit-overflow-scrolling: touch;
+}
+
+.flyer-badge {
+    display: none;
 }
 
 .flyer-card:hover .flyer-info-overlay {
@@ -2400,25 +2446,6 @@ body {
     word-break: break-word;
     overflow-wrap: anywhere;
     hyphens: auto;
-}
-
-.flyer-badge {
-    background: var(--led-red);
-    color: #fff;
-    padding: 0.35rem 0.75rem;
-    border-radius: 4px;
-    font-family: monospace;
-    font-size: 0.62rem;
-    font-weight: 700;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    box-shadow: 0 0 10px rgba(239, 68, 68, 0.35);
-    animation: pulse 2s infinite;
-}
-
-@keyframes pulse {
-    0%, 100% { transform: scale(1); }
-    50% { transform: scale(1.05); }
 }
 
 .flyer-details {
@@ -2558,9 +2585,15 @@ body {
     box-shadow: 0 0 18px var(--glow-green-faint);
 }
 
-.flyer-card--draft .flyer-badge {
+.flyer-card--draft .flyer-deck-led {
     background: var(--led-green);
-    animation: none;
+    border-color: #22543a;
+    box-shadow: 0 0 8px var(--glow-green);
+    animation: commandLedPulse 2.5s ease-in-out infinite;
+}
+
+.flyer-card--draft .flyer-deck-channel {
+    color: rgba(134, 239, 172, 0.85);
 }
 
 /* Flyers — notebooks y pantallas bajas */

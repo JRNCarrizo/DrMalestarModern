@@ -40,6 +40,7 @@ window.FlyerRender = (function () {
         const staticPreview = Boolean(opts.staticPreview);
         const isDraft = Boolean(flyer._isDraft);
         const showActions = opts.showActions !== false;
+        const index = typeof opts.index === 'number' ? opts.index : -1;
 
         const title = escapeHtml(flyer.title || 'Sin título');
         const date = flyer.date ? formatDate(flyer.date) : 'Fecha no disponible';
@@ -66,13 +67,31 @@ window.FlyerRender = (function () {
             </div>
         ` : '';
 
+        let deckTag = 'EN CARTELERA';
+        let deckChannel = index >= 0 ? `SHOW ${String(index + 1).padStart(2, '0')}` : 'SHOW';
+        let deckLedOn = false;
+        if (isDraft) {
+            deckTag = 'VISTA PREVIA';
+            deckChannel = 'INPUT';
+        } else if (index === 0) {
+            deckTag = 'PRÓXIMO SHOW';
+            deckChannel = 'NEXT · LIVE';
+            deckLedOn = true;
+        }
+
+        const deckHtml = `
+            <div class="flyer-card-deck" aria-hidden="true">
+                <span class="flyer-deck-led${deckLedOn ? ' flyer-deck-led--on' : ''}"></span>
+                <span class="flyer-deck-tag">${deckTag}</span>
+                <span class="flyer-deck-channel">${deckChannel}</span>
+            </div>
+        `;
+
         return `
             <div class="flyer-card ${extraClass}" data-flyer-id="${escapeHtml(flyer.id || '')}">
+                ${deckHtml}
                 <div class="flyer-image-wrapper">
                     <img src="${image}" class="flyer-image" alt="${title}" onerror="this.src='${fallback}'">
-                    <div class="flyer-overlay-top">
-                        <div class="flyer-badge">${isDraft ? 'Vista previa' : 'Próximo Show'}</div>
-                    </div>
                     <div class="flyer-info-overlay">
                         <div class="flyer-info-content">
                             <h3>${title}</h3>
@@ -110,7 +129,8 @@ window.FlyerRender = (function () {
             ...opts,
             staticPreview: false,
             showActions: false,
-            adminContext: true
+            adminContext: true,
+            index
         });
         const id = escapeHtml(flyer.id || '');
         const pos = index + 1;
@@ -148,7 +168,7 @@ window.FlyerRender = (function () {
                 total: list.length
             })).join('');
         }
-        return list.map(flyer => buildFlyerCard(flyer, opts)).join('');
+        return list.map((flyer, index) => buildFlyerCard(flyer, { ...opts, index })).join('');
     }
 
     return {
