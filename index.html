@@ -22,7 +22,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
     
     <!-- Custom CSS -->
-    <link href="css/style.css?v=20250752" rel="stylesheet">
+    <link href="css/style.css?v=20250761" rel="stylesheet">
     
     <!-- Meta Tags para SEO -->
     <meta property="og:title" content="Dr.Malestar - Tributo a Pappo" />
@@ -702,6 +702,70 @@
                 });
             }
 
+            function getNavbarScrollOffset(extra) {
+                const nav = document.querySelector('.amp-navbar');
+                const base = nav ? nav.getBoundingClientRect().height : 88;
+                return base + 28 + (extra || 0);
+            }
+
+            function getSectionScrollTarget(section) {
+                if (!section) return null;
+
+                if (section.id === 'videos') {
+                    return section.querySelector('.broadcast-monitor-header') || section;
+                }
+
+                const titledPanel = section.querySelector(
+                    '.amp-nameplate, .console-bank-display'
+                );
+                if (titledPanel) return titledPanel;
+
+                const title = section.querySelector(
+                    '[id$="-title"], .amp-section-title, .console-bank-title, .broadcast-title, .console-section-title'
+                );
+                if (title) return title;
+
+                return section.querySelector(
+                    '.amp-head-header, .console-bank-header, .broadcast-monitor-header, .download-amp-head, .console-section-header'
+                ) || section;
+            }
+
+            function getSectionScrollExtra(focus, section) {
+                if (!focus || !section) return 0;
+                if (section.id === 'videos') return 8;
+                if (focus.matches('.amp-nameplate, .console-bank-display')) return 10;
+                return 0;
+            }
+
+            function scrollToNavSection(target) {
+                if (!target) return;
+
+                if (target.id === 'redes') {
+                    const credit = target.querySelector('.footer-credit') || target.querySelector('.footer-text');
+                    const anchor = credit || target;
+                    const anchorBottom = anchor.getBoundingClientRect().bottom + window.scrollY;
+                    const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+                    const bottomPad = 20;
+                    const top = Math.min(
+                        Math.max(0, anchorBottom - window.innerHeight + bottomPad),
+                        maxScroll
+                    );
+                    window.scrollTo({
+                        top: top,
+                        behavior: 'smooth'
+                    });
+                    return;
+                }
+
+                const focus = getSectionScrollTarget(target);
+                const extra = getSectionScrollExtra(focus, target);
+                const top = focus.getBoundingClientRect().top + window.scrollY - getNavbarScrollOffset(extra);
+                window.scrollTo({
+                    top: Math.max(0, top),
+                    behavior: 'smooth'
+                });
+            }
+
             // Smooth scroll para enlaces internos
             document.querySelectorAll('a[href^="#"]').forEach(anchor => {
                 anchor.addEventListener('click', function (e) {
@@ -710,10 +774,7 @@
                     e.preventDefault();
                     const target = document.querySelector(href);
                     if (target) {
-                        target.scrollIntoView({
-                            behavior: 'smooth',
-                            block: 'start'
-                        });
+                        scrollToNavSection(target);
                     }
                 });
             });
@@ -807,7 +868,7 @@
 
                 function getNavbarOffset() {
                     const nav = document.querySelector('.amp-navbar');
-                    return (nav ? nav.offsetHeight : 88) + 12;
+                    return (nav ? nav.getBoundingClientRect().height : 88) + 28;
                 }
 
                 if (spyEntries.length) {

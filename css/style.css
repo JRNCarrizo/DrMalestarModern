@@ -48,6 +48,7 @@
 
 html {
     scroll-behavior: smooth;
+    scroll-padding-top: calc(var(--navbar-height) + 28px);
     overflow-x: clip;
     scrollbar-width: thin;
     scrollbar-color: #3a3a42 transparent;
@@ -1294,11 +1295,24 @@ body {
     max-width: 100%;
 }
 
+#cartelera,
+#videos,
+#biografia,
+#contacto,
 #rider,
 #redes,
 #galeria,
 #descargas {
-    scroll-margin-top: calc(var(--navbar-height) + 12px);
+    scroll-margin-top: calc(var(--navbar-height) + 28px);
+}
+
+#cartelera-title,
+#descargas-title,
+.amp-section-title,
+.console-bank-title,
+.broadcast-title,
+.console-section-title {
+    scroll-margin-top: calc(var(--navbar-height) + 32px);
 }
 
 .bg-dark {
@@ -1936,6 +1950,7 @@ body {
     margin-bottom: 3rem;
     display: flex;
     justify-content: center;
+    scroll-margin-top: calc(var(--navbar-height) + 28px);
 }
 
 .broadcast-monitor-panel {
