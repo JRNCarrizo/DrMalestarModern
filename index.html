@@ -22,7 +22,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
     
     <!-- Custom CSS -->
-    <link href="css/style.css?v=20250761" rel="stylesheet">
+    <link href="css/style.css?v=20250762" rel="stylesheet">
     
     <!-- Meta Tags para SEO -->
     <meta property="og:title" content="Dr.Malestar - Tributo a Pappo" />
@@ -702,10 +702,23 @@
                 });
             }
 
-            function getNavbarScrollOffset(extra) {
+            function isMobileNav() {
+                return window.matchMedia('(max-width: 991.98px)').matches;
+            }
+
+            function getCollapsedNavbarHeight() {
                 const nav = document.querySelector('.amp-navbar');
-                const base = nav ? nav.getBoundingClientRect().height : 88;
-                return base + 28 + (extra || 0);
+                if (!nav) return 72;
+                if (isMobileNav()) {
+                    const main = nav.querySelector('.amp-navbar-main');
+                    if (main) return main.getBoundingClientRect().height;
+                }
+                return nav.getBoundingClientRect().height;
+            }
+
+            function getNavbarScrollOffset(extra) {
+                const pad = isMobileNav() ? 10 : 28;
+                return getCollapsedNavbarHeight() + pad + (extra || 0);
             }
 
             function getSectionScrollTarget(section) {
@@ -713,6 +726,13 @@
 
                 if (section.id === 'videos') {
                     return section.querySelector('.broadcast-monitor-header') || section;
+                }
+
+                if (isMobileNav()) {
+                    const mobileHeader = section.querySelector(
+                        '.amp-head-header, .console-bank-header, .download-amp-head, .console-section-header'
+                    );
+                    if (mobileHeader) return mobileHeader;
                 }
 
                 const titledPanel = section.querySelector(
@@ -732,9 +752,32 @@
 
             function getSectionScrollExtra(focus, section) {
                 if (!focus || !section) return 0;
-                if (section.id === 'videos') return 8;
-                if (focus.matches('.amp-nameplate, .console-bank-display')) return 10;
+                const mobile = isMobileNav();
+                if (section.id === 'videos') return mobile ? 4 : 8;
+                if (focus.matches('.amp-nameplate, .console-bank-display')) return mobile ? 0 : 10;
                 return 0;
+            }
+
+            function closeMobileNavThen(callback) {
+                const navbarCollapse = document.getElementById('navbarNav');
+                if (!navbarCollapse || !navbarCollapse.classList.contains('show')) {
+                    requestAnimationFrame(callback);
+                    return;
+                }
+
+                let done = false;
+                function finish() {
+                    if (done) return;
+                    done = true;
+                    navbarCollapse.removeEventListener('hidden.bs.collapse', finish);
+                    requestAnimationFrame(callback);
+                }
+
+                navbarCollapse.addEventListener('hidden.bs.collapse', finish);
+                const bsCollapse = bootstrap.Collapse.getInstance(navbarCollapse)
+                    || new bootstrap.Collapse(navbarCollapse, { toggle: false });
+                bsCollapse.hide();
+                window.setTimeout(finish, 400);
             }
 
             function scrollToNavSection(target) {
@@ -745,7 +788,7 @@
                     const anchor = credit || target;
                     const anchorBottom = anchor.getBoundingClientRect().bottom + window.scrollY;
                     const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
-                    const bottomPad = 20;
+                    const bottomPad = isMobileNav() ? 16 : 20;
                     const top = Math.min(
                         Math.max(0, anchorBottom - window.innerHeight + bottomPad),
                         maxScroll
@@ -773,7 +816,13 @@
                     if (!href || href === '#') return;
                     e.preventDefault();
                     const target = document.querySelector(href);
-                    if (target) {
+                    if (!target) return;
+
+                    if (isMobileNav()) {
+                        closeMobileNavThen(function() {
+                            scrollToNavSection(target);
+                        });
+                    } else {
                         scrollToNavSection(target);
                     }
                 });
@@ -867,6 +916,12 @@
                 }
 
                 function getNavbarOffset() {
+                    if (window.matchMedia('(max-width: 991.98px)').matches) {
+                        const nav = document.querySelector('.amp-navbar');
+                        const main = nav ? nav.querySelector('.amp-navbar-main') : null;
+                        const base = main ? main.getBoundingClientRect().height : 72;
+                        return base + 10;
+                    }
                     const nav = document.querySelector('.amp-navbar');
                     return (nav ? nav.getBoundingClientRect().height : 88) + 28;
                 }
@@ -1037,16 +1092,15 @@
                 ).forEach(bindKnob);
             })();
 
-            // Cerrar navbar en móviles
+            // Cerrar navbar en móviles (respaldo si el enlace no dispara el scroll propio)
             document.querySelectorAll('.navbar-nav .nav-link').forEach(item => {
                 item.addEventListener('click', () => {
+                    if (!isMobileNav()) return;
                     const navbarCollapse = document.getElementById('navbarNav');
-                    if (navbarCollapse) {
-                        const bsCollapse = new bootstrap.Collapse(navbarCollapse, {
-                            toggle: false
-                        });
-                        bsCollapse.hide();
-                    }
+                    if (!navbarCollapse || !navbarCollapse.classList.contains('show')) return;
+                    const bsCollapse = bootstrap.Collapse.getInstance(navbarCollapse)
+                        || new bootstrap.Collapse(navbarCollapse, { toggle: false });
+                    bsCollapse.hide();
                 });
             });
             

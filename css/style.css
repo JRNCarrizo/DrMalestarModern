@@ -647,6 +647,34 @@ body {
         --admin-btn-gap: 52px;
     }
 
+    html {
+        scroll-padding-top: calc(var(--navbar-height) + 10px);
+    }
+
+    #cartelera,
+    #videos,
+    #biografia,
+    #contacto,
+    #rider,
+    #redes,
+    #galeria,
+    #descargas {
+        scroll-margin-top: calc(var(--navbar-height) + 10px);
+    }
+
+    #cartelera-title,
+    #descargas-title,
+    .amp-section-title,
+    .console-bank-title,
+    .broadcast-title,
+    .console-section-title {
+        scroll-margin-top: calc(var(--navbar-height) + 14px);
+    }
+
+    .broadcast-monitor-header {
+        scroll-margin-top: calc(var(--navbar-height) + 12px);
+    }
+
     .amp-navbar-main {
         display: grid;
         grid-template-columns: auto 1fr auto;
