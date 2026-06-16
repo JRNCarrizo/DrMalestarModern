@@ -2263,7 +2263,8 @@ body {
     backdrop-filter: blur(5px);
     overflow-x: hidden;
     overflow-y: auto;
-    overscroll-behavior: contain;
+    overscroll-behavior: auto;
+    pointer-events: none;
     -webkit-overflow-scrolling: touch;
 }
 
@@ -2371,6 +2372,11 @@ body {
     justify-content: center;
     padding-top: 0.65rem;
     border-top: 1px solid #2a2a30;
+    pointer-events: auto;
+}
+
+.flyer-actions .btn-console {
+    pointer-events: auto;
 }
 
 /* Botones consola — home (flyers, videos) */
