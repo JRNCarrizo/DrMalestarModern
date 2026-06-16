@@ -690,15 +690,38 @@ body {
         display: none;
     }
 
+    .amp-navbar-brand-mobile-group {
+        grid-column: 1;
+        grid-row: 1;
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+        justify-self: start;
+        align-self: center;
+        min-width: 0;
+    }
+
+    .amp-navbar-power-mobile {
+        display: flex;
+        align-items: center;
+        flex-shrink: 0;
+        align-self: center;
+    }
+
+    .amp-navbar-power-mobile-led {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: #ef4444;
+        box-shadow: 0 0 6px rgba(239, 68, 68, 0.8);
+        animation: commandLedPulse 2.5s ease-in-out infinite;
+    }
+
     .amp-navbar-chassis {
         border-bottom-width: 2px;
     }
 
     .amp-navbar-brand-mobile {
-        grid-column: 1;
-        grid-row: 1;
-        justify-self: start;
-        align-self: center;
         margin: 0;
         flex-shrink: 0;
         max-width: min(130px, 34vw);
