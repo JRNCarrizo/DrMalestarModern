@@ -62,7 +62,8 @@ class SimpleAPI {
                 const data = result.record || {};
                 const total = (Array.isArray(data.flyers) ? data.flyers.length : 0) +
                              (Array.isArray(data.photos) ? data.photos.length : 0) +
-                             (Array.isArray(data.videos) ? data.videos.length : 0);
+                             (Array.isArray(data.videos) ? data.videos.length : 0) +
+                             (Array.isArray(data.downloads) ? data.downloads.length : 0);
                 return total > 0;
             }
         } catch (e) {}
@@ -95,15 +96,17 @@ class SimpleAPI {
             }
 
             const result = await response.json();
-            const data = result.record || { flyers: [], photos: [], videos: [] };
+            const data = result.record || { flyers: [], photos: [], videos: [], downloads: [] };
+            if (!Array.isArray(data.downloads)) data.downloads = [];
             
             const flyersCount = Array.isArray(data.flyers) ? data.flyers.length : 0;
             const photosCount = Array.isArray(data.photos) ? data.photos.length : 0;
             const videosCount = Array.isArray(data.videos) ? data.videos.length : 0;
-            const total = flyersCount + photosCount + videosCount;
+            const downloadsCount = Array.isArray(data.downloads) ? data.downloads.length : 0;
+            const total = flyersCount + photosCount + videosCount + downloadsCount;
             
             console.log('✅ Datos cargados del bin:', this.binId);
-            console.log(`📊 Contenido: ${flyersCount} flyers, ${photosCount} fotos, ${videosCount} videos (Total: ${total})`);
+            console.log(`📊 Contenido: ${flyersCount} flyers, ${photosCount} fotos, ${videosCount} videos, ${downloadsCount} descargas (Total: ${total})`);
             
             // Si el bin está vacío, buscar en otros lugares posibles
             if (total === 0) {
@@ -166,7 +169,7 @@ class SimpleAPI {
                     return await this.createBin();
                 } catch (createError) {
                     console.error('❌ Error creando bin:', createError);
-                    return { flyers: [], photos: [], videos: [] };
+                    return { flyers: [], photos: [], videos: [], downloads: [] };
                 }
             }
             throw error;
@@ -214,7 +217,7 @@ class SimpleAPI {
         try {
             console.log('🔄 Creando nuevo bin...');
             
-            const initialData = { flyers: [], photos: [], videos: [] };
+            const initialData = { flyers: [], photos: [], videos: [], downloads: [] };
             
             const response = await fetch(`${this.baseUrl}/b`, {
                 method: 'POST',
@@ -431,6 +434,65 @@ class SimpleAPI {
         data.videos = videos;
         await this.saveData(data);
         return videos;
+    }
+
+    async addDownload(downloadData) {
+        const data = await this.getData();
+        const newDownload = {
+            id: Date.now().toString(),
+            ...downloadData,
+            createdAt: new Date().toISOString()
+        };
+        if (!Array.isArray(data.downloads)) data.downloads = [];
+        data.downloads.unshift(newDownload);
+        await this.saveData(data);
+        return newDownload;
+    }
+
+    async getDownloads() {
+        const data = await this.getData();
+        return Array.isArray(data.downloads) ? data.downloads : [];
+    }
+
+    async deleteDownload(id) {
+        const data = await this.getData();
+        data.downloads = (data.downloads || []).filter(d => d.id !== id);
+        await this.saveData(data);
+    }
+
+    async updateDownload(id, updates) {
+        const data = await this.getData();
+        const downloads = Array.isArray(data.downloads) ? data.downloads : [];
+        const index = downloads.findIndex(d => d.id === id);
+        if (index === -1) {
+            throw new Error('Descarga no encontrada');
+        }
+        downloads[index] = {
+            ...downloads[index],
+            ...updates,
+            id
+        };
+        data.downloads = downloads;
+        await this.saveData(data);
+        return downloads[index];
+    }
+
+    async moveDownload(id, direction) {
+        const data = await this.getData();
+        const downloads = Array.isArray(data.downloads) ? data.downloads : [];
+        const index = downloads.findIndex(d => d.id === id);
+        if (index === -1) {
+            throw new Error('Descarga no encontrada');
+        }
+        const newIndex = index + direction;
+        if (newIndex < 0 || newIndex >= downloads.length) {
+            return downloads;
+        }
+        const [item] = downloads.splice(index, 1);
+        downloads.splice(newIndex, 0, item);
+        data.downloads = downloads;
+        await this.saveData(data);
+        return downloads;
     }
 }
 

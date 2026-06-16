@@ -165,6 +165,12 @@
                                 <span class="admin-panel-tab-label">Videos</span>
                                 <span class="admin-panel-tab-count" id="videosCounter">0/8</span>
                             </button>
+                            <button type="button" class="admin-panel-tab" role="tab" id="tabDownloads" data-section="downloads" aria-selected="false" aria-controls="adminSectionDownloads">
+                                <span class="admin-panel-tab-led" aria-hidden="true"></span>
+                                <i class="bi bi-cloud-download" aria-hidden="true"></i>
+                                <span class="admin-panel-tab-label">Descargas</span>
+                                <span class="admin-panel-tab-count" id="downloadsCounter">0/12</span>
+                            </button>
                         </nav>
 
                         <div class="admin-panel-body">
@@ -209,6 +215,7 @@
                                                         <p class="admin-console-dropzone-hint">Clic para elegir JPG o PNG</p>
                                                         <input type="file" id="flyerImage" name="image" accept="image/*" hidden>
                                                     </div>
+                                                    <div id="flyerPreview" class="admin-console-preview" aria-live="polite"></div>
                                                 </div>
                                             </div>
                                         </div>
@@ -263,6 +270,7 @@
                                                         <p class="admin-console-dropzone-hint">Clic para elegir JPG o PNG</p>
                                                         <input type="file" id="photoImage" name="image" accept="image/*" hidden>
                                                     </div>
+                                                    <div id="photoPreview" class="admin-console-preview" aria-live="polite"></div>
                                                 </div>
                                             </div>
                                         </div>
@@ -335,6 +343,65 @@
                                     <div id="videosList" class="videos-grid admin-videos-published"></div>
                                 </div>
                             </section>
+
+                            <!-- Descargas -->
+                            <section id="adminSectionDownloads" class="admin-panel-section" role="tabpanel" aria-labelledby="tabDownloads" hidden>
+                                <div class="admin-console-module">
+                                    <div class="admin-console-module-head">
+                                        <span class="admin-console-module-tag">INPUT · CH 04</span>
+                                        <h2 class="admin-console-module-title">Nuevo archivo</h2>
+                                        <p class="admin-console-module-hint">Se muestra en el <strong>carrusel de Descargas</strong> debajo de la galería. Máximo 12 archivos.</p>
+                                    </div>
+                                    <form id="downloadForm" class="admin-console-form">
+                                        <div class="admin-console-form-grid">
+                                            <div class="admin-console-form-col">
+                                                <div class="admin-login-field">
+                                                    <label for="downloadTitle" class="admin-login-label"><span class="admin-login-label-led"></span>TÍTULO</label>
+                                                    <input type="text" class="admin-login-input" id="downloadTitle" name="title" placeholder="Ej: Logo Dr.Malestar" required>
+                                                </div>
+                                                <div class="admin-login-field">
+                                                    <label for="downloadDescription" class="admin-login-label"><span class="admin-login-label-led"></span>DESCRIPCIÓN</label>
+                                                    <textarea class="admin-login-input admin-login-input--area" id="downloadDescription" name="description" rows="4" placeholder="Opcional"></textarea>
+                                                </div>
+                                                <div class="admin-login-field">
+                                                    <label for="downloadFileName" class="admin-login-label"><span class="admin-login-label-led"></span>NOMBRE AL DESCARGAR</label>
+                                                    <input type="text" class="admin-login-input" id="downloadFileName" name="fileName" placeholder="logo-dr-malestar.png">
+                                                    <p class="admin-console-field-hint">Opcional. Si lo dejás vacío se usa el nombre del archivo subido.</p>
+                                                </div>
+                                            </div>
+                                            <div class="admin-console-form-col">
+                                                <div class="admin-login-field">
+                                                    <span class="admin-login-label"><span class="admin-login-label-led"></span>ARCHIVO</span>
+                                                    <div class="admin-console-dropzone" onclick="document.getElementById('downloadFile').click()">
+                                                        <i class="bi bi-cloud-upload admin-console-dropzone-icon" aria-hidden="true"></i>
+                                                        <p class="admin-console-dropzone-title">Subir archivo</p>
+                                                        <p class="admin-console-dropzone-hint">PNG, JPG, WEBP o PDF</p>
+                                                        <input type="file" id="downloadFile" name="file" accept="image/*,.pdf" hidden>
+                                                    </div>
+                                                    <div id="downloadPreview" class="admin-console-preview" aria-live="polite"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="admin-console-form-actions">
+                                            <button type="submit" class="admin-console-btn admin-console-btn--primary">
+                                                <span class="admin-console-btn-led"></span>
+                                                <span class="admin-console-btn-face"><i class="bi bi-plus-lg" aria-hidden="true"></i> AGREGAR DESCARGA</span>
+                                            </button>
+                                            <button type="button" class="admin-console-btn admin-console-btn--ghost d-none" id="downloadCancelEdit" onclick="cancelDownloadEdit()">
+                                                <span class="admin-console-btn-face"><i class="bi bi-x-circle" aria-hidden="true"></i> CANCELAR</span>
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+                                <div class="admin-console-module admin-console-module--list">
+                                    <div class="admin-console-module-head">
+                                        <span class="admin-console-module-tag">CAROUSEL · CH 04</span>
+                                        <h2 class="admin-console-module-title">Descargas publicadas</h2>
+                                        <p class="admin-console-module-hint">Usá <strong>ANTES</strong> / <strong>DESPUÉS</strong> para cambiar el orden en el carrusel de la home.</p>
+                                    </div>
+                                    <div id="downloadsList" class="admin-downloads-published"></div>
+                                </div>
+                            </section>
                         </div>
 
                         <footer class="admin-panel-footer" aria-hidden="true">
@@ -352,8 +419,9 @@
     <script src="../config.js?v=20250615"></script>
     <script src="../js/flyer-render.js?v=20250620"></script>
     <script src="../js/photo-render.js?v=20250621"></script>
+    <script src="../js/download-render.js?v=20250753"></script>
     <script src="../js/video-render.js?v=20250620"></script>
     <script src="../js/api.js?v=20250619"></script>
-    <script src="admin.js?v=20250619"></script>
+    <script src="admin.js?v=20250756"></script>
 </body>
 </html>

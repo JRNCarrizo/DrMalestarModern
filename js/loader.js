@@ -47,6 +47,11 @@ async function loadAllContent() {
     loadVideos().catch(err => {
         console.error('❌ Error cargando videos:', err);
     });
+
+    // Cargar descargas
+    loadDownloads().catch(err => {
+        console.error('❌ Error cargando descargas:', err);
+    });
     
     console.log('✅ Todas las secciones iniciadas');
 }
@@ -267,6 +272,71 @@ function displayPhotos(photos) {
         const container = document.getElementById('photos-container');
         if (container) {
             container.innerHTML = '<p class="text-center text-danger">Error mostrando fotos</p>';
+        }
+    }
+}
+
+// ===========================================
+// DESCARGAS
+// ===========================================
+
+function getDefaultDownloads() {
+    if (window.DownloadRender && typeof DownloadRender.getDefaultDownloads === 'function') {
+        return DownloadRender.getDefaultDownloads();
+    }
+    return [{
+        id: 'default-logo',
+        title: 'Logo Dr.Malestar',
+        description: 'Logo oficial de la banda en alta calidad.',
+        file: 'img/logoNuevo-malestar.png',
+        fileName: 'logoNuevo-malestar.png',
+        isDefault: true
+    }];
+}
+
+async function loadDownloads() {
+    try {
+        console.log('🔄 Cargando descargas...');
+        const downloads = await api.getDownloads();
+        const downloadsArray = Array.isArray(downloads) ? downloads : [];
+        displayDownloads(downloadsArray);
+    } catch (error) {
+        console.error('❌ Error cargando descargas:', error);
+        const container = document.getElementById('downloads-container');
+        if (container) {
+            container.innerHTML = `
+                <div class="text-center text-muted py-5">
+                    <p>No se pudieron cargar las descargas.</p>
+                    <small>Recarga la página o intenta más tarde.</small>
+                </div>
+            `;
+        }
+    }
+}
+
+function displayDownloads(downloads) {
+    try {
+        const container = document.getElementById('downloads-container');
+        if (!container) {
+            console.error('❌ Contenedor de descargas no encontrado');
+            return;
+        }
+
+        const list = Array.isArray(downloads) && downloads.length ? downloads : getDefaultDownloads();
+
+        if (!window.DownloadRender) {
+            container.innerHTML = '<p class="text-center text-muted py-5">Módulo de descargas no disponible.</p>';
+            return;
+        }
+
+        container.innerHTML = DownloadRender.buildDownloadCarousel(list, { adminContext: false });
+        DownloadRender.initDownloadCarousel(container.querySelector('[data-download-carousel]'));
+        console.log('✅ Descargas mostradas:', list.length);
+    } catch (error) {
+        console.error('❌ Error mostrando descargas:', error);
+        const container = document.getElementById('downloads-container');
+        if (container) {
+            container.innerHTML = '<p class="text-center text-danger py-5">Error mostrando descargas</p>';
         }
     }
 }

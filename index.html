@@ -22,7 +22,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
     
     <!-- Custom CSS -->
-    <link href="css/style.css?v=20250745" rel="stylesheet">
+    <link href="css/style.css?v=20250752" rel="stylesheet">
     
     <!-- Meta Tags para SEO -->
     <meta property="og:title" content="Dr.Malestar - Tributo a Pappo" />
@@ -84,20 +84,29 @@
                         </div>
 
                         <ul class="navbar-nav amp-navbar-nav">
-                            <li class="nav-item px-2 px-xl-3">
-                                <a class="nav-link nav-button nav-button--amp" href="#videos" data-nav-led="0">
-                                    <i class="bi bi-play-circle"></i> Videos
-                                </a>
-                            </li>
-                            <li class="nav-item px-2 px-xl-3">
-                                <a class="nav-link nav-button nav-button--amp" href="#cartelera" data-nav-led="1">
-                                    <i class="bi bi-calendar-event"></i> Shows
-                                </a>
-                            </li>
-                            <li class="nav-item px-2 px-xl-3">
-                                <a class="nav-link nav-button nav-button--amp" href="#biografia" data-nav-led="2">
-                                    <i class="bi bi-people"></i> Nosotros
-                                </a>
+                            <li class="amp-navbar-nav-wing amp-navbar-nav-wing--left">
+                                <div class="amp-navbar-nav-wing-inner">
+                                    <span class="nav-item px-2 px-xl-3">
+                                        <a class="nav-link nav-button nav-button--amp" href="#cartelera" data-nav-led="1">
+                                            <i class="bi bi-calendar-event"></i> Shows
+                                        </a>
+                                    </span>
+                                    <span class="nav-item px-2 px-xl-3">
+                                        <a class="nav-link nav-button nav-button--amp" href="#galeria" data-nav-led="2">
+                                            <i class="bi bi-images"></i> Galería
+                                        </a>
+                                    </span>
+                                    <span class="nav-item px-2 px-xl-3">
+                                        <a class="nav-link nav-button nav-button--amp" href="#descargas" data-nav-led="3">
+                                            <i class="bi bi-cloud-download"></i> Descargas
+                                        </a>
+                                    </span>
+                                    <span class="nav-item px-2 px-xl-3">
+                                        <a class="nav-link nav-button nav-button--amp" href="#videos" data-nav-led="0">
+                                            <i class="bi bi-play-circle"></i> Videos
+                                        </a>
+                                    </span>
+                                </div>
                             </li>
                             <li class="nav-item amp-navbar-logo-item d-none d-lg-flex px-2">
                                 <a class="navbar-brand amp-navbar-plate" href="#hero" id="logoLinkLarge">
@@ -106,20 +115,29 @@
                                     <span class="amp-navbar-plate-sub">TRIBUTE · PAPPO</span>
                                 </a>
                             </li>
-                            <li class="nav-item px-2 px-xl-3">
-                                <a class="nav-link nav-button nav-button--amp" href="#contacto" data-nav-led="3">
-                                    <i class="bi bi-envelope"></i> Contacto
-                                </a>
-                            </li>
-                            <li class="nav-item px-2 px-xl-3">
-                                <a class="nav-link nav-button nav-button--amp" href="#rider" data-nav-led="4">
-                                    <i class="bi bi-file-earmark-music"></i> Rider
-                                </a>
-                            </li>
-                            <li class="nav-item px-2 px-xl-3">
-                                <a class="nav-link nav-button nav-button--amp" href="#redes" data-nav-led="5">
-                                    <i class="bi bi-share"></i> Redes
-                                </a>
+                            <li class="amp-navbar-nav-wing amp-navbar-nav-wing--right">
+                                <div class="amp-navbar-nav-wing-inner">
+                                    <span class="nav-item px-2 px-xl-3">
+                                        <a class="nav-link nav-button nav-button--amp" href="#biografia" data-nav-led="4">
+                                            <i class="bi bi-people"></i> Nosotros
+                                        </a>
+                                    </span>
+                                    <span class="nav-item px-2 px-xl-3">
+                                        <a class="nav-link nav-button nav-button--amp" href="#contacto" data-nav-led="5">
+                                            <i class="bi bi-envelope"></i> Contacto
+                                        </a>
+                                    </span>
+                                    <span class="nav-item px-2 px-xl-3">
+                                        <a class="nav-link nav-button nav-button--amp" href="#rider" data-nav-led="6">
+                                            <i class="bi bi-file-earmark-music"></i> Rider
+                                        </a>
+                                    </span>
+                                    <span class="nav-item px-2 px-xl-3">
+                                        <a class="nav-link nav-button nav-button--amp" href="#redes" data-nav-led="7">
+                                            <i class="bi bi-share"></i> Redes
+                                        </a>
+                                    </span>
+                                </div>
                             </li>
                         </ul>
 
@@ -144,6 +162,8 @@
                 <span class="amp-led" data-nav-led="3"></span>
                 <span class="amp-led" data-nav-led="4"></span>
                 <span class="amp-led" data-nav-led="5"></span>
+                <span class="amp-led" data-nav-led="6"></span>
+                <span class="amp-led" data-nav-led="7"></span>
             </div>
 
             <div class="amp-grille amp-navbar-grille d-none d-lg-flex" aria-hidden="true">
@@ -153,6 +173,8 @@
                 <span class="amp-led" data-nav-led="3"></span>
                 <span class="amp-led" data-nav-led="4"></span>
                 <span class="amp-led" data-nav-led="5"></span>
+                <span class="amp-led" data-nav-led="6"></span>
+                <span class="amp-led" data-nav-led="7"></span>
             </div>
         </div>
     </nav>
@@ -290,6 +312,81 @@
                 <div class="text-center w-100 py-5" style="grid-column: 1/-1;">
                     <div class="spinner-border text-primary" role="status">
                         <span class="visually-hidden">Cargando fotos...</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Descargas -->
+    <section id="descargas" class="section-padding">
+        <div class="container">
+            <div class="amp-head-header download-amp-head" aria-labelledby="descargas-title">
+                <div class="amp-head-panel">
+                    <div class="download-head-power" aria-hidden="true">
+                        <span class="download-head-power-led download-head-power-led--on panel-toggle" role="button" tabindex="0" aria-pressed="true" aria-label="Power"></span>
+                        <span class="download-head-power-label">PWR</span>
+                    </div>
+                    <div class="amp-head-controls">
+                        <div class="amp-knob-group">
+                            <div class="amp-knob">
+                                <span class="amp-knob-cap"><span class="amp-knob-notch"></span></span>
+                                <span class="amp-knob-name">VOL</span>
+                            </div>
+                            <div class="amp-knob">
+                                <span class="amp-knob-cap amp-knob-cap--mid"><span class="amp-knob-notch"></span></span>
+                                <span class="amp-knob-name">DATA</span>
+                            </div>
+                        </div>
+                        <div class="amp-nameplate">
+                            <span class="amp-brand">Dr.Malestar</span>
+                            <h2 id="descargas-title" class="amp-section-title">Descargas</h2>
+                            <span class="amp-model">PRESS KIT · ASSETS</span>
+                        </div>
+                        <div class="amp-knob-group">
+                            <div class="amp-knob">
+                                <span class="amp-knob-cap amp-knob-cap--low"><span class="amp-knob-notch"></span></span>
+                                <span class="amp-knob-name">OUT</span>
+                            </div>
+                            <div class="amp-knob">
+                                <span class="amp-knob-cap amp-knob-cap--high"><span class="amp-knob-notch"></span></span>
+                                <span class="amp-knob-name">SYNC</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="download-head-console" aria-hidden="true">
+                        <div class="console-bank-group">
+                            <div class="console-bank-btn console-bank-btn--lit panel-toggle" role="button" tabindex="0" aria-pressed="true" aria-label="KIT">
+                                <span class="console-bank-led"></span>
+                                <span class="console-bank-key">KIT</span>
+                            </div>
+                            <div class="console-bank-btn panel-toggle" role="button" tabindex="0" aria-pressed="false" aria-label="ZIP">
+                                <span class="console-bank-led"></span>
+                                <span class="console-bank-key">ZIP</span>
+                            </div>
+                            <div class="console-bank-btn console-bank-btn--lit console-bank-btn--hot panel-toggle" role="button" tabindex="0" aria-pressed="true" aria-label="DL">
+                                <span class="console-bank-led"></span>
+                                <span class="console-bank-key">DL</span>
+                            </div>
+                            <div class="console-bank-btn panel-toggle" role="button" tabindex="0" aria-pressed="false" aria-label="HD">
+                                <span class="console-bank-led"></span>
+                                <span class="console-bank-key">HD</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="amp-grille section-panel-grille download-head-grille">
+                        <span class="amp-led panel-toggle" role="button" tabindex="0" aria-pressed="false" aria-label="LED 1"></span>
+                        <span class="amp-led amp-led--on panel-toggle" role="button" tabindex="0" aria-pressed="true" aria-label="LED 2"></span>
+                        <span class="amp-led amp-led--on panel-toggle" role="button" tabindex="0" aria-pressed="true" aria-label="LED 3"></span>
+                        <span class="amp-led panel-toggle" role="button" tabindex="0" aria-pressed="false" aria-label="LED 4"></span>
+                        <span class="amp-led panel-toggle" role="button" tabindex="0" aria-pressed="false" aria-label="LED 5"></span>
+                    </div>
+                </div>
+            </div>
+            <div id="downloads-container" class="download-deck">
+                <div class="text-center w-100 py-5">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Cargando descargas...</span>
                     </div>
                 </div>
             </div>
@@ -575,6 +672,7 @@
     <script src="js/api.js"></script>
     <script src="js/flyer-render.js?v=20250620"></script>
     <script src="js/photo-render.js?v=20250621"></script>
+    <script src="js/download-render.js?v=20250622"></script>
     <script src="js/video-render.js?v=20250620"></script>
     <script src="js/loader.js"></script>
     <!-- Script de diagnóstico - remover después de identificar el Bin ID correcto -->
@@ -804,7 +902,17 @@
                     );
                 });
 
-                document.querySelectorAll('.section-panel-grille .amp-led.panel-toggle, .rider-amp-footer .amp-led.panel-toggle').forEach(function(led) {
+                document.querySelectorAll('.download-head-power-led.panel-toggle').forEach(function(led) {
+                    bindToggle(led,
+                        function() { return led.classList.contains('download-head-power-led--on'); },
+                        function(on) {
+                            led.classList.toggle('download-head-power-led--on', on);
+                            led.setAttribute('aria-pressed', String(on));
+                        }
+                    );
+                });
+
+                document.querySelectorAll('.section-panel-grille .amp-led.panel-toggle, .rider-amp-footer .amp-led.panel-toggle, .download-head-grille .amp-led.panel-toggle').forEach(function(led) {
                     bindToggle(led,
                         function() { return led.classList.contains('amp-led--on'); },
                         function(on) {
@@ -864,7 +972,7 @@
                 }
 
                 document.querySelectorAll(
-                    '.amp-head-controls .amp-knob, .amp-navbar-mobile-knobs .amp-knob, .amp-navbar-strip .amp-navbar-knobs .amp-knob'
+                    '.amp-head-controls .amp-knob, .download-amp-head .amp-knob, .amp-navbar-mobile-knobs .amp-knob, .amp-navbar-strip .amp-navbar-knobs .amp-knob'
                 ).forEach(bindKnob);
             })();
 

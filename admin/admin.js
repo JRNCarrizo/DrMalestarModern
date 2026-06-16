@@ -44,9 +44,12 @@ let editingFlyerImage = null;
 let editingPhotoId = null;
 let editingPhotoImage = null;
 let editingVideoId = null;
+let editingDownloadId = null;
+let editingDownloadFile = null;
 let cachedFlyers = [];
 let cachedPhotos = [];
 let cachedVideos = [];
+let cachedDownloads = [];
 
 // Inicializar cuando el DOM esté listo
 document.addEventListener('DOMContentLoaded', function() {
@@ -165,6 +168,9 @@ function setupEventListeners() {
     document.getElementById('flyerForm').addEventListener('submit', handleFlyerSubmit);
     document.getElementById('photoForm').addEventListener('submit', handlePhotoSubmit);
     document.getElementById('videoForm').addEventListener('submit', handleVideoSubmit);
+    document.getElementById('downloadForm').addEventListener('submit', handleDownloadSubmit);
+
+    setupAdminFilePreviews();
     
     // Sync button
     const syncBtn = document.getElementById('syncBtn');
@@ -315,7 +321,8 @@ async function loadAllContent() {
         await Promise.all([
             loadFlyers(),
             loadPhotos(),
-            loadVideos()
+            loadVideos(),
+            loadDownloads()
         ]);
         } catch (error) {
         console.error('❌ Error cargando contenido:', error);
@@ -393,6 +400,8 @@ function startFlyerEdit(id) {
     }
     if (cancelBtn) cancelBtn.classList.remove('d-none');
 
+    showAdminFilePreview('flyerPreview', editingFlyerImage);
+
     switchAdminTab('flyers');
     form.scrollIntoView({ behavior: 'smooth', block: 'start' });
     notify('Editando flyer. Realiza los cambios y guarda.', 'info');
@@ -413,6 +422,7 @@ function cancelFlyerEdit(showMessage = true) {
 
     const imageInput = document.getElementById('flyerImage');
     if (imageInput) imageInput.value = '';
+    clearPreview('flyerPreview');
 
     updateFlyerButtonState();
 
@@ -474,6 +484,7 @@ async function handleFlyerSubmit(e) {
             await api.addFlyer(flyerData);
             await loadFlyers();
             e.target.reset();
+            clearPreview('flyerPreview');
             notify(`✅ Flyer agregado correctamente (${currentFlyers.length + 1}/6)`, 'success');
             updateFlyerButtonState();
         }
@@ -608,6 +619,8 @@ function startPhotoEdit(id) {
     }
     if (cancelBtn) cancelBtn.classList.remove('d-none');
 
+    showAdminFilePreview('photoPreview', editingPhotoImage);
+
     switchAdminTab('photos');
     form.scrollIntoView({ behavior: 'smooth', block: 'start' });
     notify('Editando foto. Realiza los cambios y guarda.', 'info');
@@ -628,6 +641,7 @@ function cancelPhotoEdit(showMessage = true) {
 
     const imageInput = document.getElementById('photoImage');
     if (imageInput) imageInput.value = '';
+    clearPreview('photoPreview');
 
     updatePhotoButtonState();
 
@@ -688,6 +702,7 @@ async function handlePhotoSubmit(e) {
             await api.addPhoto(photoData);
             await loadPhotos();
             e.target.reset();
+            clearPreview('photoPreview');
             notify(`✅ Foto agregada correctamente (${currentPhotos.length + 1}/10)`, 'success');
             updatePhotoButtonState();
         }
@@ -1038,51 +1053,314 @@ async function deleteVideo(id) {
 }
 
 // ===========================================
+// DESCARGAS
+// ===========================================
+
+async function loadDownloads() {
+    try {
+        const downloads = await api.getDownloads();
+        displayDownloads(downloads);
+        updateDownloadButtonState();
+        updateSectionCounter('downloadsCounter', downloads.length, 12);
+    } catch (error) {
+        console.error('❌ Error cargando descargas:', error);
+        document.getElementById('downloadsList').innerHTML = '<p class="admin-empty-state admin-empty-state--error"><i class="bi bi-exclamation-triangle"></i> Error cargando descargas</p>';
+    }
+}
+
+function displayDownloads(downloads) {
+    const container = document.getElementById('downloadsList');
+    cachedDownloads = Array.isArray(downloads) ? downloads.map(d => ({ ...d })) : [];
+
+    if (!container) return;
+
+    if (window.DownloadRender) {
+        container.innerHTML = DownloadRender.buildAdminDownloadGrid(cachedDownloads);
+        return;
+    }
+
+    container.innerHTML = '<p class="admin-empty-state admin-empty-state--error">Módulo de descargas no disponible.</p>';
+}
+
+function getDownloadById(id) {
+    const fromCache = cachedDownloads.find(entry => entry.id === id);
+    if (fromCache) return fromCache;
+    if (window.DownloadRender && DownloadRender.isDefaultDownload({ id })) {
+        return DownloadRender.getDefaultDownloads().find(entry => entry.id === id) || null;
+    }
+    return null;
+}
+
+function startDownloadEdit(id) {
+    const item = getDownloadById(id);
+    if (!item) {
+        notify('No se encontró la descarga a editar.', 'error');
+        return;
+    }
+
+    const isDefault = window.DownloadRender && DownloadRender.isDefaultDownload(item);
+
+    editingDownloadId = isDefault ? null : id;
+    editingDownloadFile = item.file || 'img/logoNuevo-malestar.png';
+
+    const form = document.getElementById('downloadForm');
+    const titleInput = document.getElementById('downloadTitle');
+    const descriptionInput = document.getElementById('downloadDescription');
+    const fileNameInput = document.getElementById('downloadFileName');
+    const fileInput = document.getElementById('downloadFile');
+    const cancelBtn = document.getElementById('downloadCancelEdit');
+
+    if (titleInput) titleInput.value = item.title || '';
+    if (descriptionInput) descriptionInput.value = item.description || '';
+    if (fileNameInput) fileNameInput.value = item.fileName || '';
+    if (fileInput) fileInput.value = '';
+    if (cancelBtn) cancelBtn.classList.remove('d-none');
+    if (form) setSubmitButtonContent(form, isDefault ? '<i class="bi bi-plus-lg"></i> PUBLICAR DESCARGA' : '<i class="bi bi-save"></i> GUARDAR CAMBIOS');
+
+    showAdminFilePreview('downloadPreview', editingDownloadFile, item.fileName || downloadFileNameFromPath(editingDownloadFile));
+
+    switchAdminTab('downloads');
+    notify(
+        isDefault
+            ? 'Completá el formulario para publicar esta descarga en la base de datos.'
+            : 'Editando descarga. Realiza los cambios y guarda.',
+        'info'
+    );
+}
+
+function cancelDownloadEdit(showMessage = true) {
+    editingDownloadId = null;
+    editingDownloadFile = null;
+
+    const form = document.getElementById('downloadForm');
+    if (form) form.reset();
+    const cancelBtn = document.getElementById('downloadCancelEdit');
+    if (cancelBtn) cancelBtn.classList.add('d-none');
+    const fileInput = document.getElementById('downloadFile');
+    if (fileInput) fileInput.value = '';
+    clearPreview('downloadPreview');
+
+    resetSubmitButton(form, '<i class="bi bi-plus-lg"></i> AGREGAR DESCARGA');
+    updateDownloadButtonState();
+
+    if (showMessage) {
+        notify('Edición de descarga cancelada', 'info');
+    }
+}
+
+async function handleDownloadSubmit(e) {
+    e.preventDefault();
+    if (isSubmitting) return;
+    isSubmitting = true;
+
+    try {
+        const isEditing = Boolean(editingDownloadId);
+        let currentDownloads = [];
+
+        if (!isEditing) {
+            currentDownloads = await api.getDownloads();
+            if (currentDownloads.length >= 12) {
+                notify('❌ Límite alcanzado: Solo se pueden tener 12 descargas.', 'error');
+                isSubmitting = false;
+                return;
+            }
+        } else {
+            currentDownloads = cachedDownloads;
+        }
+
+        const title = document.getElementById('downloadTitle').value.trim();
+        const description = document.getElementById('downloadDescription').value.trim();
+        const fileName = document.getElementById('downloadFileName').value.trim();
+        const fileInput = document.getElementById('downloadFile');
+        const file = fileInput?.files?.[0];
+
+        if (!title) {
+            notify('El título es obligatorio', 'error');
+            isSubmitting = false;
+            return;
+        }
+
+        if (!isEditing && !file && !editingDownloadFile) {
+            notify('Seleccioná un archivo para subir', 'error');
+            isSubmitting = false;
+            return;
+        }
+
+        let finalFile = editingDownloadFile || '';
+
+        if (file && file.size > 0) {
+            console.log('🔄 Subiendo archivo de descarga a Cloudinary...');
+            const cloudinaryResult = await uploadToCloudinary(file, 'drmalestar/photos');
+            finalFile = cloudinaryResult.url;
+        } else if (!isEditing && !finalFile) {
+            throw new Error('Debes subir un archivo');
+        }
+
+        if (!finalFile) {
+            throw new Error('No se pudo obtener el archivo para guardar');
+        }
+
+        const downloadData = {
+            title,
+            description,
+            file: finalFile
+        };
+
+        if (fileName) {
+            downloadData.fileName = fileName;
+        } else if (file) {
+            downloadData.fileName = file.name;
+        }
+
+        if (isEditing) {
+            await api.updateDownload(editingDownloadId, downloadData);
+            await loadDownloads();
+            notify('✅ Descarga actualizada correctamente', 'success');
+            cancelDownloadEdit(false);
+        } else {
+            await api.addDownload(downloadData);
+            await loadDownloads();
+            document.getElementById('downloadForm').reset();
+            clearPreview('downloadPreview');
+            notify(`✅ Descarga agregada correctamente (${currentDownloads.length + 1}/12)`, 'success');
+        }
+
+        updateDownloadButtonState();
+
+        if (window.opener) {
+            window.opener.postMessage('contentUpdated', '*');
+        }
+    } catch (error) {
+        console.error('❌ Error guardando descarga:', error);
+        notify('Error guardando descarga: ' + error.message, 'error');
+    } finally {
+        if (document.getElementById('downloadFile')) {
+            document.getElementById('downloadFile').value = '';
+        }
+        isSubmitting = false;
+    }
+}
+
+async function updateDownloadButtonState() {
+    try {
+        const downloads = await api.getDownloads();
+        const form = document.getElementById('downloadForm');
+        const addButton = form?.querySelector('button[type="submit"]');
+        if (!addButton || editingDownloadId) return;
+
+        if (downloads.length >= 12) {
+            addButton.disabled = true;
+            setSubmitButtonContent(form, '<i class="bi bi-exclamation-triangle"></i> LÍMITE 12/12');
+        } else {
+            resetSubmitButton(form, '<i class="bi bi-plus-lg"></i> AGREGAR DESCARGA');
+        }
+    } catch (error) {
+        console.error('Error actualizando estado del botón de descargas:', error);
+    }
+}
+
+async function moveDownload(id, direction) {
+    if (!id || !direction) return;
+    try {
+        await api.moveDownload(id, direction);
+        await loadDownloads();
+        notify('Orden de descargas actualizado', 'success');
+        if (window.opener) {
+            window.opener.postMessage('contentUpdated', '*');
+        }
+    } catch (error) {
+        console.error('❌ Error moviendo descarga:', error);
+        notify('No se pudo cambiar la posición', 'error');
+    }
+}
+
+async function deleteDownload(id) {
+    if (window.DownloadRender && DownloadRender.isDefaultDownload({ id })) {
+        notify('Este logo es el contenido por defecto del sitio. Publicá una descarga nueva si querés reemplazarlo.', 'info');
+        return;
+    }
+
+    if (!confirm('¿Estás seguro de eliminar esta descarga?')) return;
+
+    try {
+        await api.deleteDownload(id);
+        await loadDownloads();
+        notify('Descarga eliminada.', 'success');
+
+        if (window.opener) {
+            window.opener.postMessage('contentUpdated', '*');
+        }
+    } catch (error) {
+        console.error('❌ Error eliminando descarga:', error);
+        notify('Error eliminando descarga', 'error');
+    }
+}
+
+// ===========================================
 // CLOUDINARY
 // ===========================================
 
 async function uploadToCloudinary(file, folder = 'drmalestar') {
     const cloudName = window.CONFIG?.CLOUDINARY_CLOUD_NAME || 'daoo9nvfc';
-    // Intentar diferentes presets desde config o usar defaults
     const uploadPresets = window.CONFIG?.CLOUDINARY_UPLOAD_PRESETS || ['drmalestar_upload', 'drmalestar', 'ml_default'];
-    const uploadUrl = `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`;
-    
+    const isPdf = file.type === 'application/pdf' || /\.pdf$/i.test(file.name || '');
+    const resourceType = isPdf ? 'raw' : 'image';
+    const uploadUrl = `https://api.cloudinary.com/v1_1/${cloudName}/${resourceType}/upload`;
+    const foldersToTry = Array.from(new Set([
+        folder,
+        'drmalestar/photos',
+        'drmalestar/flyers',
+        'drmalestar'
+    ].filter(Boolean)));
+
     let lastError = null;
-    
-    // Intentar con cada preset
-    for (const preset of uploadPresets) {
-        try {
-            console.log(`🔄 Intentando subir con preset: ${preset}...`);
-            
-            const formData = new FormData();
-            formData.append('file', file);
-            formData.append('upload_preset', preset);
-            formData.append('folder', folder);
-            
-            const response = await fetch(uploadUrl, {
-                method: 'POST',
-                body: formData
-            });
-            
-            if (!response.ok) {
-                const errorText = await response.text();
-                console.error(`❌ Error con preset ${preset}:`, response.status, errorText);
-                lastError = `HTTP ${response.status}: ${errorText}`;
-                continue; // Intentar siguiente preset
+
+    for (const targetFolder of foldersToTry) {
+        for (const preset of uploadPresets) {
+            try {
+                console.log(`🔄 Subiendo a Cloudinary (${resourceType}, carpeta: ${targetFolder}, preset: ${preset})...`);
+
+                const formData = new FormData();
+                formData.append('file', file);
+                formData.append('upload_preset', preset);
+                formData.append('folder', targetFolder);
+
+                const response = await fetch(uploadUrl, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    console.error(`❌ Error con carpeta ${targetFolder} / preset ${preset}:`, response.status, errorText);
+                    lastError = `HTTP ${response.status}: ${errorText}`;
+                    continue;
+                }
+
+                const result = await response.json();
+                const fileUrl = result.secure_url || result.url;
+                if (!fileUrl) {
+                    lastError = 'Cloudinary no devolvió URL del archivo';
+                    continue;
+                }
+
+                console.log('✅ Archivo subido exitosamente:', fileUrl);
+                return {
+                    url: fileUrl,
+                    secure_url: fileUrl,
+                    publicId: result.public_id
+                };
+            } catch (error) {
+                console.error(`❌ Error con carpeta ${targetFolder} / preset ${preset}:`, error);
+                lastError = error.message;
             }
-            
-            const result = await response.json();
-            console.log('✅ Imagen subida exitosamente:', result.secure_url);
-            return { url: result.secure_url, publicId: result.public_id };
-            
-    } catch (error) {
-            console.error(`❌ Error con preset ${preset}:`, error);
-            lastError = error.message;
-            continue;
         }
     }
-    
-    // Si todos los presets fallaron, usar base64 como fallback
+
+    if (isPdf) {
+        throw new Error(lastError || 'No se pudo subir el PDF a Cloudinary. Verificá el preset de subida.');
+    }
+
     console.warn('⚠️ Cloudinary falló, usando base64 como fallback...');
     return await convertToBase64(file);
 }
@@ -1114,6 +1392,123 @@ async function convertToBase64(file) {
 function clearPreview(id) {
     const preview = document.getElementById(id);
     if (preview) preview.innerHTML = '';
+}
+
+function downloadFileNameFromPath(path) {
+    if (!path) return '';
+    const parts = String(path).split('/');
+    return parts[parts.length - 1] || '';
+}
+
+function isPdfSource(source, fileName) {
+    const name = fileName || (typeof source === 'string' ? source : source?.name) || '';
+    const type = typeof source === 'object' && source ? source.type : '';
+    return type === 'application/pdf' || /\.pdf$/i.test(name);
+}
+
+function isImageSource(source, fileName) {
+    const name = fileName || (typeof source === 'string' ? source : source?.name) || '';
+    const type = typeof source === 'object' && source ? source.type : '';
+    if (type && type.startsWith('image/')) return true;
+    return /\.(png|jpe?g|gif|webp|svg|bmp|avif)$/i.test(name);
+}
+
+function resolveAdminPreviewSrc(path) {
+    if (!path) return '';
+    if (path.startsWith('data:') || path.startsWith('http://') || path.startsWith('https://')) {
+        return path;
+    }
+    if (path.startsWith('img/')) return `../${path}`;
+    if (path.startsWith('/img/')) return `..${path}`;
+    return path;
+}
+
+function renderAdminFilePreviewMarkup(source, fileName) {
+    const label = fileName || downloadFileNameFromPath(typeof source === 'string' ? source : source?.name) || 'Archivo seleccionado';
+
+    if (isPdfSource(source, fileName)) {
+        return `
+            <div class="admin-console-preview-file">
+                <i class="bi bi-file-earmark-pdf" aria-hidden="true"></i>
+                <span>${label}</span>
+            </div>
+        `;
+    }
+
+    if (typeof source === 'string') {
+        const src = resolveAdminPreviewSrc(source);
+        const fallback = resolveAdminPreviewSrc('img/logoNuevo-malestar.png');
+        return `<img src="${src}" alt="Vista previa de ${label}" onerror="this.src='${fallback}'">`;
+    }
+
+    return '';
+}
+
+function showAdminFilePreview(previewId, source, fileName) {
+    const preview = document.getElementById(previewId);
+    if (!preview) return;
+
+    if (!source) {
+        preview.innerHTML = '';
+        return;
+    }
+
+    if (source instanceof File || (typeof source === 'object' && source && 'size' in source && 'name' in source)) {
+        const file = source;
+        if (isPdfSource(file)) {
+            preview.innerHTML = renderAdminFilePreviewMarkup(file, file.name);
+            return;
+        }
+        if (!isImageSource(file)) {
+            preview.innerHTML = `
+                <div class="admin-console-preview-file">
+                    <i class="bi bi-file-earmark" aria-hidden="true"></i>
+                    <span>${file.name}</span>
+                </div>
+            `;
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            preview.innerHTML = `<img src="${e.target.result}" alt="Vista previa de ${file.name}">`;
+        };
+        reader.readAsDataURL(file);
+        return;
+    }
+
+    if (typeof source === 'string') {
+        if (isPdfSource(source, fileName)) {
+            preview.innerHTML = renderAdminFilePreviewMarkup(source, fileName);
+            return;
+        }
+        preview.innerHTML = renderAdminFilePreviewMarkup(source, fileName);
+    }
+}
+
+function handleAdminFileInputChange(input, previewId) {
+    if (!input || !input.files || input.files.length === 0) {
+        clearPreview(previewId);
+        return;
+    }
+
+    showAdminFilePreview(previewId, input.files[0]);
+}
+
+function setupAdminFilePreviews() {
+    const bindings = [
+        { inputId: 'flyerImage', previewId: 'flyerPreview' },
+        { inputId: 'photoImage', previewId: 'photoPreview' },
+        { inputId: 'downloadFile', previewId: 'downloadPreview' }
+    ];
+
+    bindings.forEach(function(binding) {
+        const input = document.getElementById(binding.inputId);
+        if (!input) return;
+        input.addEventListener('change', function() {
+            handleAdminFileInputChange(input, binding.previewId);
+        });
+    });
 }
 
 function notify(message, type = 'info') {
@@ -1149,19 +1544,7 @@ window.cancelPhotoEdit = cancelPhotoEdit;
 window.startVideoEdit = startVideoEdit;
 window.cancelVideoEdit = cancelVideoEdit;
 window.handleImageChange = function(input, previewId) {
-    if (!input || !input.files || input.files.length === 0) {
-        clearPreview(previewId);
-        return;
-    }
-    
-    const reader = new FileReader();
-    reader.onload = function(e) {
-        const preview = document.getElementById(previewId);
-        if (preview) {
-            preview.innerHTML = `<img src="${e.target.result}" alt="">`;
-        }
-    };
-    reader.readAsDataURL(file);
+    handleAdminFileInputChange(input, previewId);
 };
 
 console.log('✅ Admin Simplificado listo');
