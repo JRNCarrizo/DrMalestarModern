@@ -1139,18 +1139,18 @@
                 logoLinkLarge.addEventListener('click', scrollToHero);
             }
 
-            // Logo y título del hero — se encienden al hover/focus del logo del navbar
+            // Logo y título del hero — hover enciende; clic alterna encendido/apagado
             (function initNavbarHeroLogoGlow() {
                 const heroLogo = document.querySelector('.hero-stage-glow');
                 const heroTitle = document.querySelector('.hero-title');
                 const logoLinks = [logoLinkSmall, logoLinkLarge].filter(Boolean);
                 if (!logoLinks.length) return;
 
-                let hoverCount = 0;
+                let hoverLit = false;
+                let clickLit = false;
 
-                function setHeroGlow(on) {
-                    hoverCount = Math.max(0, hoverCount + (on ? 1 : -1));
-                    const active = hoverCount > 0;
+                function syncGlow() {
+                    const active = clickLit || hoverLit;
                     if (heroLogo) {
                         heroLogo.classList.toggle('hero-stage-glow--active', active);
                     }
@@ -1160,13 +1160,18 @@
                 }
 
                 logoLinks.forEach(function(link) {
-                    link.addEventListener('mouseenter', function() { setHeroGlow(true); });
-                    link.addEventListener('mouseleave', function() { setHeroGlow(false); });
-                    link.addEventListener('focus', function() { setHeroGlow(true); });
-                    link.addEventListener('blur', function() { setHeroGlow(false); });
-                    link.addEventListener('touchstart', function() { setHeroGlow(true); }, { passive: true });
-                    link.addEventListener('touchend', function() { setHeroGlow(false); });
-                    link.addEventListener('touchcancel', function() { setHeroGlow(false); });
+                    link.addEventListener('click', function() {
+                        clickLit = !clickLit;
+                        syncGlow();
+                    });
+                    link.addEventListener('mouseenter', function() {
+                        hoverLit = true;
+                        syncGlow();
+                    });
+                    link.addEventListener('mouseleave', function() {
+                        hoverLit = false;
+                        syncGlow();
+                    });
                 });
             })();
 
