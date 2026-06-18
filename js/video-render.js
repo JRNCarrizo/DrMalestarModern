@@ -136,6 +136,7 @@ window.VideoRender = (function () {
         const opts = options || {};
         const checkEmbed = Boolean(opts.checkEmbed);
         const videoId = resolveVideoId(video);
+        const playerDomId = video.id ? `ytplayer-${video.id}` : `ytplayer-${videoId}`;
 
         if (!videoId || videoId.length !== 11 || !/^[a-zA-Z0-9_-]+$/.test(videoId)) {
             return buildInvalidVideoCard(video);
@@ -150,28 +151,15 @@ window.VideoRender = (function () {
         const description = video.description ? escapeHtml(video.description) : '';
         const url = video.url || '';
         const isShort = Boolean(video.url && (video.url.includes('/shorts/') || video.url.includes('youtube.com/shorts/')));
-        const onloadAttr = checkEmbed && isShort ? ` onload="VideoRender.checkVideoLoad('${videoId}')"` : '';
         const deckHtml = buildVideoDeckHtml();
-
-        const playerHtml = isShort ? `
-                    <iframe
-                        id="ytplayer-${videoId}"
-                        src="${embedUrl}"
-                        frameborder="0"
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                        allowfullscreen
-                        loading="lazy"
-                        style="width: 100%; height: 100%;"${onloadAttr}
-                        title="${title}">
-                    </iframe>` : `
-                    <div class="video-player-mount" id="ytplayer-${videoId}"></div>`;
+        const shortClass = isShort ? ' video-card--short' : '';
 
         return `
-            <div class="video-card" data-video-id="${videoId}">
+            <div class="video-card${shortClass}" data-video-id="${videoId}" data-player-dom-id="${escapeHtml(playerDomId)}">
                 ${deckHtml}
-                <div class="video-container" id="video-wrapper-${videoId}">
-                    ${playerHtml}
-                    <div class="video-error-overlay" id="error-${videoId}" style="display: none;">
+                <div class="video-container" id="video-wrapper-${escapeHtml(playerDomId)}">
+                    <div class="video-player-mount" id="${escapeHtml(playerDomId)}"></div>
+                    <div class="video-error-overlay" id="error-${escapeHtml(playerDomId)}" style="display: none;">
                         <div class="video-error-content">
                             <i class="bi bi-exclamation-triangle" style="font-size: 3rem; color: #ffc107; margin-bottom: 1rem;"></i>
                             <p style="color: var(--text-light); margin-bottom: 0.5rem;">Este video no permite reproducción embebida</p>
@@ -369,7 +357,12 @@ window.VideoRender = (function () {
 
             if (data.event !== 'onStateChange' || data.info === undefined) return;
 
-            const iframe = document.getElementById(data.id);
+            let iframe = data.id ? document.getElementById(data.id) : null;
+            if (!iframe && event.source) {
+                iframe = Array.from(document.querySelectorAll('.video-card iframe')).find(function(frame) {
+                    return frame.contentWindow === event.source;
+                }) || null;
+            }
             if (!iframe) return;
 
             const card = iframe.closest('.video-card');

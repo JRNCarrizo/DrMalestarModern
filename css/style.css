@@ -2959,6 +2959,17 @@ body {
     filter: drop-shadow(0 8px 24px rgba(0, 0, 0, 0.45));
 }
 
+@media (min-width: 992px) {
+    #descargas .download-slide {
+        padding: 0.4rem;
+    }
+
+    #descargas .download-slide-image {
+        transform: scale(1.2);
+        transform-origin: center center;
+    }
+}
+
 .download-carousel-dots {
     display: flex;
     justify-content: center;
@@ -3405,17 +3416,13 @@ body {
     box-shadow: 0 2px 0 #0e0e12, 0 0 8px var(--glow-red-faint);
 }
 
-.video-card--live .video-deck-vu .vu-seg {
-    animation: videoVuBounce 0.75s ease-in-out infinite;
-}
-
-.video-card--live .video-deck-vu .vu-seg:nth-child(1) { animation-delay: 0s; }
-.video-card--live .video-deck-vu .vu-seg:nth-child(2) { animation-delay: 0.08s; }
-.video-card--live .video-deck-vu .vu-seg:nth-child(3) { animation-delay: 0.16s; }
-.video-card--live .video-deck-vu .vu-seg:nth-child(4) { animation-delay: 0.24s; }
-.video-card--live .video-deck-vu .vu-seg:nth-child(5) { animation-delay: 0.32s; }
-.video-card--live .video-deck-vu .vu-seg:nth-child(6) { animation-delay: 0.4s; }
-.video-card--live .video-deck-vu .vu-seg:nth-child(7) { animation-delay: 0.48s; }
+.video-card--live .video-deck-vu .vu-seg:nth-child(1) { animation: videoVu1 0.55s ease-in-out infinite; }
+.video-card--live .video-deck-vu .vu-seg:nth-child(2) { animation: videoVu2 0.68s ease-in-out infinite; }
+.video-card--live .video-deck-vu .vu-seg:nth-child(3) { animation: videoVu3 0.47s ease-in-out infinite; }
+.video-card--live .video-deck-vu .vu-seg:nth-child(4) { animation: videoVu4 0.73s ease-in-out infinite; }
+.video-card--live .video-deck-vu .vu-seg:nth-child(5) { animation: videoVu5 0.59s ease-in-out infinite; }
+.video-card--live .video-deck-vu .vu-seg:nth-child(6) { animation: videoVu6 0.81s ease-in-out infinite; }
+.video-card--live .video-deck-vu .vu-seg:nth-child(7) { animation: videoVu7 0.64s ease-in-out infinite; }
 
 .video-card--live .video-deck-vu .vu-seg:nth-child(1),
 .video-card--live .video-deck-vu .vu-seg:nth-child(2),
@@ -3436,9 +3443,56 @@ body {
     box-shadow: 0 0 5px rgba(239, 68, 68, 0.5);
 }
 
-@keyframes videoVuBounce {
-    0%, 100% { transform: scaleY(0.35); opacity: 0.45; }
-    50% { transform: scaleY(1); opacity: 1; }
+@keyframes videoVu1 {
+    0%, 100% { transform: scaleY(0.22); opacity: 0.42; }
+    28% { transform: scaleY(0.58); opacity: 0.78; }
+    52% { transform: scaleY(0.34); opacity: 0.5; }
+    76% { transform: scaleY(0.72); opacity: 0.92; }
+}
+
+@keyframes videoVu2 {
+    0%, 100% { transform: scaleY(0.38); opacity: 0.55; }
+    22% { transform: scaleY(0.82); opacity: 0.95; }
+    48% { transform: scaleY(0.46); opacity: 0.62; }
+    71% { transform: scaleY(0.66); opacity: 0.8; }
+}
+
+@keyframes videoVu3 {
+    0%, 100% { transform: scaleY(0.48); opacity: 0.6; }
+    18% { transform: scaleY(0.92); opacity: 1; }
+    44% { transform: scaleY(0.55); opacity: 0.68; }
+    63% { transform: scaleY(0.78); opacity: 0.88; }
+    86% { transform: scaleY(0.4); opacity: 0.58; }
+}
+
+@keyframes videoVu4 {
+    0%, 100% { transform: scaleY(0.3); opacity: 0.48; }
+    31% { transform: scaleY(0.64); opacity: 0.82; }
+    57% { transform: scaleY(0.42); opacity: 0.58; }
+    79% { transform: scaleY(0.86); opacity: 0.96; }
+}
+
+@keyframes videoVu5 {
+    0%, 100% { transform: scaleY(0.52); opacity: 0.65; }
+    24% { transform: scaleY(0.74); opacity: 0.85; }
+    46% { transform: scaleY(0.96); opacity: 1; }
+    68% { transform: scaleY(0.5); opacity: 0.64; }
+    88% { transform: scaleY(0.68); opacity: 0.8; }
+}
+
+@keyframes videoVu6 {
+    0%, 100% { transform: scaleY(0.4); opacity: 0.58; }
+    19% { transform: scaleY(0.88); opacity: 0.98; }
+    41% { transform: scaleY(0.52); opacity: 0.66; }
+    62% { transform: scaleY(0.7); opacity: 0.84; }
+    84% { transform: scaleY(0.36); opacity: 0.52; }
+}
+
+@keyframes videoVu7 {
+    0%, 100% { transform: scaleY(0.18); opacity: 0.4; }
+    33% { transform: scaleY(0.48); opacity: 0.7; }
+    58% { transform: scaleY(0.28); opacity: 0.48; }
+    81% { transform: scaleY(0.56); opacity: 0.76; }
 }
 
 .video-player-mount,
